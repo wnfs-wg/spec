@@ -40,6 +40,10 @@ This represents a ciphertext that's marked with the data type `Data` that it nee
 
 This represents a `ByteArray` of `length` bytes.
 
+### `hash()`
+
+### `deriveKey()`
+
 ## WNFS Root
 
 The WNFS root is a [UnixFS](https://github.com/ipfs/specs/blob/main/UNIXFS.md) directory with links to WNFS's partitions:
@@ -129,13 +133,12 @@ The keys in the HAMT are namefilters.
 
 SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 
-### HAMT
 
 ```typescript
 type PrivateRoot =
   CBOR<HAMT<
     hash(saturate(bareName)), // map key
-    Array<CID<CBOR<EncryptedPrivateBlock<bareName, unknown>>>> // map value
+    Array<CID<EncryptedPrivateBlock>> // map value
   >>
 
 type HAMT<K, V> = {
@@ -152,23 +155,48 @@ type Node<K, V> =
 type Entry<K, V>
   = CID<CBOR<Node<K, V>>>
   | [K, V][] // bucket of values
-
-type EncryptedPrivateBlock<ratchet> = {
-  alg: "AES-GCM",
-  cip: Encrypted<hash(derive_key(ratchet)), PrivateNode<ratchet>>
-}
-
-type PrivateNode<ratchet>
-  = PrivateDirectory<ratchet>
-  | PrivateFile<ratchet>
-
-type PrivateDirectory<bareName, ratchet> = {
-  revision: Encrypted<derive_key(ratchet), ratchet>
-  inumber: ByteArray<32>
-  bareName: bareName
-  // wip
-}
-
 ```
 
+### The Decrypted Layer
 
+```typescript
+type EncryptedPrivateBlock = PrivateNode<Namefilter, SkipRatchet>
+
+type Namefilter = ByteArray<256>
+
+type SkipRatchet = {
+  large: ByteArray<32>
+  mediumCount: Uint8
+  medium: ByteArray<32>
+  smallCount: Uint8
+  small: ByteArray<32>
+}
+
+type PrivateNode
+  = PrivateDirectory
+  | PrivateFile
+
+type PrivateDirectory = {
+  revision: Encrypted<deriveKey(ratchet), CBOR<{
+    ratchet: SkipRatchet
+    bareName: Namefilter
+    inumber: ByteArray<32> // TODO(matheus23): Inside or outside the revision section?
+  }>>
+  metadata: Metadata<false>
+  entries: Record<string, {
+    snapshotKey: hash(deriveKey(entryRatchet))
+    revisionKey: Encrypted<deriveKey(ratchet), deriveKey(entryRatchet)>
+    name: hash(saturated(entryBareName)) // links to a PrivateNode<entryBareName, entryRatchet>
+  }>
+}
+
+type PrivateFile = {
+  revision: Encrypted<deriveKey(ratchet), CBOR<{
+    ratchet: SkipRatchet
+    bareName: Namefilter
+    inumber: ByteArray<32>
+  }>>
+  metadata: Metadata<true>
+  content: ByteArray // TODO(matheus23) non-inline files
+}
+```
