@@ -32,17 +32,16 @@ The CID's multicodec is meant to be inferred automatically from its type paramet
 
 The *actual* representation of `CID` is meant to be a byte representation for CIDs, and depends on the context. E.g. if `CID` is found somewhere within a `CBOR<>` block, then it uses the DAG-CBOR-native way of encoding CIDs as CBOR objects with a `42` tag and a binary representation of a CID.
 
-### `Encrypted<key, Data>`
+### `Encrypted<Data>`
 
-This represents a ciphertext that's marked with the data type `Data` that it needs to decrypt to, if provided with the correct key `key`. The `key` parameter is supposed to be a value-level expression. For example `Encrypted<sha3(derive_key(ratchet)), ratchet>` represents a byte string that would decrypt to the value `ratchet` given the key computed by `sha3(derive_key(ratchet))`.
+This represents a ciphertext that's marked with the data type `Data` that it needs to decrypt to. For example `Encrypted<Ratchet>` represents a byte string that would decrypt to a value of type `Ratchet`.
 
 ### `ByteArray<length>`
 
 This represents a `ByteArray` of `length` bytes.
 
-### `hash()`
+### `Hash<Data>`
 
-### `deriveKey()`
 
 ## WNFS Root
 
@@ -101,7 +100,7 @@ type PublicFile = {
   previous?: CID<CBOR<PublicFile>>
   merge?: CID<CBOR<PublicFile>>
   metadata: Metadata<true> // must always mark this as a file
-  content: CID<CBOR<IPFSUnixFSFile>>
+  content: CID<IPFSUnixFSFile>
 }
 
 type Metadata<IsFile> = {
@@ -137,8 +136,8 @@ SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 ```typescript
 type PrivateRoot =
   CBOR<HAMT<
-    hash(saturate(bareName)), // map key
-    Array<CID<EncryptedPrivateBlock>> // map value
+    Namefilter, // Map Key: The namefilter ("name") for that private node
+    Array<CID<ByteArray>> // Map Value: A set of links to encrypted blocks of data
   >>
 
 type HAMT<K, V> = {
@@ -148,28 +147,28 @@ type HAMT<K, V> = {
 }
 
 type Node<K, V> =
-  [ [UInt8, UInt8] // bitmask
+  [ ByteArray<2> // bitmask
   , Array<Entry<K, V>> // Entries
   ]
 
 type Entry<K, V>
   = CID<CBOR<Node<K, V>>>
-  | [K, V][] // bucket of values
+  | Array<[K, V]> // bucket of values
 ```
 
 ### The Decrypted Layer
 
 ```typescript
-type EncryptedPrivateBlock = PrivateNode<Namefilter, SkipRatchet>
-
 type Namefilter = ByteArray<256>
+type Key = ByteArray<32>
+type Inumber = ByteArray<32>
 
 type SkipRatchet = {
-  large: ByteArray<32>
+  large: Key
   mediumCount: Uint8
-  medium: ByteArray<32>
+  medium: Key
   smallCount: Uint8
-  small: ByteArray<32>
+  small: Key
 }
 
 type PrivateNode
@@ -177,24 +176,28 @@ type PrivateNode
   | PrivateFile
 
 type PrivateDirectory = {
-  revision: Encrypted<deriveKey(ratchet), CBOR<{
+  // encrypted using deriveKey(ratchet)
+  revision: Encrypted<CBOR<{
     ratchet: SkipRatchet
     bareName: Namefilter
-    inumber: ByteArray<32> // TODO(matheus23): Inside or outside the revision section?
+    inumber: Inumber // TODO(matheus23): Inside or outside the revision section?
   }>>
   metadata: Metadata<false>
   entries: Record<string, {
-    snapshotKey: hash(deriveKey(entryRatchet))
-    revisionKey: Encrypted<deriveKey(ratchet), deriveKey(entryRatchet)>
-    name: hash(saturated(entryBareName)) // links to a PrivateNode<entryBareName, entryRatchet>
+    snapshotKey: Key // hash(deriveKey(entryRatchet))
+    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+    name: Hash<Namefilter> // hash(saturated(entryBareName))
+    // and can be used as the key in the private parition HAMT to lookup
+    // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
   }>
 }
 
 type PrivateFile = {
-  revision: Encrypted<deriveKey(ratchet), CBOR<{
+  // encrypted using deriveKey(ratchet)
+  revision: Encrypted<CBOR<{
     ratchet: SkipRatchet
     bareName: Namefilter
-    inumber: ByteArray<32>
+    inumber: Inumber
   }>>
   metadata: Metadata<true>
   content: ByteArray // TODO(matheus23) non-inline files
