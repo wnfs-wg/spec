@@ -1,0 +1,35 @@
+type PublicEntry {
+    | Directory PublicDirectory
+    | File PublicFile
+} representation kinded
+
+
+type PublicDirectory {
+    previous nullable &PublicDirectory # historical backpointer
+    merge nullable &PublicDirectory # if this version is a merge, will be populated
+    metadata Metadata
+    entries { String: &PublicEntry }
+} representation map
+
+
+type PublicFile {
+    previous nullable &PublicFile # historical backpointer
+    merge nullable &PublicFile
+    metadata Metadata
+    content &Any # link to an IPFS (UnixFS) File
+}
+
+
+type Metadata {
+    version String ("0.2.0")
+    isFile Boolean
+    unixMeta UnixMeta
+    # meant to be extensible
+} representation map
+
+
+type UnixMeta {
+    mtime Int
+    ctime Int
+    mode Int
+} representation map

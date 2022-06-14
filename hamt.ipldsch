@@ -1,0 +1,23 @@
+type HAMT struct {
+    structure String ("hamt") # signalling
+    version String ("0.1.0") # allows protocol upgrades
+    root Node
+}
+
+
+type Node struct {
+    bitmask Bytes # ceil(degree / 8) bytes
+    entries [Entry]
+} representation tuple
+
+
+type Entry {
+    | Bucket [KeyValue] # at max bucket_size entries
+    | Link &Node
+} representation kinded
+
+
+type KeyValue {
+    key Any # in practice in WNFS will be Bytes (the namefilter)
+    value Any # in practice will be &Bytes, encrypted bytes
+} representation tuple
