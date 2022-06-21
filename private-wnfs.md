@@ -9,7 +9,7 @@ It makes sense to split the private partition into two layers:
 
 The private partition consists of lots of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kBs in order to comply with block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
-These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. 
+These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
 The keys in the HAMT are saturated [namefilter](/namefilter.md)s.
 
