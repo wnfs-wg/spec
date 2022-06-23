@@ -32,7 +32,13 @@ type PublicFile = {
   metadata: Metadata<"wnfs-file">
   content: CID<IPFSUnixFSFile>
 }
+```
 
+## Metadata
+
+Metadata in public WNFS must be extensible. Additional fields in the metadata type must be parsed without errors and preserved between versions unless explicitly modified by an application.
+
+```typescript
 type Metadata<Type> = {
   version: "0.2.0"
   type: Type
