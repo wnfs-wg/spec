@@ -28,3 +28,11 @@ Due to distinguishability, GCAs potentially leak some information about related,
 
 We considered using XOR or Cuckoo filters instead of class Bloom filters. XOR is very close to the theoretic efficiency limit, but is very new and the library untested. Cuckoo filters would provide around an additional 4 path segments with the same false-positive rate, but we lose the single-bit-collision of Bloom filters which is actually an advantage for obfuscation.
 
+
+## Zero-Knowledge Succinct, Non-Interactive Arguments of Knowledge (zkSNARKs)
+
+(Or zkSTARKs, Bulletproofs, etc.)
+
+We've briefly considered zkSNARKs, but initially decided against them due to longer proof times (state 2021). In the [private WNFS](/private-wnfs.md) a client may have to generate a proof that they're allowed to write to a private node under a certain key for every directory or file they're modifying. Proof times of above 1 second on mobile devices are thus impractical.
+
+Another reason for deciding against zkSNARKs is a lack of expertise. However, given the speed of advancement in zkSNARK techonology recently, the above paragraph may be outdated already! If *you* have expertise in working with zkSNARKs, please contact us!
