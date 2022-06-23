@@ -1,9 +1,14 @@
-
 # Private WNFS
 
 It makes sense to split the private partition into two layers:
 - The "decrypted" layer that defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
 - The "encrypted" layer that defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
+
+## Key Structure
+
+![hierarchical key structure](/images/hierarchical_key_structure.png)
+
+![key structure](/images/key_structure.png)
 
 ## The Encrypted Layer
 
@@ -19,8 +24,10 @@ SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 ```typescript
 type PrivateRoot =
   CBOR<HAMT<
-    Namefilter, // Map Key: The namefilter ("name") for that private node
-    Array<CID<ByteArray>> // Map Value: A set of links to encrypted blocks of data
+    // Map Key: The namefilter ("name") for that private node
+    Namefilter,
+    // Map Value: A tuple of an encrypted private node header and a set of links to encrypted node contents
+    [ByteArray, Array<CID<ByteArray>>]
   >>
 
 type HAMT<K, V> = {
@@ -41,6 +48,8 @@ type Entry<K, V>
 
 ## The Decrypted Layer
 
+The private WNFS borrows the same metadata structure as the [public WNFS](/public-wnfs.md#metadata).
+
 ```typescript
 type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
@@ -58,17 +67,18 @@ type PrivateNode
   = PrivateDirectory
   | PrivateFile
 
+// encrypted using deriveKey(ratchet)
+type PrivateNodeHeader = {
+  ratchet: SkipRatchet
+  bareName: Namefilter
+  inumber: Inumber // TODO(matheus23): Inside or outside the revision section?
+}
+
 type PrivateDirectory = {
-  // encrypted using deriveKey(ratchet)
-  revision: Encrypted<CBOR<{
-    ratchet: SkipRatchet
-    bareName: Namefilter
-    inumber: Inumber // TODO(matheus23): Inside or outside the revision section?
-  }>>
-  metadata: Metadata<false>
+  metadata: Metadata<"wnfs-private-dir">
   entries: Record<string, {
-    snapshotKey: Key // hash(deriveKey(entryRatchet))
-    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+    contentKey: Key // hash(deriveKey(entryRatchet))
+    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey)(entryRatchet))
     name: Hash<Namefilter> // hash(saturated(entryBareName))
     // and can be used as the key in the private parition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
@@ -76,13 +86,12 @@ type PrivateDirectory = {
 }
 
 type PrivateFile = {
-  // encrypted using deriveKey(ratchet)
-  revision: Encrypted<CBOR<{
-    ratchet: SkipRatchet
-    bareName: Namefilter
-    inumber: Inumber
-  }>>
   metadata: Metadata<true>
   content: ByteArray // TODO(matheus23) non-inline files
 }
 ```
+
+
+Example:
+
+![block encryption example](/images/encrypted_blocks.png)
