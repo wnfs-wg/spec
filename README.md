@@ -1,4 +1,6 @@
-# Webnative File System (WNFS) Specification v0.2.0
+⚠️ This spec suite is Work-in-Progress. It may be useful for reference & discussion, though ⚠️
+
+# Webnative File System (WNFS) Specification v0.2.0-alpha
 
 ## Abstract
 
