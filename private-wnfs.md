@@ -87,7 +87,10 @@ type PrivateDirectory = {
 
 type PrivateFile = {
   metadata: Metadata<true>
-  content: ByteArray // TODO(matheus23) non-inline files
+  content: ByteArray | {
+    ratchet: SkipRatchet
+    count: Uint64
+  }
 }
 ```
 
@@ -95,3 +98,35 @@ type PrivateFile = {
 Example:
 
 ![block encryption example](/images/encrypted_blocks.png)
+
+
+## Algorithms
+
+### File Content Access
+
+Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
+
+Since external content is separate from the header, it needs a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed.
+
+External content namefilters are defined thus:
+
+```typescript
+const segmentNames = (file) => {
+  const { bareNamefilter, content: { ratchet, count } } = file.header
+  const key = ratchet.toBytes()
+  
+  let names = []
+  for (i = 0; i < count; i++) {  
+    names[i] = bareNamefilter
+                 .addBare(sha3(key))
+                 .addBare(sha3(`${key}${i}`))
+                 .saturate()
+  }
+
+  return contentNames
+}
+```
+
+
+### Merge
+

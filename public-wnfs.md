@@ -51,3 +51,8 @@ type UnixMeta = {
   mode: Int // POSIX file mode, e.g. (octal) 666 or 777
 }
 ```
+
+## Algorithms
+
+### Merge
+
