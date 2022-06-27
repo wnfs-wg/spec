@@ -21,3 +21,5 @@ The specifications are:
 - [Public WNFS](/public-wnfs.md)
 - [Private WNFS](/private-wnfs.md)
 - [Namefilters](/namefilters.md)
+- [Skip Ratchet](/skip-ratchet.md)
+

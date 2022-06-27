@@ -50,18 +50,12 @@ type Entry<K, V>
 
 The private WNFS borrows the same metadata structure as the [public WNFS](/public-wnfs.md#metadata).
 
+Encryption keys are derived from a [skip ratchet](/skip.ratchet.md).
+
 ```typescript
 type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
 type Inumber = ByteArray<32>
-
-type SkipRatchet = {
-  large: Key
-  mediumCount: Uint8
-  medium: Key
-  smallCount: Uint8
-  small: Key
-}
 
 type PrivateNode
   = PrivateDirectory
