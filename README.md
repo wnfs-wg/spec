@@ -18,8 +18,8 @@ WNFS is content-addressed and thus extremely portable. It may be stored on the e
 The WNFS spec is a suite of specifications consisting of public WNFS, private WNFS and its parts. Some of these specifications use common notation described in [notation.md](/notation.md).
 
 The specifications are:
-- [Public WNFS](/public-wnfs.md)
-- [Private WNFS](/private-wnfs.md)
-- [Namefilters](/namefilters.md)
-- [Skip Ratchet](/skip-ratchet.md)
+- [Public WNFS](/spec/public-wnfs.md)
+- [Private WNFS](/spec/private-wnfs.md)
+- [Namefilters](/spec/namefilters.md)
+- [Skip Ratchet](/spec/skip-ratchet.md)
 
