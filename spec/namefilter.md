@@ -16,7 +16,7 @@ A namefilter starts out as an empty bloom filter, i.e. a byte string of length 2
 
 Such a bloom filter is considered a "bare" namefilter until it is saturated, i.e. until at least 1019 bits are set to one.
 
-Only bare namefilters can have items added to them. Once a namefilter is saturated, it must not have items added ot it.
+Only bare namefilters can have items added to them. Once a namefilter is saturated, it must not have items added to it.
 
 Bare namefilters should be treated as confidential.
 

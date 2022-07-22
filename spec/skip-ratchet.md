@@ -21,7 +21,7 @@ type SkipRatchet = {
 ### Key Derivation
 
 The skip ratchet cannot be used as-is for an AES-256 key, because it's bigger than 256 bits.
-To derive a key suitable for AES-256 useage from a skip ratchet, XOR the large, medium and small parts of the skip ratchet:
+To derive a key suitable for AES-256 usage from a skip ratchet, XOR the large, medium and small parts of the skip ratchet:
 
 ```typescript
 function deriveKey(ratchet: SkipRatchet): ByteArray<32> {
