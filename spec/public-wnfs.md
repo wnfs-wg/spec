@@ -23,7 +23,7 @@ type PublicDirectory = {
 }
 
 type PublicSymlink = {
-  ipns: string // e.g. alice.files.fission.name/public/ABCD
+  ipns: string // e.g. alice.files.fission.name/public/<public-key>
 }
 
 type PublicFile = {

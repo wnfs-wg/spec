@@ -12,7 +12,7 @@ It makes sense to split the private partition into two layers:
 
 ## The Encrypted Layer
 
-The private partition consists of lots of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kBs in order to comply with block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
+The private partition consists of lots of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kilobytes in order to comply with block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
 These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
@@ -74,7 +74,7 @@ type PrivateDirectory = {
     contentKey: Key // hash(deriveKey(entryRatchet))
     revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey)(entryRatchet))
     name: Hash<Namefilter> // hash(saturated(entryBareName))
-    // and can be used as the key in the private parition HAMT to lookup
+    // and can be used as the key in the private partition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
   }>
 }

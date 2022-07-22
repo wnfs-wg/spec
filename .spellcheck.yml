@@ -8,6 +8,10 @@ matrix:
     wordlists: [".custom-words.txt"]
   pipeline:
   - pyspelling.filters.markdown:
+      comments: false
+      ignores:
+      - code
+      - pre
   - pyspelling.filters.html:
       comments: false
       ignores:
@@ -22,5 +26,8 @@ matrix:
       - open: '(?P<open>`+)'
         close: '(?P=open)'
   sources:
-  - '**/*.md'
+  - 'spec/*.md'
+  - 'README.md'
+  - 'Notice.md'
+  - 'Scope.md'
   default_encoding: utf-8

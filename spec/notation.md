@@ -13,7 +13,7 @@ You can think of the *actual* representation of `CBOR` as being a `Uint8Array`/b
 
 ## `CID<Block>`
 
-This means at this point in the data structure there's a single IPLD CID adressing data that decodes to the provided phantom type parameter `Block`.
+This means at this point in the data structure there's a single IPLD CID addressing data that decodes to the provided phantom type parameter `Block`.
 
 The CID's multicodec is meant to be inferred automatically from its type parameter. For example, `CID<CBOR<...>>` will always be a CID marked as `dag-cbor`, and `CID<Encrypted<...>>` will always be a CID marked as `raw`.
 
