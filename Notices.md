@@ -4,7 +4,7 @@
 
 The Code of Conduct is available in the repository in [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
-Contact for Code of Conduct issues or inquires: hello@brooklynzelenka.com, philipp@fission.codes, hello@fission.codes
+Contact for Code of Conduct issues or inquires: hello@fission.codes
 
 ## License Acceptance
 
@@ -17,6 +17,14 @@ A Licensee may consent to accepting the current Community Specification License 
 Licensee’s name: Philipp Krüger
 
 Authorized individual and system identifier: matheus23
+
+Specification version: 0.2.0-alpha or later
+
+---------------------------------------------------------------------------------
+
+Licensee’s name: Brooklyn Zelenka
+
+Authorized individual and system identifier: expede
 
 Specification version: 0.2.0-alpha or later
 
