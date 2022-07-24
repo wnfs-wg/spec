@@ -6,6 +6,16 @@ CLA
 
 # CSLv1
 SPDX
+non-sublicensable
+merchantability
+transferee
+SPDX-License-Identifier
+
+# Names
+Zelenka
+expede
+matheus23
+Krüger
 
 README
 md
