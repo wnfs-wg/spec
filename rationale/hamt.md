@@ -1,6 +1,6 @@
 # Need
 
-For the private WNFS we need a data structure that efficently encodes a hash-map in IPLD.
+For the private WNFS we need a data structure that efficiently encodes a hash-map in IPLD.
 We're optimizing for
 - byte diffs that need to be transferred to sync two separate versions of a HAMT and
 - key/value pair lookup performance.
@@ -21,7 +21,7 @@ We've chosen a 16-degree HAMT (hash array mapped trie) with commutative differen
 
 We've both considered a binary merkle tree (degree 2 HAMT), since they have byte-minimal merkle proofs as well as very high degree HAMTs such as 1024 or 256-degree HAMTs, since they minimize the internal CID-link byte overheads.
 
-We've experimentally evalualted various degrees. This chart shows the trade-off between total byte storage overhead and merkle proof size clearly:
+We've experimentally evaluated various degrees. This chart shows the trade-off between total byte storage overhead and merkle proof size clearly:
 
 ![total bytes vs. proof bytes](/images/hamt_total_bytes_vs_proof_bytes.png)
 

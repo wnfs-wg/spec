@@ -56,6 +56,7 @@ decrypt
 decrypted
 CID
 CIDs
+CID's
 DAG-CBOR-native
 multicodec
 DAG-CBOR-encoded
@@ -67,6 +68,8 @@ IPFS
 symlinks
 AES-256
 CBOR
+distinguishability
+bitarray
 
 
 # Other

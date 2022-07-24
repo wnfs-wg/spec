@@ -35,4 +35,4 @@ We considered using XOR or Cuckoo filters instead of class Bloom filters. XOR is
 
 We've briefly considered zkSNARKs, but initially decided against them due to longer proof times (state 2021). In the [private WNFS](/private-wnfs.md) a client may have to generate a proof that they're allowed to write to a private node under a certain key for every directory or file they're modifying. Proof times of above 1 second on mobile devices are thus impractical.
 
-Another reason for deciding against zkSNARKs is a lack of expertise. However, given the speed of advancement in zkSNARK techonology recently, the above paragraph may be outdated already! If *you* have expertise in working with zkSNARKs, please contact us!
+Another reason for deciding against zkSNARKs is a lack of expertise. However, given the speed of advancement in zkSNARK technology recently, the above paragraph may be outdated already! If *you* have expertise in working with zkSNARKs, please contact us!

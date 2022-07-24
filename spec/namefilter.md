@@ -5,10 +5,10 @@ A namefilter in WNFS is a 256 bytes (2048 bits) bloom filter. Its bloom filter p
 Formally the construction we are using is known a *symmetric cryptographic accumulator* or a *Nyberg accumulator*.
 
 The namefilter is used as an obfuscated naming scheme for private blocks. You should think of it similar to the name of a public directory or file consisting of all the directory or file's ancestors and the name of the file or directory itself. For example, the file path "/public/Documents/thesis.pdf" contains its own name "thesis.pdf" and its ancestor's names "public" and "Documents".
-Similarily, namefilters are bloom filter that contain the identity numbers (`inumber`s) of what they're addressing and their ancestors.
+Similarly, namefilters are bloom filter that contain the identity numbers (`inumber`s) of what they're addressing and their ancestors.
 Given only such a namefilter, it's impossible to extract the original `inumber`s in the path of that namefilter.
 However, given a single `inumber` that is contained in the namefilter, it's possible to verify its membership in the namefilter (with a false positive rate of 1 in a billion) without revealing information about any other members of that namefilter.
-This is useful for proving that you have right access to a particular file or directory and all of its decendants to a third party that doesn't need to be able to read the private files that are written to.
+This is useful for proving that you have right access to a particular file or directory and all of its descendants to a third party that doesn't need to be able to read the private files that are written to.
 
 ## Initialization
 
