@@ -30,7 +30,7 @@ NPM like ABC
 XXHash3
 popcount like noun
 tunable like reachable
-cryptographic like cartographic
+cryptographic
 PDF
 pdf
 SHA3
