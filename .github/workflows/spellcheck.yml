@@ -10,8 +10,9 @@ jobs:
       - uses: matheus23/md-spellcheck-action@v4.1.0
         with:
           files-to-check: "**/*.md"
-          files-to-ignore: |
+          files-to-exclude: |
             CODE_OF_CONDUCT.md
+            CONTRIBUTING.md
             Community_Specification_License-v1.md
             Notices.md
           words-to-ignore-file: ./.github/workflows/words-to-ignore.txt
