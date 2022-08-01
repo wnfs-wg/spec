@@ -16,9 +16,11 @@ type PublicNode
   | PublicFile
 
 type PublicDirectory = {
-  previous?: CID<CBOR<PublicDirectory>>
-  merge?: CID<CBOR<PublicDirectory>>
-  metadata: Metadata<"wnfs-dir">
+  type: "wnfs/pub/dir"
+  version: "0.2.0"
+  previous: Array<CID<CBOR<PublicDirectory>>>
+  // userland:
+  metadata: Metadata
   entries: Record<string, CID<CBOR<PublicNode>> | PublicSymlink>
 }
 
@@ -27,29 +29,21 @@ type PublicSymlink = {
 }
 
 type PublicFile = {
-  previous?: CID<CBOR<PublicFile>>
-  merge?: CID<CBOR<PublicFile>>
-  metadata: Metadata<"wnfs-file">
+  type: "wnfs/pub/file"
+  version: "0.2.0"
+  previous: Array<CID<CBOR<PublicFile>>>
+  // userland:
+  metadata: Metadata
   content: CID<IPFSUnixFSFile>
 }
 ```
 
 ## Metadata
 
-Metadata in public WNFS must be extensible. Additional fields in the metadata type must be parsed without errors and preserved between versions unless explicitly modified by an application.
+Metadata in WNFS is a CBOR record with arbitrary keys and values.
 
-```typescript
-type Metadata<Type> = {
-  version: "0.2.0"
-  type: Type
-  unixMeta: UnixMeta
-}
-
-type UnixMeta = {
-  mtime: Int // POSIX timestamp
-  ctime: Int // POSIX timestamp
-  mode: Int // POSIX file mode, e.g. (octal) 666 or 777
-}
+```ts
+type Metadata = CBOR<Record<string, any>>
 ```
 
 ## Algorithms

@@ -69,7 +69,10 @@ type PrivateNodeHeader = {
 }
 
 type PrivateDirectory = {
-  metadata: Metadata<"wnfs-private-dir">
+  type: "wnfs/priv/dir"
+  version: "0.2.0"
+  // userland:
+  metadata: Metadata
   entries: Record<string, {
     contentKey: Key // hash(deriveKey(entryRatchet))
     revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey)(entryRatchet))
@@ -80,7 +83,10 @@ type PrivateDirectory = {
 }
 
 type PrivateFile = {
-  metadata: Metadata<true>
+  type: "wnfs/priv/file"
+  version: "0.2.0"
+  // userland:
+  metadata: Metadata
   content: ByteArray | {
     ratchet: SkipRatchet
     count: Uint64
