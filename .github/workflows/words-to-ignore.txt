@@ -11,6 +11,8 @@ merchantability
 transferee
 SPDX-License-Identifier
 individuals'
+CODE_OF_CONDUCT
+
 
 # Names
 Zelenka
@@ -27,9 +29,7 @@ Merklization
 Webnative
 v0
 HAMT
-HAMTs
 namefilter
-namefilters
 Merkle
 Ethereum
 MMPT
@@ -38,10 +38,8 @@ IPLD
 encodings
 bitswap
 zkSNARK
-zkSNARKs
-zkSTARKs
+zkSTARK
 GCA
-GCAs
 cardinality
 RSA
 NPM
@@ -55,16 +53,13 @@ ciphertext
 decrypt
 decrypted
 CID
-CIDs
-CID's
 DAG-CBOR-native
 multicodec
 DAG-CBOR-encoded
 DAG-CBOR
-lookups
+lookup
 inlined
 IPFS
--
 symlinks
 AES-256
 CBOR
@@ -75,4 +70,5 @@ bitarray
 # Other
 README
 md
+-
 
