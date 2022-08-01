@@ -13,7 +13,7 @@ merklization
 webnative
 v0
 HAMT like ABC
-namefilter
+namefilter like noun
 merkle
 ethereum
 MMPT like ABC
@@ -30,8 +30,9 @@ NPM like ABC
 XXHash3
 popcount like noun
 tunable like reachable
-cryptographic like histographic
+cryptographic like cartographic
 PDF
+pdf
 SHA3
 ciphertext like noun
 decrypt like encrypt
@@ -40,6 +41,7 @@ DAG-CBOR-native
 multicodec like noun
 DAG-CBOR-encoded
 DAG-CBOR
+dag-cbor
 lookup like noun
 inline like outline
 IPFS like ABC
@@ -48,3 +50,6 @@ AES-256
 CBOR like ABC
 distinguishability
 bitarray like noun
+
+# other
+-
