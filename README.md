@@ -2,6 +2,18 @@
 
 # Webnative File System (WNFS) Specification v0.2.0-alpha
 
+## Editors
+
+* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
+* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
+
+## Authors
+
+* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
+* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
+* [Daniel Holmgren](https://github.com/dhomls), [Bluesky](https://blueskyweb.xyz/)
+* [Brendan O'Brien](https://github.com/b5), Number 0
+
 ## Abstract
 
 The Web Native File System (WNFS) is a distributed file system. It is versioned, logged, programmable, has strong-yet-flexible security, and is fully controlled by the end user. Service providers can validate writes without reading the contents of the file system, and minimal metadata is leaked.
@@ -23,3 +35,8 @@ The specifications are:
 - [Namefilters](/spec/namefilters.md)
 - [Skip Ratchet](/spec/skip-ratchet.md)
 
+## Acknowledgments
+
+Thank you [Brendan O'Brien](https://github.com/b5) for invaluable feedback on specification changes and building a benchmarking golang implementation of WNFS.
+
+Thank you [Steven Allen](https://github.com/stebalien) engaging with the specification, pointing out concerns with namefilters, coming up with salted namefilters and suggesting them as an improvement.
