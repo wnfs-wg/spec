@@ -50,7 +50,7 @@ AES-256
 CBOR like ABC
 distinguishability
 bitarray like noun
-benchmark like increase
+benchmarking
 golang
 
 # other
