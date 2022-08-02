@@ -20,6 +20,6 @@ The WNFS spec is a suite of specifications consisting of public WNFS, private WN
 The specifications are:
 - [Public WNFS](/spec/public-wnfs.md)
 - [Private WNFS](/spec/private-wnfs.md)
-- [Namefilters](/spec/namefilters.md)
+- [Namefilters](/spec/namefilter.md)
 - [Skip Ratchet](/spec/skip-ratchet.md)
 
