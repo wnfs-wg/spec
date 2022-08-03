@@ -9,7 +9,7 @@ This specifies the field names for the skip ratchet when encoded as CBOR:
 ```typescript
 type SkipRatchet = {
   large: ByteString<32>
-  mediumCount: Uint8
+  mediumCount: Uint8 // technically a Uint8, but encoded as a normal CBOR varint
   medium: ByteString<32>
   smallCount: Uint8
   small: ByteString<32>

@@ -152,7 +152,7 @@ It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of th
 
 `: (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
 
-Resolving paths in the private filesystem is always relative. The private partition is actually a forest of trees, and you may not know what other cryptrees exist in there next to what an app may consider the "root". We sometimes refer to the private forest as a "dark forest".
+Resolving paths in the private file system is always relative. The private partition is actually a forest of trees, and you may not know what other cryptrees exist in there next to what an app may consider the "root". We sometimes refer to the private forest as a "dark forest".
 
 Path resolving can happen in three modes:
 - Resolve the current snapshot: You only resolve the current snapshot of a version. This only requires a content key for decryption.
@@ -166,7 +166,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 ### Sharded File Content Access
 
-`: (PrivateFile) -> Array<Namefilter>`
+`: PrivateFile -> Array<Namefilter>`
 
 Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
 
