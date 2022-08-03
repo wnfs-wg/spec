@@ -30,3 +30,38 @@ function deriveKey(ratchet: SkipRatchet): ByteArray<32> {
 }
 ```
 
+### Increasing
+
+The skip ratchet can be stepped forward, but not backwards.
+
+Forward stepping can happen at
+- the small digit, in increments of one,
+- the medium digit, in increments of (mostly) 256,
+- the large digit, in increments of (mostly) 65536.
+
+These intervals for each digit are often referred to as small, medium or large "epochs".
+
+Skipping to the next small epoch will always be a step of size 1.
+
+The next small epoch is computed by replacing `small` with its hash and increasing `smallCount`.
+
+This kind of step is only valid if the `smallCount` is below 255. Once the `smallCount` would hit 256, you need to perform a skip to the next medium epoch.
+
+Skipping to the next medium epoch can also be though of as a "carry-over" operation in the digit interpretation.
+
+The next medium epoch is computed by
+- replacing `small` with the hash of the ones-complement of the current `medium`
+- replacing `medium` with its hash
+- resetting `smallCount` to 0
+- increasing `mediumCount` by one.
+
+This kind of step is only valid if the `mediumCount` is below 255. Once the `mediumCount` would hit 256, you need to perform a skip to the next large epoch.
+
+The next large epoch is computed by
+- replacing `medium` with the hash of the ones-complement of the current `large`
+- replacing `small` with the hash of the ones-complement of the previously computed `medium`
+- replacing `large` with the hash of the current `large`
+- resetting `smallCount` to 0
+- resetting `mediumCount` to 0
+
+Increasing a ratchet by one may thus involve not only a skip to the next small epoch, but a skip to the next medium or large epoch. Precisely, if the `mediumCount` and `smallCount` are 255, then it involves a skip to the next large epoch. If only the `smallCount` is 255, it involves a skip to the next medium epoch. In all other cases it only involves a skip to the next epoch.

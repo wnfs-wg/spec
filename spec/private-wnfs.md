@@ -16,13 +16,13 @@ The private partition consists of lots of private data blocks encrypted with dif
 
 These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
-The keys in the HAMT are saturated [namefilter](/namefilter.md)s.
+The keys in the HAMT are saturated [namefilter](/spec/namefilter.md)s.
 
 SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 
 
 ```typescript
-type PrivateRoot =
+type PrivateForest =
   CBOR<HAMT<
     // Map Key: The namefilter ("name") for that private node
     Namefilter,
@@ -48,9 +48,9 @@ type Entry<K, V>
 
 ## The Decrypted Layer
 
-The private WNFS borrows the same metadata structure as the [public WNFS](/public-wnfs.md#metadata).
+The private WNFS borrows the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata).
 
-Encryption keys are derived from a [skip ratchet](/skip.ratchet.md).
+Encryption keys are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
 ```typescript
 type Namefilter = ByteArray<256>
@@ -65,7 +65,7 @@ type PrivateNode
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   bareName: Namefilter
-  inumber: Inumber // TODO(matheus23): Inside or outside the revision section?
+  inumber: Inumber // Invariant: The `inumber` is included in `bareName`
 }
 
 type PrivateDirectory = {
@@ -102,7 +102,71 @@ Example:
 
 ## Algorithms
 
-### File Content Access
+All algorithms assume to have access to a `PrivateForest` in their context.
+
+### Namefilter Hash Resolving
+
+`: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
+
+The private file system is a pointer machine, where pointers are hashes of namefilters.
+
+To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair will give you the full namefilter as well as the private node header and a list of at least one private directory.
+
+Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` gets split into the nibbles `0xf`, `0x1`, `0x9`, etc.
+
+The nibble order is first taking the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This way this matches the usual hex encoding of byte-strings and reading the hex digits off one-by-one.
+
+Each nibble is used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as
+
+$$index = popcount(bitmask \land ((1 \ll nibble) - 1))$$
+
+If the child is a Node, repeat the process of with the next nibble.
+
+If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
+
+
+### Private Versioning
+
+`: (Namefilter, RevisionKey) -> Namefilter`
+
+Every private file or directory implicitly links to the name (namefilter) of its next version.
+
+These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`.
+
+Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead.
+
+Then, the new namefilter is:
+
+$$saturate(add(deriveKey(inc^n(ratchet)), bareName))$$
+
+Where
+- $add$ refers to the [namefilter `add` operation](/spec/namefilter.md#Operation-add)
+- $saturate$ refers to the [namefilter `saturate` operation](/spec/namefilter.md#Operation-saturate)
+- $deriveKey$ refers to the [skip ratchet `deriveKey` operation](/spec/skip-ratchet.md#Key-Derivation) and
+- $inc$ refers to the [skip ratchet increase operation](/spec/skip-ratchet.md#Increasing)
+
+It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of the skip ratchet skip ahead versions instead of having to skip one-by-one. When looking for the most recent version of a file, we recommend first skipping to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found.
+
+
+### Path Resolving
+
+`: (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
+
+Resolving paths in the private filesystem is always relative. The private partition is actually a forest of trees, and you may not know what other cryptrees exist in there next to what an app may consider the "root". We sometimes refer to the private forest as a "dark forest".
+
+Path resolving can happen in three modes:
+- Resolve the current snapshot: You only resolve the current snapshot of a version. This only requires a content key for decryption.
+- Seeking: For each path segment, you look up the most recent version you can find (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key
+- Seeking & repairing: Similar to seeking, this mode will look for the most recent version of a file and once it found it and in case it's not the same as what the parent refers to, it'll repair the parent's link to link to the most recent revision.
+
+In all of these cases the next path segment's directory or file's hash of the namefilter can be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking the private node up as described in [Namefilter Hash Resolving](#Namefilter-Hash-Resolving) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
+
+If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
+
+
+### Sharded File Content Access
+
+`: (PrivateFile) -> Array<Namefilter>`
 
 Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
 
@@ -129,4 +193,6 @@ const segmentNames = (file) => {
 
 
 ### Merge
+
+`: Array<PrivateForest> -> PrivateForest`
 
