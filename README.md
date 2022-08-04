@@ -2,18 +2,6 @@
 
 # Webnative File System (WNFS) Specification v0.2.0-alpha
 
-## Editors
-
-* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
-* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
-
-## Authors
-
-* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
-* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
-* [Daniel Holmgren](https://github.com/dhomls), [Bluesky](https://blueskyweb.xyz/)
-* [Brendan O'Brien](https://github.com/b5), Number 0
-
 ## Abstract
 
 The Web Native File System (WNFS) is a distributed file system. It is versioned, logged, programmable, has strong-yet-flexible security, and is fully controlled by the end user. Service providers can validate writes without reading the contents of the file system, and minimal metadata is leaked.
@@ -34,6 +22,23 @@ The specifications are:
 - [Private WNFS](/spec/private-wnfs.md)
 - [Namefilters](/spec/namefilter.md)
 - [Skip Ratchet](/spec/skip-ratchet.md)
+
+## Discussions & Community
+
+- For live chat, join the `#wnfs` channel in the [IPFS discord](https://discord.gg/vj7qWuAyHY)
+- For ideas & use cases, feel free to use this repo's [github discussions](https://github.com/wnfs-wg/spec/discussions/2)
+
+## Editors
+
+* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
+* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
+
+## Authors
+
+* [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
+* [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
+* [Daniel Holmgren](https://github.com/dholms), [Bluesky](https://blueskyweb.xyz/)
+* [Brendan O'Brien](https://github.com/b5), Number 0
 
 ## Acknowledgments
 
