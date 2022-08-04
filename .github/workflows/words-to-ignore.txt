@@ -1,10 +1,10 @@
 # Names
-Zelenka
+Zelenka like Alice
 expede
 matheus23
-Philipp
-Krüger
-Nyberg
+Philipp like Alice
+Krüger like Alice
+Nyberg like Alice
 
 # Spec
 WNFS
@@ -38,7 +38,7 @@ ciphertext like text
 decrypt like encrypt
 CID like ABC
 DAG-CBOR-native
-multicodec like codec
+multicodec like noun
 DAG-CBOR-encoded
 DAG-CBOR
 dag-cbor
@@ -55,5 +55,10 @@ sharded
 benchmarking
 golang
 
+# rationale
+Combinatoric
+POS like ABC
+
 # other
 -
+md
