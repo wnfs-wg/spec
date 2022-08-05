@@ -71,5 +71,5 @@ For directories, merge the entry maps key-wise. If a directory entry only exists
 (TODO: What to do when one is a directory and the other is a file?)
 
 Once a node's content (either the `content` or the `entries` field) has been merged, create a new node that links back to all merged nodes in the `previous` field.
-For all nodes that are to-be-merged, if they are a merge node themselves, i.e. if they have more than one `previous` entry, merge that node into the root merge node by repeating all its `previous` entires instead of linking to the merge node itself.
+For all nodes that are to-be-merged, if they are a merge node themselves, i.e. if they have more than one `previous` entry, merge that node into the root merge node by repeating all its `previous` entries instead of linking to the merge node itself.
 
