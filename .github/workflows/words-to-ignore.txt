@@ -54,6 +54,10 @@ cryptree like tree
 sharded
 benchmarking
 golang
+semilattice like lattice
+-ary
+idempotence like omnipotence
+
 
 # rationale
 Combinatoric
@@ -62,3 +66,4 @@ POS like ABC
 # other
 -
 md
+TODO
