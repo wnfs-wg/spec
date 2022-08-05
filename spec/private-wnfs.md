@@ -12,13 +12,13 @@ It makes sense to split the private partition into two layers:
 
 ## The Encrypted Layer
 
-The private partition consists of lots of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kilobytes in order to comply with block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
+Unlike in the public partition, there is no "root" in the private partition. The private file system can contain multiple unrelated private trees at the same time. Thus, we refer to it as a `PrivateForest`. 
+
+At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
 These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
 The keys in the HAMT are saturated [namefilter](/spec/namefilter.md)s.
-
-SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 
 
 ```typescript
@@ -26,8 +26,9 @@ type PrivateForest =
   CBOR<HAMT<
     // Map Key: The namefilter ("name") for that private node
     Namefilter,
-    // Map Value: A tuple of an encrypted private node header and a set of links to encrypted node contents
-    [ByteArray, Array<CID<ByteArray>>]
+    // Map Value: a set of links to encrypted node contents.
+    // CIDs must be deduplicated and in ascending order
+    Array<CID<ByteArray>>
   >>
 
 type HAMT<K, V> = {
@@ -49,6 +50,8 @@ type Entry<K, V>
 ## The Decrypted Layer
 
 The private WNFS borrows the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata).
+
+SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
 
 Encryption keys are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
@@ -196,3 +199,22 @@ const segmentNames = (file) => {
 
 `: Array<PrivateForest> -> PrivateForest`
 
+The private forest forms a join-semilattice with the `merge` ($\land$) function as the semilattice operation:
+The merge operation is
+- associative: $(a \land b) \land c = a \land (b \land c)$
+- commutative: $a \land b = b \land a$
+- idempotent: $a \land a = a$
+
+The merge operation has an identity element which is the empty HAMT.
+
+It is sufficient to describe a two-way merge function, as it can be extended to an $n$-ary algorithm by reducing the array of forests using the two-way merge. However, an implementation may decide to implement a more efficient $n$-ary merge.
+
+When the two `PrivateForest`s to merge have the same CID, they're equal and thus nothing has to be done. This gives the merge algorithm the idempotence property.
+
+Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. At each level:
+- Find the difference between the `Node` bitmasks. The resulting bitmask is simply the binary-or of the input bitmasks.
+- Figure out which children one `Node` adds over the other. Keep the superset of both sets of children.
+- Recursively apply this algorithm on matching pairs of children nodes, unless they have the same CID.
+- When merging buckets of values, merge them by matching keys in the bucket entries. Merge the values of matching keys by merging the CID lists using set semantics and keep the CID list sorted. Key-value pairs that only appear in one of the inputs are kept as-is. If the bucket gets bigger than the normal bucket size, split the bucket into its own node, as per its normal splitting semantics.
+
+The private forest merge algorithm thus works completely on the encrypted layer and can be done by a third party that doesn't have read access to the private file system at all. However, there is some complexity involved when reading files. It's possible multiple "conflicting" file writes exist at a single revision. In these cases, we need to do some simple tie-breaking and may just choose the smallest CID.

@@ -43,10 +43,33 @@ type PublicFile = {
 Metadata in WNFS is a CBOR record with arbitrary keys and values.
 
 ```ts
-type Metadata = CBOR<Record<string, any>>
+type Metadata = CBOR<Record<string, DagCbor>>
 ```
 
 ## Algorithms
 
 ### Merge
+
+`: Array<PublicNode> -> PublicNode`
+
+Public file system nodes forms a join-semilattice with the `merge` ($\land$) function as the semilattice operation:
+The merge operation is
+- associative: $(a \land b) \land c = a \land (b \land c)$
+- commutative: $a \land b = b \land a$
+- idempotent: $a \land a = a$
+
+It is sufficient to describe a two-way merge function, as it can be extended to an $n$-ary algorithm by reducing a non-empty array of forests using the two-way merge. However, an implementation may decide to implement a more efficient $n$-ary merge.
+
+When the two `PublicNode`s have the same CID, they are the same and merging will just return that `PublicNode`. From this it follows that `PublicNode` merging is idempotent.
+
+Otherwise, check whether the CID of one of the nodes is one of the (transitive) `previous` links of the other node.
+If this is the case, then we know that that node is "older", because it appears in the history of the "newer" node. Thus the result of the merge operation is just the newer node.
+
+If the nodes don't contain each other in their histories in one way, proceed to merging the node contents themselves.
+For files, we can't make any assumptions about the file contents, so we need to tie-break on the file content. Merge in the file content with the lower CID.
+For directories, merge the entry maps key-wise. If a directory entry only exists in one directory, keep it in the output as-is. If a directory entry exists in both nodes, recursively apply the merge algorithm on that pair of sub-directories or files.
+(TODO: What to do when one is a directory and the other is a file?)
+
+Once a node's content (either the `content` or the `entries` field) has been merged, create a new node that links back to all merged nodes in the `previous` field.
+For all nodes that are to-be-merged, if they are a merge node themselves, i.e. if they have more than one `previous` entry, merge that node into the root merge node by repeating all its `previous` entires instead of linking to the merge node itself.
 

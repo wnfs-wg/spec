@@ -12,7 +12,7 @@
 * [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
 * [Philipp Krüger](https://github.com/matheus23), [Fission](https://fission.codes)
 * [Daniel Holmgren](https://github.com/dhomls), [Bluesky](https://blueskyweb.xyz/)
-* [Brendan O'Brien](https://github.com/b5), Number 0
+* [Brendan O'Brien](https://github.com/b5), [number 0](https://www.n0.computer)
 
 ## Abstract
 
