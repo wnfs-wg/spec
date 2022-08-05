@@ -64,7 +64,6 @@ type PrivateNode
   = PrivateDirectory
   | PrivateFile
 
-// encrypted using deriveKey(ratchet)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   bareName: Namefilter
@@ -74,11 +73,13 @@ type PrivateNodeHeader = {
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
+  // encrypted using deriveKey(ratchet)
+  header: Encrypted<CBOR<PrivateNodeHeader>>
   // userland:
   metadata: Metadata
   entries: Record<string, {
     contentKey: Key // hash(deriveKey(entryRatchet))
-    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey)(entryRatchet))
+    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
     name: Hash<Namefilter> // hash(saturated(entryBareName))
     // and can be used as the key in the private partition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
@@ -88,6 +89,8 @@ type PrivateDirectory = {
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
+  // encrypted using deriveKey(ratchet)
+  header: Encrypted<CBOR<PrivateNodeHeader>>
   // userland:
   metadata: Metadata
   content: ByteArray | {
