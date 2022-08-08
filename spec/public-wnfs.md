@@ -67,8 +67,7 @@ If this is the case, then we know that that node is "older", because it appears 
 
 If the nodes don't contain each other in their histories in one way, proceed to merging the node contents themselves.
 For files, we can't make any assumptions about the file contents, so we need to tie-break on the file content. Merge in the file content with the lower CID.
-For directories, merge the entry maps key-wise. If a directory entry only exists in one directory, keep it in the output as-is. If a directory entry exists in both nodes, recursively apply the merge algorithm on that pair of sub-directories or files.
-(TODO: What to do when one is a directory and the other is a file?)
+For directories, merge the entry maps key-wise. If a directory entry only exists in one directory, keep it in the output as-is. If a directory entry exists in both nodes, recursively apply the merge algorithm on that pair of sub-directories or files. If one of the nodes is a directory and one is a file, take the node with the lower CID.
 
 Once a node's content (either the `content` or the `entries` field) has been merged, create a new node that links back to all merged nodes in the `previous` field.
 For all nodes that are to-be-merged, if they are a merge node themselves, i.e. if they have more than one `previous` entry, merge that node into the root merge node by repeating all its `previous` entries instead of linking to the merge node itself.
