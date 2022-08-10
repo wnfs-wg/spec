@@ -80,7 +80,7 @@ type PrivateDirectory = {
   entries: Record<string, {
     contentKey: Key // hash(deriveKey(entryRatchet))
     revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-    name: Hash<Namefilter> // hash(saturated(entryBareName))
+    name: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
     // and can be used as the key in the private partition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
   }>
