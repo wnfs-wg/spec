@@ -8,7 +8,26 @@ It makes sense to split the private partition into two layers:
 
 ![hierarchical key structure](/images/hierarchical_key_structure.png)
 
+> A key structure diagram exploring how hierarchical read access works:
+> Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
+> It's possible to share the content key of a subdirectory which allows you to decrypt evertyhing below that directory, but not siblings or anything above.
+>
+> - CK: content key
+> - Yellow lines indicate what box of data keys can en/decrypt.
+
 ![key structure](/images/key_structure.png)
+
+> A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
+>
+> - SR: skip ratchet
+> - CK: content key
+> - Yellow lines indicate what box of data keys can en/decrypt.
+> - Dotted, blue lines indicate what data can be derived via one-way functions.
+>
+> Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
+>
+> Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
+> It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
 
 ## The Encrypted Layer
 
