@@ -32,3 +32,7 @@ If `length` isn't provided, this represents a `ByteArray` that additionally stor
 ## `Hash<Data>`
 
 This means at this point in the data structure there's a 32-byte array representing the SHA3 hash of `Data`.
+
+## Algorithm Type Signatures
+
+For algorithms, we often specify their type signature, e.g. `: (Namefilter, RevisionKey) -> Namefilter`. This is read as "has the type signature 'function of namefilter and revision key to namefilter'".
