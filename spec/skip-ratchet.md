@@ -36,8 +36,11 @@ The skip ratchet can be stepped forward, but not backwards.
 
 Forward stepping can happen at
 - the small digit, in increments of one,
-- the medium digit, in increments of (mostly) 256,
-- the large digit, in increments of (mostly) 65536.
+- the small digit, in increments of one
+- the medium digit, in increments up to 256
+- the large digit, in increments up to 65536
+
+These intervals for each digit are often referred to as small, medium or large "epochs". The reason that it isn't exactly 256 and 65536 is because each ratchet can only be incremented to the beginning of their next epoch.
 
 These intervals for each digit are often referred to as small, medium or large "epochs".
 
