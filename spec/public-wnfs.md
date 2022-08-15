@@ -40,7 +40,7 @@ type PublicFile = {
 
 ## Metadata
 
-Metadata in WNFS is a CBOR record with arbitrary keys and values.
+The metadata field MUST be a CBOR map. It is in userland, and contains arbitrary keys and values.
 
 ```ts
 type Metadata = CBOR<Record<string, DagCbor>>
