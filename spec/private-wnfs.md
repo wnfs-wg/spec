@@ -33,9 +33,9 @@ It makes sense to split the private partition into two layers:
 
 The private file system's encrypted "root" is not the root of the decrypted file system.
 
-The private file system can contain multiple unrelated private trees at the same time. Thus, we refer to it as a `PrivateForest`.
+A single file system's encrypted root can represent a whole forest of decrypted file system trees. The roots of these trees may be completely unrelated. We refer to them as the `PrivateForest`. Since you may not know what else there is in the forest, we sometimes refer to the it as the "dark forest".
 
-At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
+At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are should be smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
 These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
@@ -179,7 +179,7 @@ It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of th
 
 `: (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
 
-Resolving paths in the private file system is always relative. The private partition is actually a forest of trees, and you may not know what other cryptrees exist in there next to what an app may consider the "root". We sometimes refer to the private forest as a "dark forest".
+Paths in the private file system need to be resolved relative to a directory to resolve the path from.
 
 Path resolving can happen in three modes:
 - Resolve the current snapshot: You only resolve the current snapshot of a version. This only requires a content key for decryption.
