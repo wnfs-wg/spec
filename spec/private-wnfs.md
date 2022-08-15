@@ -31,7 +31,9 @@ It makes sense to split the private partition into two layers:
 
 ## The Encrypted Layer
 
-Unlike in the public partition, there is no "root" in the private partition. The private file system can contain multiple unrelated private trees at the same time. Thus, we refer to it as a `PrivateForest`. 
+The private file system's encrypted "root" is not the root of the decrypted file system.
+
+The private file system can contain multiple unrelated private trees at the same time. Thus, we refer to it as a `PrivateForest`.
 
 At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are supposed to be of size smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. However, keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
