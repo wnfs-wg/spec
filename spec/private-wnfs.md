@@ -145,7 +145,7 @@ The nibble order is first taking the 4 most significant bits of and *then* the 4
 
 Each nibble is used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as
 
-$$index = popcount(bitmask \land ((1 \ll nibble) - 1))$$
+$$\textsf{index} = \textsf{popcount}(bitmask \land ((1 \ll nibble) - 1))$$
 
 If the child is a Node, repeat the process of with the next nibble.
 
