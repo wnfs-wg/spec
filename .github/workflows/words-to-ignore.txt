@@ -49,7 +49,7 @@ lookup like noun
 inline like outline
 IPFS like ABC
 symlink like link
-AES-256
+AES
 CBOR like ABC
 distinguishability
 bitarray like array
@@ -61,7 +61,8 @@ semilattice like lattice
 ary
 idempotence like omnipotence
 subdirectory like directory
-
+superset like set
+userland
 
 # rationale
 Combinatoric
