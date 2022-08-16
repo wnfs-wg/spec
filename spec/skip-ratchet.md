@@ -35,7 +35,7 @@ function deriveKey(ratchet: SkipRatchet): ByteArray<32> {
 ![A diagram of a skip ratchet stepping/skipping with three binary digits](/images/skip_ratchet.png)
 
 > A diagram of a skip ratchet stepping/skipping with three binary digits
-> The skip ratchet in wnfs also has three digits, but they're base 256, not base 2.
+> The skip ratchet in WNFS also has three digits, but they're base 256, not base 2.
 
 The skip ratchet can be stepped forward, but not backwards.
 
