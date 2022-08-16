@@ -5,13 +5,15 @@ matheus23
 Philipp like Alice
 Krüger like Alice
 Nyberg like Alice
+Holmgren like Alice
+Bluesky
+
 
 # Spec
 WNFS
 CRDT like ABC
 merklization
 webnative
-v0
 HAMT like ABC
 namefilter like filter
 merkle
@@ -21,19 +23,20 @@ trie
 IPLD like ABC
 encoding like noun
 bitswap
+bitmask like mask
 zkSNARK like ABC
 zkSTARK like ABC
 GCA like ABC
 cardinality like formality
 RSA like ABC
 NPM like ABC
-XXHash3
+XXHash
 popcount like count
 tunable like reachable
 cryptographic
 PDF
 pdf
-SHA3
+SHA
 ciphertext like text
 decrypt like encrypt
 CID like ABC
@@ -55,7 +58,7 @@ sharded
 benchmarking
 golang
 semilattice like lattice
--ary
+ary
 idempotence like omnipotence
 subdirectory like directory
 
@@ -65,6 +68,5 @@ Combinatoric
 POS like ABC
 
 # other
--
 md
 TODO
