@@ -57,6 +57,7 @@ golang
 semilattice like lattice
 -ary
 idempotence like omnipotence
+subdirectory like directory
 
 
 # rationale

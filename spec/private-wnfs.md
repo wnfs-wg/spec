@@ -10,7 +10,7 @@ It makes sense to split the private partition into two layers:
 
 > A key structure diagram exploring how hierarchical read access works:
 > Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
-> It's possible to share the content key of a subdirectory which allows you to decrypt evertyhing below that directory, but not siblings or anything above.
+> It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 >
 > - CK: content key
 > - Yellow lines indicate what box of data keys can en/decrypt.
