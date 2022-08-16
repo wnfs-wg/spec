@@ -1,19 +1,21 @@
 # Names
-Zelenka
+Zelenka like Alice
 expede
 matheus23
-Philipp
-Krüger
-Nyberg
+Philipp like Alice
+Krüger like Alice
+Nyberg like Alice
+Holmgren like Alice
+Bluesky
+
 
 # Spec
 WNFS
 CRDT like ABC
 merklization
 webnative
-v0
 HAMT like ABC
-namefilter like noun
+namefilter like filter
 merkle
 ethereum
 MMPT like ABC
@@ -21,20 +23,21 @@ trie
 IPLD like ABC
 encoding like noun
 bitswap
+bitmask like mask
 zkSNARK like ABC
 zkSTARK like ABC
 GCA like ABC
 cardinality like formality
 RSA like ABC
 NPM like ABC
-XXHash3
-popcount like noun
+XXHash
+popcount like count
 tunable like reachable
 cryptographic
 PDF
 pdf
-SHA3
-ciphertext like noun
+SHA
+ciphertext like text
 decrypt like encrypt
 CID like ABC
 DAG-CBOR-native
@@ -45,13 +48,26 @@ dag-cbor
 lookup like noun
 inline like outline
 IPFS like ABC
-symlink like noun
-AES-256
+symlink like link
+AES
 CBOR like ABC
 distinguishability
-bitarray like noun
+bitarray like array
+cryptree like tree
+sharded
 benchmarking
 golang
+semilattice like lattice
+ary
+idempotence like omnipotence
+subdirectory like directory
+superset like set
+userland
+
+# rationale
+Combinatoric
+POS like ABC
 
 # other
--
+md
+TODO
