@@ -49,10 +49,9 @@ From this, we can broadly talk about the "decrypted" and "encrypted" layers.
 │                                                   │  │                       │     │
 │  ┌───/Thesis.pdf───┐         ┌─────/Notes.md───┐  │  │  ┌───/Hawaii.png───┐  │     │
 │  │                 │         │                 │  │  │  │                 │  │     │
-│  │                 │         │                 │  │  │  │                 │  │     │
-│  │   Namefiltery&  │         │   Namefiltery&  │  │  │  │   Namefiltery&  │  │     │
-│  │    Content Key  │         │    Content Key  │  │  │  │    Content Key  │  │ Hierarchy
-│  │                 │         │                 │  │  │  │                 │  │     │
+│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │     │
+│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │     │
+│  │                 │         │                 │  │  │  │                 │  │ Hierarchy
 │  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘  │     │
 │          │                             │          │  │            │          │     │
 └──────────┼─────────────────────────────┼──────────┘  └────────────┼──────────┘     │
@@ -63,7 +62,8 @@ From this, we can broadly talk about the "decrypted" and "encrypted" layers.
   │    Encrypted   │            │    Encrypted   │         │    Encrypted   │        │
   │      Bytes     │            │      Bytes     │         │      Bytes     │        │
   │                │            │                │         │                │        │
-  └────────────────┘            └────────────────┘         └────────────────┘        ▼
+  └────────────────┘            └────────────────┘         └────────────────┘        │
+                                                                                     ▼
 ```
 
 > A key structure diagram exploring how hierarchical read access works:
