@@ -129,7 +129,58 @@ type PrivateFile = {
 
 Example:
 
-![block encryption example](/images/encrypted_blocks.png)
+[Block encryption example]
+
+
+```
+                                    ┌────────────┐
+                                    │            │
+                                    │ Header Key │
+                                    │            │
+                                    └──┬───┬───┬─┘
+                                       │   │   │
+            ┌──────────────────────────┘   │   └──────SHA3─────────────┐
+            │                              │                           │
+            │                              │                           ▼
+            │                              │                    ┌─────────────┐
+            │                              │                    │             │
+            │                              │                    │ Content Key │
+            │                              │                    │             │
+            │                              │                    └──────┬──────┘
+            ▼                              │                           │
+┌────Private Header─────┐   ┌──────────────┼───Private Directory───────┼───────────────────────────────┐
+│                       │   │              │                           │                               │
+│                       │   │              ▼                           ▼                               │
+│  ┌──────────────┐     │   │   ┌───Temporal Header───────┐   ┌─────Content────────────────────────┐   │
+│  │              │     │   │   │                         │   │                                    │   │
+│  │ Skip Ratchet │     │   │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │   │
+│  │              │     │   │   │   │                     │   │                     │ │          │ │   │
+│  └──────────────┘     │   │   │   │  ┌──────────────┐   │   │    ┌─────────────┐  │ │ Metadata │ │   │
+│                       │   │   │   │  │              │   │   │    │             │  │ │          │ │   │
+│  ┌─────────────────┐  │   │   │   │  │  Documents   │   │   │    │  Documents  │  │ └──────────┘ │   │
+│  │                 │  │   │   │   │  │ Skip Ratchet │   │   │    │ Content Key │  │              │   │
+│  │ Bare Namefilter │  │   │   │   │  │              │   │   │    │             │  │              │   │
+│  │                 │  │   │   │   │  └──────────────┘   │   │    └─────────────┘  │              │   │
+│  └─────────────────┘  │   │   │   │                     │   │                     │              │   │
+│                       │   │   │   └─────────────────────┼───┼─────────────────────┘              │   │
+│  ┌──────────┐         │   │   │                         │   │                                    │   │
+│  │          │         │   │   │                         │   │                                    │   │
+│  │ i-number │         │   │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │   │
+│  │          │         │   │   │   │                     │   │                     │              │   │
+│  └──────────┘         │   │   │   │  ┌──────────────┐   │   │    ┌─────────────┐  │              │   │
+│                       │   │   │   │  │              │   │   │    │             │  │              │   │
+└───────────────────────┘   │   │   │  │     Apps     │   │   │    │  Documents  │  │              │   │
+                            │   │   │  │ Skip Ratchet │   │   │    │ Content Key │  │              │   │
+                            │   │   │  │              │   │   │    │             │  │              │   │
+                            │   │   │  └──────────────┘   │   │    └─────────────┘  │              │   │
+                            │   │   │                     │   │                     │              │   │
+                            │   │   └─────────────────────┼───┼─────────────────────┘              │   │
+                            │   │                         │   │                                    │   │
+                            │   └─────────────────────────┘   └────────────────────────────────────┘   │
+                            │                                                                          │
+                            │                                                                          │
+                            └──────────────────────────────────────────────────────────────────────────┘
+```
 
 ## 3.1 Key Structure
 
@@ -335,7 +386,4 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 
 The private forest merge algorithm thus works completely on the encrypted layer and can be done by a third party that doesn't have read access to the private file system at all. However, there is some complexity involved when reading files. It's possible multiple "conflicting" file writes exist at a single revision. In these cases, we need to do some simple tie-breaking and may just choose the smallest CID.
 
-# Footnotes
-
  [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.
- 
