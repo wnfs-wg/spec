@@ -1,103 +1,38 @@
-# Private WNFS
+# WNFS Private Partition Spec
 
-## Layers
+# 0 Abstract
 
-Encryption add another dimension to a file system. The data and file layers are each augmented with cleartext and ciphertext components:
+The private file system provides granular control over read access along two dimensions: file hierarchy and time. Access is granted with a backward secret mechanism, where being grated access to a subgraph at a point in time is either a single snapshot point in time, or from that time forward -- but never access to the past of a point of history. Similarly, access to a directory implies access to all children nodes, but not to its parents or sibling nodes. Key sharing is an orthognal concern, and is accomplished out of band, or via the WNFS shared segment.
+
+# 1 Terminology
+
+Encryption adds another dimension to a file system. The data and file layers are each augmented with cleartext and ciphertext components:
 
 |      | Ciphertext                | Cleartext    |
 |------|---------------------------|--------------|
 | Data | Block Layout              | CBOR Schema  |
 | File | Namefilters & multivalues | Files & dirs |
 
-|      | Ciphertext | Cleartext |
-|------|------------|-----------|
-| Data | Cipherdata | Cleardata |
-| File | Cipherfile | Clearfile |
+## 1.1 Layers
 
-From this, we can broadly talk about the "decrypted" and "encrypted" layers.
+We can broadly talk about "decrypted" and "encrypted" layers.
 
 - The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
 - The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-## Key Structure
+# 2 The Encrypted Layer
 
-```
-◄────────────────────────────────────────Siblings──────────────────────────────────►
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a HAMT. The root node of the resulting HAMT is thus fulfills a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the filesystem. The file system structure will be ["rediscovered" in the decrypted layer (§FIXME)](#FIXME).
 
+A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
-                                      ┌─────External─────┐                            │
-                                      │                  │                            │
-                                      │   Namefilter &   │                            │
-                                      │   Content Key    │                            │
-                                      │                  │                            │
-                                      └─────────┬────────┘                            │
-                                                │                                     │
-                                                ▼                                     │
-                       ┌─────────────────Private Directory────────────────┐           │
-                       │                                                  │           │
-                       │  ┌───/Documents───┐          ┌─────/Images────┐  │           │
-                       │  │                │          │                │  │           │
-                       │  │  Namefilter &  │          │  Namefilter &  │  │           │
-                       │  │  Content Key   │          │  Content Key   │  │           │
-                       │  │                │          │                │  │           │
-                       │  └────────┬───────┘          └────────┬───────┘  │           │
-                       │           │                           │          │           │
-                       └───────────┼───────────────────────────┼──────────┘           │
-                                   │                           │                      │
-                                   ▼                           ▼                      │
-┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐  Hierarchy
-│                                                   │  │                       │      │
-│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │      │
-│  │                 │         │                 │  │  │  │                 │  │      │
-│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │      │
-│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │      │
-│  │                 │         │                 │  │  │  │                 │  │      │
-│  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘  │      │
-│          │                             │          │  │            │          │      │
-└──────────┼─────────────────────────────┼──────────┘  └────────────┼──────────┘      │
-           │                             │                          │                 │
-           ▼                             ▼                          ▼                 │
-  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐         │
-  │                │            │                │         │                │         │
-  │    Content     │            │    Content     │         │    Content     │         │
-  │                │            │                │         │                │         │
-  └────────────────┘            └────────────────┘         └────────────────┘         │
-                                                                                      ▼
-```
-
-> A key structure diagram exploring how hierarchical read access works:
-> Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
-> It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
->
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
-
-![key structure](/images/key_structure.png)
-
-> A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
->
-> - SR: skip ratchet
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
-> - Dotted, blue lines indicate what data can be derived via one-way functions.
->
-> Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
->
-> Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
-> It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
-
-## The Encrypted Layer
-
-The private file system's encrypted "root" is not the root of the decrypted file system.
-
-A single file system's encrypted root can represent a whole forest of decrypted file system trees. The roots of these trees may be completely unrelated. We refer to them as the `PrivateForest`. Since you may not know what else there is in the forest, we sometimes refer to the it as the "dark forest".
+## 2.1 
 
 At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are should be smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
 
 These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
 
 The keys in the HAMT are saturated [namefilter](/spec/namefilter.md)s.
-
 
 ```typescript
 type PrivateForest =
@@ -124,6 +59,93 @@ type Entry<K, V>
   = CID<CBOR<Node<K, V>>>
   | Array<[K, V]> // bucket of values
 ```
+
+# 3 Key Structure
+
+The 
+
+## 3.1 Decryption Pointers
+
+Access is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others).
+
+Keys are always attached to pointers to some data.
+
+```
+┌──Decryption Pointer──┐
+│                      │
+│     Namefilter &     │
+│     Content Key      │
+│                      │
+└──────────────────────┘
+```
+
+## 3.2 Hierarchy
+
+Decryption pointers provide a way to "discover" the structure of 
+
+```
+                                       ┌────External────┐
+                                       │                │
+                                       │  Namefilter &  │
+                                       │  Content Key   │
+                                       │                │
+                                       └────────┬───────┘
+                                                │
+                                                ▼
+                       ┌─────────────────Private Directory────────────────┐
+                       │                                                  │
+                       │  ┌───/Documents───┐          ┌─────/Images────┐  │
+                       │  │                │          │                │  │
+                       │  │  Namefilter &  │          │  Namefilter &  │  │
+                       │  │  Content Key   │          │  Content Key   │  │
+                       │  │                │          │                │  │
+                       │  └────────┬───────┘          └────────┬───────┘  │
+                       │           │                           │          │
+                       └───────────┼───────────────────────────┼──────────┘
+                                   │                           │
+                                   ▼                           ▼ 
+┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
+│                                                   │  │                       │
+│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
+│  │                 │         │                 │  │  │  │                 │  │
+│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
+│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
+│  │                 │         │                 │  │  │  │                 │  │
+│  └───────┬─────────┘         └────────┬────────┘  │  │  └────────┬────────┘  │
+│          │                            │           │  │           │           │
+└──────────┼────────────────────────────┼───────────┘  └───────────┼───────────┘
+           │                            │                          │
+           ▼                            ▼                          ▼
+  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐
+  │                │            │                │         │                │
+  │    Content     │            │    Content     │         │    Content     │
+  │                │            │                │         │                │
+  └────────────────┘            └────────────────┘         └────────────────┘
+```
+
+## 3.2 
+
+> A key structure diagram exploring how hierarchical read access works:
+> Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
+> It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
+>
+> - CK: content key
+> - Yellow lines indicate what box of data keys can en/decrypt.
+
+![key structure](/images/key_structure.png)
+
+> A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
+>
+> - SR: skip ratchet
+> - CK: content key
+> - Yellow lines indicate what box of data keys can en/decrypt.
+> - Dotted, blue lines indicate what data can be derived via one-way functions.
+>
+> Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
+>
+> Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
+> It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
+
 
 ## The Decrypted Layer
 
