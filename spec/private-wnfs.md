@@ -22,70 +22,49 @@ From this, we can broadly talk about the "decrypted" and "encrypted" layers.
 ## Key Structure
 
 ```
-     ◄─────────────────────────Siblings──────────────────────────────────────────►        │
-                                                                                          │
-                                                                                          │
-                                                                                          │
-                                                                                          │
-                                          ┌─External─Storage─┐                            │
-                                          │                  │                            │
-                                          │   Namefilter &   │                            │
-                                          │    Content Key   │                            │
-                                          │          │       │                            │
-                                          └──────────┼───────┘                            │
-                                                     │                                    │
-                                                     │                                    │
-                                                     │                                    │
-                                                     ▼                                    │
-                                                                                          │
-                       ┌────────────────────Private Directory──────────────┐              │
-                       │                                                   │              │
-                       │                                                   │              │
-                       │  ┌───/Documents────┐         ┌─────/Images─────┐  │              │
-                       │  │                 │         │                 │  │              │
-                       │  │  Namefilter &   │         │                 │  │              │
-                       │  │   Content Key   │         │   Namefilter &  │  │              │
-                       │  │                 │         │    Content Key  │  │              │
-                       │  │                 │         │                 │  │              │
-                       │  └────────┬────────┘         └────────┬────────┘  │              │
-                       │           │                           │           │              │
-                       │           │                           │           │              │
-                       │           │                           │           │              │
-                       └───────────┼───────────────────────────┼───────────┘              │
-                                   │                           │                          │
-                                   │                           │                          │
-                                   │                           │                      Hierarchy
-                                   │                           │                          │
-                                   │                           │                          │
-                                   │                           │                          │
-                                   ▼                           ▼                          │
-┌────────────────────Private Directory──────────────┐  ┌─────────────────────────┐        │
-│                                                   │  │                         │        │
-│                                                   │  │                         │        │
-│  ┌───/Thesis.pdf───┐         ┌─────/Notes.md───┐  │  │  ┌───/Documents────┐    │        │
-│  │                 │         │                 │  │  │  │                 │    │        │
-│  │                 │         │                 │  │  │  │                 │    │        │
-│  │   Namefiltery&  │         │   Namefiltery&  │  │  │  │   Namefiltery&  │    │        │
-│  │    Content Key  │         │    Content Key  │  │  │  │    Content Key  │    │        │
-│  │                 │         │                 │  │  │  │                 │    │        │
-│  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘    │        │
-│          │                             │          │  │            │            │        │
-│          │                             │          │  │            │            │        │
-│          │                             │          │  │            │            │        │
-└──────────┼─────────────────────────────┼──────────┘  └────────────┼────────────┘        │
-           │                             │                          │                     │
-           │                             │                          │                     │
-           ▼                             ▼                          ▼                     │
-   ┌───Private File──┐          ┌───Private File──┐        ┌───Private File──┐            │
-   │                 │          │                 │        │                 │            │
-   │                 │          │                 │        │                 │            │
-   │   Content Key   │          │   Content Key   │        │   Content Key   │            │
-   │                 │          │                 │        │                 │            │
-   │                 │          │                 │        │                 │            ▼
-   └─────────────────┘          └─────────────────┘        └─────────────────┘
-```
+◄────────────────────────────────────────Siblings──────────────────────────────────►
 
-![hierarchical key structure](/images/hierarchical_key_structure.png)
+
+                                      ┌──────────────────┐                           │
+                                      │                  │                           │
+                                      │   Namefilter &   │                           │
+                                      │    Content Key   │                           │
+                                      │         │        │                           │
+                                      └─────────┼────────┘                           │
+                                                │                                    │
+                                                ▼                                    │
+                       ┌─────────────────Private Directory────────────────┐          │
+                       │                                                  │          │
+                       │  ┌───/Documents───┐          ┌─────/Images────┐  │          │
+                       │  │                │          │                │  │          │
+                       │  │  Namefilter &  │          │  Namefilter &  │  │          │
+                       │  │  Content Key   │          │  Content Key   │  │          │
+                       │  │                │          │                │  │          │
+                       │  └────────┬───────┘          └────────┬───────┘  │          │
+                       │           │                           │          │          │
+                       └───────────┼───────────────────────────┼──────────┘          │
+                                   │                           │                     │
+                                   ▼                           ▼                     │
+┌────────────────────Private Directory──────────────┐  ┌────Private Directory──┐     │
+│                                                   │  │                       │     │
+│  ┌───/Thesis.pdf───┐         ┌─────/Notes.md───┐  │  │  ┌───/Hawaii.png───┐  │     │
+│  │                 │         │                 │  │  │  │                 │  │     │
+│  │                 │         │                 │  │  │  │                 │  │     │
+│  │   Namefiltery&  │         │   Namefiltery&  │  │  │  │   Namefiltery&  │  │     │
+│  │    Content Key  │         │    Content Key  │  │  │  │    Content Key  │  │ Hierarchy
+│  │                 │         │                 │  │  │  │                 │  │     │
+│  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘  │     │
+│          │                             │          │  │            │          │     │
+└──────────┼─────────────────────────────┼──────────┘  └────────────┼──────────┘     │
+           │                             │                          │                │
+           ▼                             ▼                          ▼                │
+  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐        │
+  │                │            │                │         │                │        │
+  │    Encrypted   │            │    Encrypted   │         │    Encrypted   │        │
+  │      Bytes     │            │      Bytes     │         │      Bytes     │        │
+  │                │            │                │         │                │        │
+  └────────────────┘            └────────────────┘         └────────────────┘        ▼
+```
 
 > A key structure diagram exploring how hierarchical read access works:
 > Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
