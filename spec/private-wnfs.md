@@ -1,8 +1,23 @@
 # Private WNFS
 
-It makes sense to split the private partition into two layers:
-- The "decrypted" layer that defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
-- The "encrypted" layer that defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
+## Layers
+
+Encryption add another dimension to a file system. The data and file layers are each augmented with cleartext and ciphertext components:
+
+|      | Ciphertext                | Cleartext    |
+|------|---------------------------|--------------|
+| Data | Block Layout              | CBOR Schema  |
+| File | Namefilters & multivalues | Files & dirs |
+
+|      | Ciphertext | Cleartext |
+|------|------------|-----------|
+| Data | Cipherdata | Cleardata |
+| File | Cipherfile | Clearfile |
+
+From this, we can broadly talk about the "decrypted" and "encrypted" layers.
+
+- The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
+- The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
 ## Key Structure
 
