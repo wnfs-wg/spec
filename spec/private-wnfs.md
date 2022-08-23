@@ -255,63 +255,73 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
 ![key structure](/images/key_structure.png)
 
 ```
-                                                              Revisions
-         ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────►
+                                                           Revisions
+         ────────────────────────────────────────────────────────────────────────────────────────────────────────────►
 
-          ┌─     ┌────────────────┐                      ┌────────────────┐                      ┌────────────────┐
-          │      │                │                      │                │                      │                │
-          │      │  Root          │                      │  Root          │                      │  Root          │
-          │ ⋯⋯⋯─►│  Skip Ratchet  ├─────────────────────►│  Skip Ratchet  ├─────────────────────►│  Skip Ratchet  │
-          │      │  Revision: 4   │                      │  Revision: 5   │                      │  Revision: 6   │
-          │      │                ├─────┐                │                ├─────┐                │                ├─────┐
-          │      └───────┬────────┘     │                └────────┬───────┘     │                └────────┬───────┘     │
-     Root │              │              │                         │             │                         │             │
-          │              │              ▼                         │             ▼                         │             ▼
-          │              │          ┌───────────────┐             │         ┌───────────────┐             │         ┌───────────────┐
-          │              │          │               │             │         │               │             │         │               │
-          │              │          │  Root         │             │         │  Root         │             │         │  Root         │
-          │              │          │  Content Key  │             │         │  Content Key  │             │         │  Content Key  │
-          │              │          │  Revision: 42 │             │         │  Revision: 5  │             │         │  Revision: 6  │
-          │              │          │               │             │         │               │             │         │               │
-          └─             │          └───────┬───────┘             │         └───────┬───────┘             │         └───────┬───────┘
-                         │                  │                     │                 │                     │                 │
-                         │                  │                     │                 │                     │                 │
-                         ▼                  │                     ▼                 │                     ▼                 │
-          ┌─     ┌────────────────┐         │            ┌────────────────┐         │            ┌────────────────┐         │
-          │      │                │         │            │                │         │            │                │         │
-          │      │  Documents     │         │            │  Documents     │         │            │  Documents     │         │
-          │      │  Skip Ratchet  ├─────────┼───────────►│  Skip Ratchet  ├─────────┼───────────►│  Skip Ratchet  │         │
-          │      │  Revision: 0   │         │            │  Revision: 1   │         │            │  Revision: 2   │         │
-          │      │                ├─────┐   │            │                ├─────┐   │            │                ├─────┐   │
-          │      └────────────────┘     │   │            └────────┬───────┘     │   │            └────────┬───────┘     │   │
-Documents │                             │   │                     │             │   │                     │             │   │
-          │                             ▼   ▼                     │             ▼   ▼                     │             ▼   │
-          │                        ┌───────────────┐              │        ┌───────────────┐              │        ┌────────┴──────┐
-          │                        │               │              │        │               │              │        │               │
-          │                        │  Documents    │              │        │  Documents    │              │        │  Documents    │
-          │                        │  Content Key  │              │        │  Content Key  │              │        │  Content Key  │
-          │                        │  Revision: 0  │              │        │  Revision: 1  │              │        │  Revision: 2  │
-          │                        │               │              │        │               │              │        │               │
-          └─                       └───────────────┘              │        └────────┬──────┘              │        └────────┬──────┘
-                                                                  │                 │                     │                 │
-                                                                  │                 │                     │                 │
-                                                                  ▼                 │                     ▼                 │
-          ┌─                                              ┌────────────────┐        │             ┌────────────────┐        │
-          │                                               │                │        │             │                │        │
-          │                                               │  Notes.md      │        │             │  Notes.md      │        │
-          │                                               │  Skip Ratchet  ├────────┼────────────►│  Skip Ratchet  │        │
-          │                                               │  Revision: 0   │        │             │  Revision: 1   │        │
-          │                                               │                ├─────┐  │             │                ├─────┐  │
-          │                                               └────────────────┘     │  │             └────────────────┘     │  │
- Notes.md │                                                                      │  │                                    │  │
-          │                                                                      ▼  ▼                                    ▼  ▼
-          │                                                                 ┌───────────────┐                       ┌───────────────┐
-          │                                                                 │               │                       │               │
-          │                                                                 │  Notes.md     │                       │  Notes.md     │
-          │                                                                 │  Content Key  │                       │  Content Key  │
-          │                                                                 │  Revision: 0  │                       │  Revision: 1  │
-          │                                                                 │               │                       │               │
-          └─                                                                └───────────────┘                       └───────────────┘
+          ┌─    ┌────────────────┐                    ┌────────────────┐                    ┌────────────────┐
+          │     │                │                    │                │                    │                │
+          │     │  Root          │                    │  Root          │                    │  Root          │
+          │ ⋯⋯─►│  Skip Ratchet  ├───────────────────►│  Skip Ratchet  ├───────────────────►│  Skip Ratchet  │
+          │     │  Revision: 4   │                    │  Revision: 5   │                    │  Revision: 6   │
+          │     │                ├─────┐              │                ├─────┐              │                ├─────┐
+          │     └───────┬────────┘     │              └────────┬───────┘     │              └────────┬───────┘     │
+     Root │             │              │                       │             │                       │             │
+          │             │              ▼                       │             ▼                       │             ▼
+          │             │          ┌───────────────┐           │         ┌───────────────┐           │         ┌───────────────┐
+          │             │          │               │           │         │               │           │         │               │
+          │             │          │  Root         │           │         │  Root         │           │         │  Root         │
+          │             │          │  Content Key  │           │         │  Content Key  │           │         │  Content Key  │
+          │             │          │  Revision: 42 │           │         │  Revision: 5  │           │         │  Revision: 6  │
+          │             │          │               │           │         │               │           │         │               │
+          └─            │          └───────┬───────┘           │         └───────┬───────┘           │         └───────┬───────┘
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        │                  │                   │                 │                   │                 │
+                        ▼                  │                   ▼                 │                   ▼                 │
+          ┌─    ┌────────────────┐         │          ┌────────────────┐         │          ┌────────────────┐         │
+          │     │                │         │          │                │         │          │                │         │
+          │     │  Documents     │         │          │  Documents     │         │          │  Documents     │         │
+          │     │  Skip Ratchet  ├─────────┼─────────►│  Skip Ratchet  ├─────────┼─────────►│  Skip Ratchet  │         │
+          │     │  Revision: 0   │         │          │  Revision: 1   │         │          │  Revision: 2   │         │
+          │     │                ├─────┐   │          │                ├─────┐   │          │                ├─────┐   │
+          │     └────────────────┘     │   │          └────────┬───────┘     │   │          └────────┬───────┘     │   │
+Documents │                            │   │                   │             │   │                   │             │   │
+          │                            ▼   ▼                   │             ▼   ▼                   │             ▼   ▼
+          │                       ┌───────────────┐            │        ┌───────────────┐            │        ┌───────────────┐
+          │                       │               │            │        │               │            │        │               │
+          │                       │  Documents    │            │        │  Documents    │            │        │  Documents    │
+          │                       │  Content Key  │            │        │  Content Key  │            │        │  Content Key  │
+          │                       │  Revision: 0  │            │        │  Revision: 1  │            │        │  Revision: 2  │
+          │                       │               │            │        │               │            │        │               │
+          └─                      └───────────────┘            │        └────────┬──────┘            │        └────────┬──────┘
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               │                 │                   │                 │
+                                                               ▼                 │                   ▼                 │
+          ┌─                                           ┌────────────────┐        │           ┌────────────────┐        │
+          │                                            │                │        │           │                │        │
+          │                                            │  Notes.md      │        │           │  Notes.md      │        │
+          │                                            │  Skip Ratchet  ├────────┼──────────►│  Skip Ratchet  │        │
+          │                                            │  Revision: 0   │        │           │  Revision: 1   │        │
+          │                                            │                ├─────┐  │           │                ├─────┐  │
+          │                                            └────────────────┘     │  │           └────────────────┘     │  │
+ Notes.md │                                                                   │  │                                  │  │
+          │                                                                   ▼  ▼                                  ▼  ▼
+          │                                                              ┌───────────────┐                     ┌───────────────┐
+          │                                                              │               │                     │               │
+          │                                                              │  Notes.md     │                     │  Notes.md     │
+          │                                                              │  Content Key  │                     │  Content Key  │
+          │                                                              │  Revision: 0  │                     │  Revision: 1  │
+          │                                                              │               │                     │               │
+          └─                                                             └───────────────┘                     └───────────────┘
 ```
 
 > A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
