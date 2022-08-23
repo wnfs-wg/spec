@@ -25,45 +25,44 @@ From this, we can broadly talk about the "decrypted" and "encrypted" layers.
 ◄────────────────────────────────────────Siblings──────────────────────────────────►
 
 
-                                      ┌──────────────────┐                           │
-                                      │                  │                           │
-                                      │   Namefilter &   │                           │
-                                      │    Content Key   │                           │
-                                      │         │        │                           │
-                                      └─────────┼────────┘                           │
-                                                │                                    │
-                                                ▼                                    │
-                       ┌─────────────────Private Directory────────────────┐          │
-                       │                                                  │          │
-                       │  ┌───/Documents───┐          ┌─────/Images────┐  │          │
-                       │  │                │          │                │  │          │
-                       │  │  Namefilter &  │          │  Namefilter &  │  │          │
-                       │  │  Content Key   │          │  Content Key   │  │          │
-                       │  │                │          │                │  │          │
-                       │  └────────┬───────┘          └────────┬───────┘  │          │
-                       │           │                           │          │          │
-                       └───────────┼───────────────────────────┼──────────┘          │
-                                   │                           │                     │
-                                   ▼                           ▼                     │
-┌────────────────────Private Directory──────────────┐  ┌────Private Directory──┐     │
-│                                                   │  │                       │     │
-│  ┌───/Thesis.pdf───┐         ┌─────/Notes.md───┐  │  │  ┌───/Hawaii.png───┐  │     │
-│  │                 │         │                 │  │  │  │                 │  │     │
-│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │     │
-│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │     │
-│  │                 │         │                 │  │  │  │                 │  │ Hierarchy
-│  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘  │     │
-│          │                             │          │  │            │          │     │
-└──────────┼─────────────────────────────┼──────────┘  └────────────┼──────────┘     │
-           │                             │                          │                │
-           ▼                             ▼                          ▼                │
-  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐        │
-  │                │            │                │         │                │        │
-  │    Encrypted   │            │    Encrypted   │         │    Encrypted   │        │
-  │      Bytes     │            │      Bytes     │         │      Bytes     │        │
-  │                │            │                │         │                │        │
-  └────────────────┘            └────────────────┘         └────────────────┘        │
-                                                                                     ▼
+                                      ┌─────External─────┐                            │
+                                      │                  │                            │
+                                      │   Namefilter &   │                            │
+                                      │   Content Key    │                            │
+                                      │                  │                            │
+                                      └─────────┬────────┘                            │
+                                                │                                     │
+                                                ▼                                     │
+                       ┌─────────────────Private Directory────────────────┐           │
+                       │                                                  │           │
+                       │  ┌───/Documents───┐          ┌─────/Images────┐  │           │
+                       │  │                │          │                │  │           │
+                       │  │  Namefilter &  │          │  Namefilter &  │  │           │
+                       │  │  Content Key   │          │  Content Key   │  │           │
+                       │  │                │          │                │  │           │
+                       │  └────────┬───────┘          └────────┬───────┘  │           │
+                       │           │                           │          │           │
+                       └───────────┼───────────────────────────┼──────────┘           │
+                                   │                           │                      │
+                                   ▼                           ▼                      │
+┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐  Hierarchy
+│                                                   │  │                       │      │
+│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │      │
+│  │                 │         │                 │  │  │  │                 │  │      │
+│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │      │
+│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │      │
+│  │                 │         │                 │  │  │  │                 │  │      │
+│  └───────┬─────────┘         └─────────┬───────┘  │  │  └─────────┬───────┘  │      │
+│          │                             │          │  │            │          │      │
+└──────────┼─────────────────────────────┼──────────┘  └────────────┼──────────┘      │
+           │                             │                          │                 │
+           ▼                             ▼                          ▼                 │
+  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐         │
+  │                │            │                │         │                │         │
+  │    Content     │            │    Content     │         │    Content     │         │
+  │                │            │                │         │                │         │
+  └────────────────┘            └────────────────┘         └────────────────┘         │
+                                                                                      ▼
 ```
 
 > A key structure diagram exploring how hierarchical read access works:
