@@ -288,7 +288,7 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
         │                          ▼   ▼                  │             ▼   ▼                  │             ▼   ▼
         │                     ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
         │                     │               │           │         │               │          │        │               │
-        │                     │  Documents    │           │         │  Documents    │          │        │  Documents    │
+        │                     │  Docs/        │           │         │  Docs/        │          │        │  Docs/        │
         │                     │  Revision: 0  │           │         │  Revision: 1  │          │        │  Revision: 2  │
         │                     │               │           │         │               │          │        │               │
         └─                    └───────────────┘           │         └───────┬───────┘          │        └────────┬──────┘
@@ -300,8 +300,7 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
                                                           ▼                 │                  ▼                 │
         ┌─                                        ┌──Skip Ratchet──┐        │          ┌──Skip Ratchet──┐        │
         │                                         │                │        │          │                │        │
-        │                                         │  Note.md       │        │          │  Note.md       │        │
-        │                                         │  Skip Ratchet  ├────────┼─────────►│  Skip Ratchet  │        │
+        │                                         │  Note.md       ├────────┼─────────►│  Note.md       │        │
         │                                         │  Revision: 0   │        │          │  Revision: 1   │        │
         │                                         │                ├─────┐  │          │                ├─────┐  │
         │                                         └────────────────┘     │  │          └────────────────┘     │  │
