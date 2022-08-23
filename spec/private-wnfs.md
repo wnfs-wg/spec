@@ -127,59 +127,69 @@ type PrivateFile = {
 }
 ```
 
-Example:
+### 3.2.1 Decryption Pointers
 
-[Block encryption example]
+Access is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others).
+
+Keys are always attached to pointers to some data.
 
 ```
-                                            ┌────────────┐
-                                            │            │
-┌─────────────────Derive───────────────────►│ Header Key │
-│                                           │            │
-│                                           └──┬───┬───┬─┘
-│                                              │   │   │
-│                   ┌──────────────────────────┘   │   └──────SHA3─────────────┐
-│                   │                              │                           │
-│                   │                              │                           ▼
-│                   │                              │                    ┌─────────────┐
-│                   │                              │                    │             │
-│                   │                              │                    │ Content Key │
-│                   │                              │                    │             │
-│                   │                              │                    └──────┬──────┘
-│                   ▼                              │                           │
-│       ┌────Private Header─────┐   ┌──────────────┼─────Private Directory─────┼───────────────────────────────┐
-│       │                       │   │              │                           │                               │
-│       │                       │   │              ▼                           ▼                               │
-│       │  ┌──────────────┐     │   │   ┌───Temporal Header───────┐   ┌─────Content────────────────────────┐   │
-│       │  │              │     │   │   │                         │   │                                    │   │
-└───────┼──┤ Skip Ratchet │     │   │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │   │
-        │  │              │     │   │   │   │                     │   │                     │ │          │ │   │
-        │  └──────────────┘     │   │   │   │  ┌──────────────┐   │   │    ┌─────────────┐  │ │ Metadata │ │   │
-        │                       │   │   │   │  │              │   │   │    │             │  │ │          │ │   │
-        │  ┌─────────────────┐  │   │   │   │  │  Documents   │   │   │    │  Documents  │  │ └──────────┘ │   │
-        │  │                 │  │   │   │   │  │ Skip Ratchet │   │   │    │ Content Key │  │              │   │
-        │  │ Bare Namefilter │  │   │   │   │  │              │   │   │    │             │  │              │   │
-        │  │                 │  │   │   │   │  └──────────────┘   │   │    └─────────────┘  │              │   │
-        │  └─────────────────┘  │   │   │   │                     │   │                     │              │   │
-        │                       │   │   │   └─────────────────────┼───┼─────────────────────┘              │   │
-        │  ┌──────────┐         │   │   │                         │   │                                    │   │
-        │  │          │         │   │   │                         │   │                                    │   │
-        │  │ i-number │         │   │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │   │
-        │  │          │         │   │   │   │                     │   │                     │              │   │
-        │  └──────────┘         │   │   │   │  ┌──────────────┐   │   │    ┌─────────────┐  │              │   │
-        │                       │   │   │   │  │              │   │   │    │             │  │              │   │
-        └───────────────────────┘   │   │   │  │     Apps     │   │   │    │  Documents  │  │              │   │
-                                    │   │   │  │ Skip Ratchet │   │   │    │ Content Key │  │              │   │
-                                    │   │   │  │              │   │   │    │             │  │              │   │
-                                    │   │   │  └──────────────┘   │   │    └─────────────┘  │              │   │
-                                    │   │   │                     │   │                     │              │   │
-                                    │   │   └─────────────────────┼───┼─────────────────────┘              │   │
-                                    │   │                         │   │                                    │   │
-                                    │   └─────────────────────────┘   └────────────────────────────────────┘   │
-                                    │                                                                          │
-                                    │                                                                          │
-                                    └──────────────────────────────────────────────────────────────────────────┘
+┌──Decryption Pointer──┐
+│                      │
+│     Namefilter &     │
+│     Content Key      │
+│                      │
+└──────────────────────┘
 ```
+
+### 3.2.2 Hierarchy
+
+Decryption pointers provide a way to "discover" the structure of 
+
+```
+                                       ┌────External────┐
+                                       │                │
+                                       │  Namefilter &  │
+                                       │  Content Key   │
+                                       │                │
+                                       └────────┬───────┘
+                                                │
+                                                ▼
+                       ┌─────────────────Private Directory────────────────┐
+                       │                                                  │
+                       │  ┌───/Documents───┐          ┌─────/Images────┐  │
+                       │  │                │          │                │  │
+                       │  │  Namefilter &  │          │  Namefilter &  │  │
+                       │  │  Content Key   │          │  Content Key   │  │
+                       │  │                │          │                │  │
+                       │  └────────┬───────┘          └────────┬───────┘  │
+                       │           │                           │          │
+                       └───────────┼───────────────────────────┼──────────┘
+                                   │                           │
+                                   ▼                           ▼ 
+┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
+│                                                   │  │                       │
+│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
+│  │                 │         │                 │  │  │  │                 │  │
+│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
+│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
+│  │                 │         │                 │  │  │  │                 │  │
+│  └───────┬─────────┘         └────────┬────────┘  │  │  └────────┬────────┘  │
+│          │                            │           │  │           │           │
+└──────────┼────────────────────────────┼───────────┘  └───────────┼───────────┘
+           │                            │                          │
+           ▼                            ▼                          ▼
+  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐
+  │                │            │                │         │                │
+  │    Content     │            │    Content     │         │    Content     │
+  │                │            │                │         │                │
+  └────────────────┘            └────────────────┘         └────────────────┘
+```
+
+### 3.2.3 Key Structure
+
+
+Below is a diagram representing the inner structure of a single cleartext node and its keys.
 
 ```
                                    ┌────────────┐
@@ -226,68 +236,12 @@ Example:
                                └─────────────────────────┘   └────────────────────────────────────┘
 ```
 
-## 3.1 Key Structure
+FIXME more storytelling abouyt the diagram here would be helpful
 
-The 
+FIXME single source of truth for keys
 
-## 3.1 Decryption Pointers
+FIXME explain how to walk the two parallel paths (headers & content) using above diagram
 
-Access is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others).
-
-Keys are always attached to pointers to some data.
-
-```
-┌──Decryption Pointer──┐
-│                      │
-│     Namefilter &     │
-│     Content Key      │
-│                      │
-└──────────────────────┘
-```
-
-## 3.2 Hierarchy
-
-Decryption pointers provide a way to "discover" the structure of 
-
-```
-                                       ┌────External────┐
-                                       │                │
-                                       │  Namefilter &  │
-                                       │  Content Key   │
-                                       │                │
-                                       └────────┬───────┘
-                                                │
-                                                ▼
-                       ┌─────────────────Private Directory────────────────┐
-                       │                                                  │
-                       │  ┌───/Documents───┐          ┌─────/Images────┐  │
-                       │  │                │          │                │  │
-                       │  │  Namefilter &  │          │  Namefilter &  │  │
-                       │  │  Content Key   │          │  Content Key   │  │
-                       │  │                │          │                │  │
-                       │  └────────┬───────┘          └────────┬───────┘  │
-                       │           │                           │          │
-                       └───────────┼───────────────────────────┼──────────┘
-                                   │                           │
-                                   ▼                           ▼ 
-┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
-│                                                   │  │                       │
-│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
-│  │                 │         │                 │  │  │  │                 │  │
-│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
-│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
-│  │                 │         │                 │  │  │  │                 │  │
-│  └───────┬─────────┘         └────────┬────────┘  │  │  └────────┬────────┘  │
-│          │                            │           │  │           │           │
-└──────────┼────────────────────────────┼───────────┘  └───────────┼───────────┘
-           │                            │                          │
-           ▼                            ▼                          ▼
-  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐
-  │                │            │                │         │                │
-  │    Content     │            │    Content     │         │    Content     │
-  │                │            │                │         │                │
-  └────────────────┘            └────────────────┘         └────────────────┘
-```
 
 ## 3.2 
 
@@ -299,6 +253,77 @@ Decryption pointers provide a way to "discover" the structure of
 > - Yellow lines indicate what box of data keys can en/decrypt.
 
 ![key structure](/images/key_structure.png)
+
+```
+                                                             Revisions
+          ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────►
+
+
+
+
+          ┌─           ┌────────────────┐                               ┌────────────────┐                             ┌────────────────┐
+          │            │                │                               │                │                             │                │
+          │            │  Root          │                               │  Root          │                             │  Root          │
+          │   ⋯⋯⋯⋯⋯⋯⋯─►│  Skip Ratchet  ├──────────────────────────────►│  Skip Ratchet  ├────────────────────────────►│  Skip Ratchet  │
+          │            │  Revision: 4   │                               │  Revision: 5   │                             │  Revision: 6   │
+          │            │                ├─────┐                         │                ├─────┐                       │                ├─────┐
+          │            └───────┬────────┘     │                         └────────┬───────┘     │                       └────────┬───────┘     │
+     Root │                    │              │                                  │             │                                │             │
+          │                    │              ▼                                  │             ▼                                │             ▼
+          │                    │          ┌───────────────┐                      │         ┌───────────────┐                    │         ┌───────────────┐
+          │                    │          │               │                      │         │               │                    │         │               │
+          │                    │          │  Root         │                      │         │  Root         │                    │         │  Root         │
+          │                    │          │  Content Key  │                      │         │  Content Key  │                    │         │  Content Key  │
+          │                    │          │  Revision: 42 │                      │         │  Revision: 5  │                    │         │  Revision: 6  │
+          │                    │          │               │                      │         │               │                    │         │               │
+          └─                   │          └───────┬───────┘                      │         └───────┬───────┘                    │         └───────┬───────┘
+                               │                  │                              │                 │                            │                 │
+                               │                  │                              │                 │                            │                 │
+                               │                  │                              │                 │                            │                 │
+                               │                  │                              │                 │                            │                 │
+                               │                  │                              │                 │                            │                 │
+                               │                  │                              │                 │                            │                 │
+                               ▼                  │                              ▼                 │                            ▼                 │
+          ┌─           ┌────────────────┐         │                     ┌────────────────┐         │                   ┌────────────────┐         │
+          │            │                │         │                     │                │         │                   │                │         │
+          │            │  Documents     │         │                     │  Documents     │         │                   │  Documents     │         │
+          │            │  Skip Ratchet  ├─────────┼───────────────────◄►│  Skip Ratchet  ├─────────┼──────────────────►│  Skip Ratchet  │         │
+          │            │  Revision: 0   │         │                     │  Revision: 1   │         │                   │  Revision: 0   │         │
+          │            │                ├─────┐   │                     │                ├─────┐   │                   │                ├─────┐   │
+          │            └────────────────┘     │   │                     └────────┬───────┘     │   │                   └────────┬───────┘     │   │
+Documents │                                   │   │                              │             │   │                            │             │   │
+          │                                   ▼   ▼                              │             ▼   ▼                            │             ▼   │
+          │                              ┌───────────────┐                       │        ┌───────────────┐                     │        ┌────────┴──────┐
+          │                              │               │                       │        │               │                     │        │               │
+          │                              │  Documents    │                       │        │  Documents    │                     │        │  Documents    │
+          │                              │  Content Key  │                       │        │  Content Key  │                     │        │  Content Key  │
+          │                              │  Revision: 0  │                       │        │  Revision: 1  │                     │        │  Revision: 2  │
+          │                              │               │                       │        │               │                     │        │               │
+          └─                             └───────────────┘                       │        └────────┬──────┘                     │        └────────┬──────┘
+                                                                                 │                 │                            │                 │
+                                                                                 │                 │                            │                 │
+                                                                                 │                 │                            │                 │
+                                                                                 │                 │                            │                 │
+                                                                                 │                 │                            │                 │
+                                                                                 │                 │                            │                 │
+                                                                                 ▼                 │                            ▼                 │
+          ┌─                                                             ┌────────────────┐        │                    ┌────────────────┐        │
+          │                                                              │                │        │                    │                │        │
+          │                                                              │  Notes.md      │        │                    │  Notes.md      │        │
+          │                                                              │  Skip Ratchet  ├────────┼──────────────────► │  Skip Ratchet  │        │
+          │                                                              │  Revision: 0   │        │                    │  Revision: 1   │        │
+          │                                                              │                ├─────┐  │                    │                ├─────┐  │
+          │                                                              └────────────────┘     │  │                    └────────────────┘     │  │
+ Notes.md │                                                                                     │  │                                           │  │
+          │                                                                                     ▼  ▼                                           ▼  ▼
+          │                                                                                ┌───────────────┐                              ┌───────────────┐
+          │                                                                                │               │                              │               │
+          │                                                                                │  Root         │                              │  Root         │
+          │                                                                                │  Content Key  │                              │  Content Key  │
+          │                                                                                │  Revision: 0  │                              │  Revision: 1  │
+          │                                                                                │               │                              │               │
+          └─                                                                               └───────────────┘                              └───────────────┘
+```
 
 > A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 >
