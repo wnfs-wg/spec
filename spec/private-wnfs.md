@@ -258,12 +258,12 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
                                                       Revisions
      ──────────────────────────────────────────────────────────────────────────────────────────────────────────►
 
-        ┌─  ┌──Skip Ratchet──┐                   ┌──Skip Ratchet──┐                   ┌──Skip Ratchet──┐
-        │   │                │                   │                │                   │                │
-       ⋯⋯⋯─►│  Root          ├──────────────────►│  Root          ├──────────────────►│  Root          │
-        │   │  Revision: 4   │                   │  Revision: 5   │                   │  Revision: 6   │
-        │   │                ├─────┐             │                ├─────┐             │                ├─────┐
-        │   └───────┬────────┘     │             └────────┬───────┘     │             └────────┬───────┘     │
+        ┌─  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
+        │   ║                ║                   ║                ║                   ║                ║
+       ⋯⋯⋯─►║  Root          ╟──────────────────►║  Root          ╟──────────────────►║  Root          ║
+        │   ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
+        │   ║                ╟─────┐             ║                ╟─────┐             ║                ╟─────┐
+        │   ╚═══════╤════════╝     │             ╚════════╤═══════╝     │             ╚════════╤═══════╝     │
    Root │           │              │                      │             │                      │             │
         │           │              ▼                      │             ▼                      │             ▼
         │           │          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
@@ -278,12 +278,12 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
                     │                  │                  │                 │                  │                 │
                     │                  │                  │                 │                  │                 │
                     ▼                  │                  ▼                 │                  ▼                 │
-        ┌─  ┌──Skip Ratchet──┐         │         ┌──Skip Ratchet──┐         │         ┌──Skip Ratchet──┐         │
-        │   │                │         │         │                │         │         │                │         │
-        │   │  Docs/         ├─────────┼────────►│  Docs/         ├─────────┼────────►│  Docs/         │         │
-        │   │  Revision: 0   │         │         │  Revision: 1   │         │         │  Revision: 2   │         │
-        │   │                ├─────┐   │         │                ├─────┐   │         │                ├─────┐   │
-        │   └────────────────┘     │   │         └────────┬───────┘     │   │         └────────┬───────┘     │   │
+        ┌─  ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │
+        │   ║                ║         │         ║                ║         │         ║                ║         │
+        │   ║  Docs/         ╟─────────┼────────►║  Docs/         ╟─────────┼────────►║  Docs/         ║         │
+        │   ║  Revision: 0   ║         │         ║  Revision: 1   ║         │         ║  Revision: 2   ║         │
+        │   ║                ╟─────┐   │         ║                ╟─────┐   │         ║                ╟─────┐   │
+        │   ╚════════════════╝     │   │         ╚════════╤═══════╝     │   │         ╚════════╤═══════╝     │   │
    Docs │                          │   │                  │             │   │                  │             │   │
         │                          ▼   ▼                  │             ▼   ▼                  │             ▼   ▼
         │                     ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
@@ -298,12 +298,12 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
                                                           │                 │                  │                 │
                                                           │                 │                  │                 │
                                                           ▼                 │                  ▼                 │
-        ┌─                                        ┌──Skip Ratchet──┐        │          ┌──Skip Ratchet──┐        │
-        │                                         │                │        │          │                │        │
-        │                                         │  Note.md       ├────────┼─────────►│  Note.md       │        │
-        │                                         │  Revision: 0   │        │          │  Revision: 1   │        │
-        │                                         │                ├─────┐  │          │                ├─────┐  │
-        │                                         └────────────────┘     │  │          └────────────────┘     │  │
+        ┌─                                        ╔══Skip Ratchet══╗        │          ╔══Skip Ratchet══╗        │
+        │                                         ║                ║        │          ║                ║        │
+        │                                         ║  Note.md       ╟────────┼─────────►║  Note.md       ║        │
+        │                                         ║  Revision: 0   ║        │          ║  Revision: 1   ║        │
+        │                                         ║                ╟─────┐  │          ║                ╟─────┐  │
+        │                                         ╚════════════════╝     │  │          ╚════════════════╝     │  │
 Note.md │                                                                │  │                                 │  │
         │                                                                ▼  ▼                                 ▼  ▼
         │                                                          ┌──Content Key──┐                    ┌──Content Key──┐
@@ -314,26 +314,19 @@ Note.md │                                                                │  
         └─                                                         └───────────────┘                    └───────────────┘
 ```
 
-> A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
->
-> - SR: skip ratchet
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
-> - Dotted, blue lines indicate what data can be derived via one-way functions.
->
-> Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
->
-> Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
-> It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
+A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 
+Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
 
+Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
 
+It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
 
-## Algorithms
+# 4 Algorithms
 
 All algorithms assume to have access to a `PrivateForest` in their context.
 
-### Namefilter Hash Resolving
+## 4.1 Namefilter Hash Resolving
 
 `resolveHashedKey: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
 
@@ -354,7 +347,7 @@ If the child is a Node, repeat the process of with the next nibble.
 If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
 
 
-### Private Versioning
+## 4.2 Private Versioning
 
 `: (Namefilter, RevisionKey) -> Namefilter`
 
@@ -377,7 +370,7 @@ Where
 It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of the skip ratchet skip ahead versions instead of having to skip one-by-one. When looking for the most recent version of a file, we recommend first skipping to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found.
 
 
-### Path Resolution
+## 4.3 Path Resolution
 
 `resolvePath : (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
 
@@ -393,7 +386,7 @@ In all of these cases the next path segment's directory or file's hash of the na
 If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
 
 
-### Sharded File Content Access
+## 4.4 Sharded File Content Access
 
 `_ : PrivateFile -> Array<Namefilter>` FIXME name
 
@@ -420,7 +413,7 @@ const segmentNames = (file) => {
 }
 ```
 
-### Merge
+## 4.5 Merge
 
 `merge : Array<PrivateForest> -> PrivateForest`
 
