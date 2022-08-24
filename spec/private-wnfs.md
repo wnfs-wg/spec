@@ -252,66 +252,70 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
 > - CK: content key
 > - Yellow lines indicate what box of data keys can en/decrypt.
 
-![key structure](/images/key_structure.png)
+Legend:
+| Line  | Meaning          |
+| ----- | ---------------- | 
+| `╴╴╴` | Derive via SHA   |
+| `───` | Contains Key     |
+| `═══` | Contains Ratchet | 
 
 ```
                                                       Revisions
         ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴►
 
-        ┌─  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
-        │   ║                ║                   ║                ║                   ║                ║
-     ══════►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
-        │   ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
-        │   ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮
-        │   ╚═══════╦════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
-   Root │           ║              ╷                      │             ╷                      │             ╷
-        │           ║              ▼                      │             ▼                      │             ▼
-        │           ║          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
-        │           ║          │               │          │         │               │          │         │               │
-        │           ║          │  Root         │          │         │  Root         │          │         │  Root         │
-        │           ║          │  Revision: 4  │          │         │  Revision: 5  │          │         │  Revision: 6  │
-        │           ║          │               │          │         │               │          │         │               │
-        └─          ║          └───────┬───────┘          │         └───────┬───────┘          │         └───────┬───────┘
-                    ║                  │                  │                 │                  │                 │
-                    ║                  │                  │                 │                  │                 │
-                    ║                  │                  │                 │                  │                 │
-                    ║                  │                  │                 │                  │                 │
-                    ║                  │                  │                 │                  │                 │
-                    ▼                  │                  ▼                 │                  ▼                 │
-        ┌─  ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │
-        │   ║                ║         │         ║                ║         │         ║                ║         │
-        │   ║  Docs/         ╠══════════════════►║  Docs/         ╠══════════════════►║  Docs/         ║         │
-        │   ║  Revision: 0   ║         │         ║  Revision: 1   ║         │         ║  Revision: 2   ║         │
-        │   ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │
-        │   ╚════════════════╝     ╷   │         ╚════════╤═══════╝     ╷   │         ╚════════╤═══════╝     ╷   │
-   Docs │                          ╷   │                  │             ╷   │                  │             ╷   │
-        │                          ▼   ▼                  │             ▼   ▼                  │             ▼   ▼
-        │                     ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
-        │                     │               │           │         │               │          │        │               │
-        │                     │  Docs/        │           │         │  Docs/        │          │        │  Docs/        │
-        │                     │  Revision: 0  │           │         │  Revision: 1  │          │        │  Revision: 2  │
-        │                     │               │           │         │               │          │        │               │
-        └─                    └───────────────┘           │         └───────┬───────┘          │        └────────┬──────┘
-                                                          │                 │                  │                 │
-                                                          │                 │                  │                 │
-                                                          │                 │                  │                 │
-                                                          │                 │                  │                 │
-                                                          │                 │                  │                 │
-                                                          ▼                 │                  ▼                 │
-        ┌─                                        ╔══Skip Ratchet══╗        │          ╔══Skip Ratchet══╗        │
-        │                                         ║                ║        │          ║                ║        │
-        │                                         ║  Note.md       ╠══════════════════►║  Note.md       ║        │
-        │                                         ║  Revision: 0   ║        │          ║  Revision: 1   ║        │
-        │                                         ║                ╟╴╴╴╴╴╮  │          ║                ╟╴╴╴╴─╮  │
-        │                                         ╚════════════════╝     ╷  │          ╚════════════════╝     ╷  │
-Note.md │                                                                ╷  │                                 ╷  │
-        │                                                                ▼  ▼                                 ▼  ▼
-        │                                                          ┌──Content Key──┐                    ┌──Content Key──┐
-        │                                                          │               │                    │               │
-        │                                                          │  Note.md      │                    │  Note.md      │
-        │                                                          │  Revision: 0  │                    │  Revision: 1  │
-        │                                                          │               │                    │               │
-        └─                                                         └───────────────┘                    └───────────────┘
+        ┌  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
+        │  ║                ║                   ║                ║                   ║                ║
+     ═════►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
+        │  ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
+        │  ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮
+        │  ╚═══════╦════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
+   Root │          ║              ╷                      │             ╷                      │             ╷
+        │          ║              ▼                      │             ▼                      │             ▼
+        │          ║          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
+        │          ║          │               │          │         │               │          │         │               │
+        │          ║          │  Root         │          │         │  Root         │          │         │  Root         │
+        │          ║          │  Revision: 4  │          │         │  Revision: 5  │          │         │  Revision: 6  │
+        │          ║          │               │          │         │               │          │         │               │
+        └          ║          └───────┬───────┘          │         └───────┬───────┘          │         └───────┬───────┘
+                   ║                  │                  │                 │                  │                 │
+                   ║                  │                  │                 │                  │                 │
+                   ║                  │                  │                 │                  │                 │
+                   ║                  │                  │                 │                  │                 │
+                   ▼                  │                  ▼                 │                  ▼                 │
+        ┌  ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │
+        │  ║                ║         │         ║                ║         │         ║                ║         │
+        │  ║  Docs/         ╠═════════╪════════►║  Docs/         ╠═════════╪════════►║  Docs/         ║         │
+        │  ║  Revision: 0   ║         │         ║  Revision: 1   ║         │         ║  Revision: 2   ║         │
+        │  ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │
+        │  ╚════════════════╝     ╷   │         ╚════════╤═══════╝     ╷   │         ╚════════╤═══════╝     ╷   │
+   Docs │                         ╷   │                  │             ╷   │                  │             ╷   │
+        │                         ▼   ▼                  │             ▼   ▼                  │             ▼   ▼
+        │                    ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
+        │                    │               │           │         │               │          │        │               │
+        │                    │  Docs/        │           │         │  Docs/        │          │        │  Docs/        │
+        │                    │  Revision: 0  │           │         │  Revision: 1  │          │        │  Revision: 2  │
+        │                    │               │           │         │               │          │        │               │
+        └                    └───────────────┘           │         └───────┬───────┘          │        └────────┬──────┘
+                                                         │                 │                  │                 │
+                                                         │                 │                  │                 │
+                                                         │                 │                  │                 │
+                                                         │                 │                  │                 │
+                                                         ▼                 │                  ▼                 │
+        ┌                                        ╔══Skip Ratchet══╗        │          ╔══Skip Ratchet══╗        │
+        │                                        ║                ║        │          ║                ║        │
+        │                                        ║  Note.md       ╠════════╪═════════►║  Note.md       ║        │
+        │                                        ║  Revision: 0   ║        │          ║  Revision: 1   ║        │
+        │                                        ║                ╟╴╴╴╴╴╮  │          ║                ╟╴╴╴╴─╮  │
+        │                                        ╚════════════════╝     ╷  │          ╚════════════════╝     ╷  │
+Note.md │                                                               ╷  │                                 ╷  │
+        │                                                               ▼  ▼                                 ▼  ▼
+        │                                                         ┌──Content Key──┐                    ┌──Content Key──┐
+        │                                                         │               │                    │               │
+        │                                                         │  Note.md      │                    │  Note.md      │
+        │                                                         │  Revision: 0  │                    │  Revision: 1  │
+        │                                                         │               │                    │               │
+        └                                                         └───────────────┘                    └───────────────┘
+        
 ```
 
 A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
