@@ -43,7 +43,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the filesystem. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
-A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
+The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
 ## 2.1 Ciphertext Blocks
 
@@ -105,17 +105,13 @@ The encrypted file layer is a very thin enrichment of the data layer. In particu
 
 # 3 Decrypted
 
+The decrypted (or "cleartext") layer is where the actual structure of the file system is rediscovered out of the encrypted layer.
+
 The decrypted layer has two sublayers: a cleartext data layer, and a cleartext file layer.
 
 ## 3.1 Cleartext Data 
 
-## 3.2 Cleartext Files
-
-The private WNFS borrows the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata).
-
-SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
-
-Encryption keys are derived from a [skip ratchet](/spec/skip.ratchet.md).
+The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
 ```typescript
 type Namefilter = ByteArray<256>
@@ -153,18 +149,35 @@ type PrivateFile = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
-  // userland:
+
+  // USERLAND
   metadata: Metadata
-  content: ByteArray | {
-    ratchet: SkipRatchet
+  content: ByteArray | { // FIXME what is the SR here for? Is this a tombstone? If so, is that not a different node type?
+    ratchet: SkipRatchet 
     count: Uint64
   }
 }
 ```
 
-### 3.2.1 Decryption Pointers
+### 3.2.1 Node Headers
 
-Access is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others).
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernelspace and MUST NOT be user writable. Refer to the key structure (FIXME) section for more detail.
+
+### 3.2.2 Node Metadata
+
+Node metadata is the userland equivalent of the node's header.
+
+### 3.2.1 Private File
+
+A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
+
+### 3.2.1 Private Directory
+
+A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
+
+See the FIXME section for more information about the link structure.
+
+### 3.2.3 Pointers & Keys
 
 Keys are always attached to pointers to some data.
 
@@ -177,9 +190,19 @@ Keys are always attached to pointers to some data.
 └──────────────────────┘
 ```
 
-### 3.2.2 Hierarchy
+#### 3.2.3.1 Node Key
 
-Decryption pointers provide a way to "discover" the structure of 
+Node keys MUST be deirved from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+
+#### 3.2.3.2 Content Key
+
+Content keys MUST be dervied from the [Node Key](#3231-node-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+
+### 3.2.4 Read Hierarchy
+
+Access in WNFS is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others). Decryption pointers provide a way to "discover" the structure of the portion of the file system accessible to the viewer. This process is always statred from a pointer held by the viewer outside of the file system.
+
+For example, having a decryption pointer to a directory with the `Documents/` and `Images/` directories could look something like this:
 
 ```
                                        ┌────External────┐
@@ -192,7 +215,7 @@ Decryption pointers provide a way to "discover" the structure of
                                                 ▼
                        ┌─────────────────Private Directory────────────────┐
                        │                                                  │
-                       │  ┌───/Documents───┐          ┌─────/Images────┐  │
+                       │  ┌───Documents/───┐          ┌─────Images/────┐  │
                        │  │                │          │                │  │
                        │  │  Namefilter &  │          │  Namefilter &  │  │
                        │  │  Content Key   │          │  Content Key   │  │
@@ -204,7 +227,7 @@ Decryption pointers provide a way to "discover" the structure of
                                    ▼                           ▼ 
 ┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
 │                                                   │  │                       │
-│  ┌───/Thesis.pdf───┐         ┌────/Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
+│  ┌────Thesis.pdf───┐         ┌─────Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
 │  │                 │         │                 │  │  │  │                 │  │
 │  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
 │  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
@@ -214,68 +237,14 @@ Decryption pointers provide a way to "discover" the structure of
 └──────────┼────────────────────────────┼───────────┘  └───────────┼───────────┘
            │                            │                          │
            ▼                            ▼                          ▼
-  ┌──Private File──┐            ┌──Private File──┐         ┌──Private File──┐
-  │                │            │                │         │                │
-  │    Content     │            │    Content     │         │    Content     │
-  │                │            │                │         │                │
-  └────────────────┘            └────────────────┘         └────────────────┘
+   ┌──Private File──┐           ┌──Private File──┐         ┌──Private File──┐
+   │                │           │                │         │                │
+   │    Content     │           │    Content     │         │    Content     │
+   │                │           │                │         │                │
+   └────────────────┘           └────────────────┘         └────────────────┘
 ```
 
-### 3.2.3 Key Structure
-
-
-Below is a diagram representing the inner structure of a single cleartext node and its keys.
-
-```
-                                   ┌────────────┐
-                                   │            │
-┌────────Derive───────────────────►│  Node Key  │
-│                                  │            │
-│                                  └──┬───┬───┬─┘
-│                                     │   │   │
-│              ┌──────────────────────┘   │   └─────────────SHA3────────────────┐
-│              │                          │                                     │
-│              │                          │                                     ▼
-│              │                          │                              ┌─────────────┐
-│              │                          │                              │             │
-│              │                          │                              │ Content Key │
-│              │                          │                              │             │
-│              │                          │                              └──────┬──────┘
-│              │                          │                                     │
-│              ▼                          ▼                                     ▼
-│  ┌────Private Header─────┐   ┌───Temporal Header───────┐   ┌───────────Private Content──────────┐
-│  │                       │   │                         │   │                                    │
-│  │                       │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │
-│  │  ┌──────────────┐     │   │   │                     ╷   ╷                     │ │          │ │
-│  │  │              │     │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │ │ Metadata │ │
-└──┼──┤ Skip Ratchet │     │   │   │  │              │   ╷   ╷    │             │  │ │          │ │
-   │  │              │     │   │   │  │  Documents   │   ╷   ╷    │  Documents  │  │ └──────────┘ │
-   │  └──────────────┘     │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
-   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
-   │  ┌─────────────────┐  │   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
-   │  │                 │  │   │   │                     ╷   ╷                     │              │
-   │  │ Bare Namefilter │  │   │   └─────────────────────┼───┼─────────────────────┘              │
-   │  │                 │  │   │                         │   │                                    │
-   │  └─────────────────┘  │   │                         │   │                                    │
-   │                       │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │
-   │  ┌──────────┐         │   │   │                     ╷   ╷                     │              │
-   │  │          │         │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │              │
-   │  │ i-number │         │   │   │  │              │   ╷   ╷    │             │  │              │
-   │  │          │         │   │   │  │     Apps     │   ╷   ╷    │  Documents  │  │              │
-   │  └──────────┘         │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
-   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
-   └───────────────────────┘   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
-                               │   │                     ╷   ╷                     │              │
-                               │   └─────────────────────┼───┼─────────────────────┘              │
-                               │                         │   │                                    │
-                               └─────────────────────────┘   └────────────────────────────────────┘
-```
-
-FIXME more storytelling abouyt the diagram here would be helpful
-
-FIXME single source of truth for keys
-
-FIXME explain how to walk the two parallel paths (headers & content) using above diagram
+Each link in the above picture is looked up in the [encrypted HAMT](FIXME), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
 
 
 ## 3.2 
@@ -356,6 +325,72 @@ Knowing the root content key of a directory will only give you access to a singl
 Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
 
 It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
+
+### 3.2.3 Node Key Structure
+
+A viewing agent may be able to view more than a single version of a file.
+
+Below is a diagram representing the inner structure of a single cleartext node and its keys.
+
+```
+                                   ┌────────────┐
+                                   │            │
+╭╶╶╶╶╶╶╶╶╶╶╶╶Derive╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶►│  Node Key  │
+╷                                  │            │
+╷                                  └─┬────┬───┬─┘
+╷                                    │    │   │
+╷              ┌─────────────────────┘    │   └──────────────SHA3───────────────┐
+╷              │                          │                                     │
+╷              │                          │                                     ▼
+╷              │                          │                              ┌─────────────┐
+╷              │                          │                              │             │
+╷              │                          │                              │ Content Key │
+╷              │                          │                              │             │
+╷              │                          │                              └──────┬──────┘
+╷              │                          │                                     │
+╷              ▼                          ▼                                     ▼
+╷  ┌────Private Header─────┐   ┌─────Temporal Header─────┐   ┌──────────Private Content───────────┐
+╷  │                       │   │                         │   │                                    │
+╷  │                       │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │
+╷  │  ┌──────────────┐     │   │   │                     ╷   ╷                     │ │          │ │
+╷  │  │              │     │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │ │ Metadata │ │
+╰╶╶┼╶╶┤ Skip Ratchet │     │   │   │  │              │   ╷   ╷    │             │  │ │          │ │
+   │  │              │     │   │   │  │  Documents   │   ╷   ╷    │  Documents  │  │ └──────────┘ │
+   │  └──────────────┘     │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
+   │  ┌─────────────────┐  │   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
+   │  │                 │  │   │   │                     ╷   ╷                     │              │
+   │  │ Bare Namefilter │  │   │   └─────────────────────┼───┼─────────────────────┘              │
+   │  │                 │  │   │                         │   │                                    │
+   │  └─────────────────┘  │   │                         │   │                                    │
+   │                       │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │
+   │  ┌──────────┐         │   │   │                     ╷   ╷                     │              │
+   │  │          │         │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │              │
+   │  │ i-number │         │   │   │  │              │   ╷   ╷    │             │  │              │
+   │  │          │         │   │   │  │     Apps     │   ╷   ╷    │  Documents  │  │              │
+   │  └──────────┘         │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
+   └───────────────────────┘   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
+                               │   │                     ╷   ╷                     │              │
+                               │   └─────────────────────┼───┼─────────────────────┘              │
+                               │                         │   │                                    │
+                               └─────────────────────────┘   └────────────────────────────────────┘
+```
+
+FIXME more storytelling abouyt the diagram here would be helpful
+
+FIXME single source of truth for keys
+
+FIXME explain how to walk the two parallel paths (headers & content) using above diagram
+
+
+## 3.2 Cleartext Files
+
+The decrypted (cleartext) file layer is very straightforward: it follows the exact interface as public WNFS files and directories. The primary difference is that while the public file system MUST form a DAG by its hash-linked structure, special care MUST be taken so that the private file system does not form pointer cycles.
+
+### 3.2.1 Backwards Secrecy
+
+FIXME add access control semantics.
 
 # 4 Algorithms
 
