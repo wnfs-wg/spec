@@ -264,7 +264,7 @@ It's possible to share the content key of a subdirectory which allows you to dec
 ```
         ┌  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
         │  ║                ║                   ║                ║                   ║                ║
-     ═════►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
+     ═══╪═►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
         │  ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
         │  ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮
         │  ╚═══════╤════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
