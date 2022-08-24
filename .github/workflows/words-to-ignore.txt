@@ -10,6 +10,15 @@ Bluesky
 
 
 # Spec
+cleartext
+Cleartext
+sharding
+multimap
+untrusted
+namespace
+multivalues
+subgraph
+Merklized
 WNFS
 CRDT like ABC
 merklization

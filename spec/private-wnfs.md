@@ -2,7 +2,7 @@
 
 # 0 Abstract
 
-The private file system provides granular control over read access along two dimensions: file hierarchy and time. Access is granted with a backward secret mechanism, where being grated access to a subgraph at a point in time is either a single snapshot point in time, or from that time forward -- but never access to the past of a point of history. Similarly, access to a directory implies access to all children nodes, but not to its parents or sibling nodes. Key sharing is an orthognal concern, and is accomplished out of band, or via the WNFS shared segment.
+The private file system provides granular control over read access along two dimensions: file hierarchy and time. Access is granted with a backward secret mechanism, where being grated access to a subgraph at a point in time is either a single snapshot point in time, or from that time forward -- but never access to the past of a point of history. Similarly, access to a directory implies access to all children nodes, but not to its parents or sibling nodes. Key sharing is an orthogonal concern, and is accomplished out of band, or via the WNFS shared segment.
 
 # 1 Terminology
 
@@ -41,7 +41,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the filesystem. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -49,11 +49,11 @@ The encrypted layer is intended to hide as much information as possible, while s
 
 At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16[^1], and MUST used saturared  saturated [namefilter](/spec/namefilter.md)s as keys.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16[^1], and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys.
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-fomatted binary blobs.
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-formatted binary blobs.
 
 All values in the Merkle HAMT MUST be sorted in lexicographic ascending order by CID.
 
@@ -107,7 +107,7 @@ The encrypted file layer is a very thin enrichment of the data layer. In particu
 
 The decrypted (or "cleartext") layer is where the actual structure of the file system is rediscovered out of the encrypted layer.
 
-The decrypted layer has two sublayers: a cleartext data layer, and a cleartext file layer.
+The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext file layer.
 
 ## 3.1 Cleartext Data 
 
@@ -161,7 +161,7 @@ type PrivateFile = {
 
 ### 3.2.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernelspace and MUST NOT be user writable. Refer to the key structure (FIXME) section for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to the key structure (FIXME) section for more detail.
 
 ### 3.2.2 Node Metadata
 
@@ -192,7 +192,7 @@ Keys are always attached to pointers to some data.
 
 #### 3.2.3.1 Node Key
 
-Node keys MUST be deirved from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+Node keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
 
 #### 3.2.3.2 Content Key
 
@@ -250,7 +250,7 @@ Note that holding the decryption pointer to this particular directory MUST NOT g
 
 ### 3.2.4.1 Temporal Hierarchy
 
-Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read heirarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
@@ -319,11 +319,11 @@ Note.md │                                                             ╷    �
 
 In the above diagram, newer revisions of nodes progress left-to-right. The file hierarchy still runs top-to-bottom: subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 
-Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content heirarchy. The primary difference is that access to _only_ a content key does not grant access to oher revisions, wheer having access to a skip ratchet includes the next revisions and the ability to derive the content key.
+Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a content key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the content key.
 
 ### 3.2.4.2 Node Key Structure
 
-A viewing agent may be able to view more than a single revisions of a node. This informaion must be kept somewhere that some agenst would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "node key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "node key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowlege of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the content key for the current node
@@ -392,7 +392,7 @@ The private file system is a pointer machine, where pointers MUST be hashes of n
 
 Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
-To split bytes into nibbles, first take the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This method matches the common hex encoding of bytestrings and reading the hex digits off one-by-one in most languages.
+To split bytes into nibbles, first take the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This method matches the common hex encoding of byte strings and reading the hex digits off one-by-one in most languages.
 
 Each nibble MUST be used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as:
 
@@ -472,7 +472,7 @@ The private forest forms a join-semilattice via the `merge` ($\land$) operation.
 
 The identity element is the empty HAMT.
 
-THese properties are very helpful in the case of an n-ary merge: the merge may be performed in any order, and either in a simple pipeline or with a more sophisticated merge mechanism.
+These properties are very helpful in the case of an n-ary merge: the merge may be performed in any order, and either in a simple pipeline or with a more sophisticated merge mechanism.
 
 Merklization is also helpful for performance. When the two `PrivateForest`s being merged have the same CID, they're equal and thus nothing has to be done (thanks to idempotence). This also applies recursively: if a HAMT branch or leaf have the same CID, treat both as one node (idempotence).
 
@@ -484,6 +484,6 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 
 ### 4.5.1 Blind Merge
 
-The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a tradeoff, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
+The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
  [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.
