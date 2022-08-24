@@ -1,6 +1,6 @@
 # Skip Ratchet
 
-The skip ratchet is described in this paper: https://github.com/fission-suite/skip-ratchet-paper/blob/main/spiral-ratchet.pdf
+The skip ratchet is described in this paper: https://eprint.iacr.org/2022/1078
 
 ## Encoding
 
