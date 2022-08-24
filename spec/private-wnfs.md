@@ -9,27 +9,33 @@ The private file system provides granular control over read access along two dim
 Encryption adds another dimension to a file system. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
 
 ```
-┌────────────────┬──────────────────┐
-│                │                  │
-│                │       File       │
-│                │                  │
-│   Decrypted    ├──────────────────┤
-│                │                  │
-│                │       Data       │
-│                │                  │
-├────────────────┼──────────────────┤
-│                │                  │
-│   Encrypted    │       Data       │
-│                │                  │
-└────────────────┴──────────────────┘
+ ┌───Visibility──┐ ┌─────Layer─────┐
+
+┌─────────────────┬─────────────────┐
+│                 │                 │
+│                 │       File      │
+│                 │                 │
+│   Decrypted     ├─────────────────┤
+│                 │                 │
+│                 │       Data      │
+│                 │                 │
+├─────────────────┼─────────────────┤
+│                 │                 │
+│   Encrypted     │       Data      │
+│                 │                 │
+└─────────────────┴─────────────────┘
 ```
 
-## 1.1 Layers
+Broadly speaking, there is a "decrypted" layer and a "encrypted" levels
 
-We can broadly talk about "decrypted" and "encrypted" layers.
+- The "decrypted" level defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
+- The "encrypted" level defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-- The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
-- The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
+| Visibility | Layer | Nodes       | Links      |
+|------------|-------|-------------|------------|
+| Decrypted  | File  | WNFS File   | File Paths |
+| Decrypted  | Data  | CBOR Object | Namefilter |
+| Encrypted  | Data  | IPLD Block  | CID        |
 
 # 2 Encrypted Layer
 
@@ -245,19 +251,15 @@ FIXME explain how to walk the two parallel paths (headers & content) using above
 
 ## 3.2 
 
-> A key structure diagram exploring how hierarchical read access works:
-> Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
-> It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
->
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
+A key structure diagram exploring how hierarchical read access works:
+Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
+It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 
-Legend:
-| Line  | Meaning          |
-| ----- | ---------------- | 
-| `╴╴╴` | Derive via SHA   |
-| `───` | Contains Key     |
-| `═══` | Contains Ratchet | 
+| Line   | Meaning          |
+| ------ | ---------------- | 
+| `╴╴╴►` | Derive via SHA   |
+| `───►` | Contains Key     |
+| `═══►` | Contains Ratchet | 
 
 ```
                                                       Revisions
@@ -353,7 +355,7 @@ If the child is a HAMT bucket of values, iterate that bucket to find one that ha
 
 ## 4.2 Private Versioning
 
-`: (Namefilter, RevisionKey) -> Namefilter`
+`toVersioned : (Namefilter, RevisionKey) -> Namefilter`
 
 Every private file or directory implicitly links to the name (namefilter) of its next version.
 
@@ -392,7 +394,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 ## 4.4 Sharded File Content Access
 
-`_ : PrivateFile -> Array<Namefilter>` FIXME name
+`getShards : PrivateFile -> Array<Namefilter>`
 
 Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
 
