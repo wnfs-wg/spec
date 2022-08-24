@@ -196,11 +196,11 @@ Node keys MUST be derived from the skip ratchet for that node, incremented to th
 
 #### 3.2.3.2 Content Key
 
-Content keys MUST be dervied from the [Node Key](#3231-node-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+Content keys MUST be derived from the [Node Key](#3231-node-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
 
 ### 3.2.4 Read Hierarchy
 
-Access in WNFS is fundamentally heirarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others). Decryption pointers provide a way to "discover" the structure of the portion of the file system accessible to the viewer. This process is always statred from a pointer held by the viewer outside of the file system.
+Access in WNFS is fundamentally hierarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others). Decryption pointers provide a way to "discover" the structure of the portion of the file system accessible to the viewer. This process is always started from a pointer held by the viewer outside of the file system.
 
 For example, having a decryption pointer to a directory with the `Documents/` and `Images/` directories could look something like this:
 
@@ -325,9 +325,9 @@ Special attention should be paid to the relationship of the skip ratchet to cont
 
 A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "node key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
-The skip ratchet is the single source of truth for generating the decryption key. Knowlege of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
+The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the content key for the current node
-* Generate decryption pointers for furture versions of this node
+* Generate decryption pointers for future versions of this node
 * Access to decryption pointers to all child nodes
 * Access to the skip ratchets for all child nodes
 
