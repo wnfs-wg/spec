@@ -244,25 +244,24 @@ For example, having a decryption pointer to a directory with the `Documents/` an
    └────────────────┘           └────────────────┘         └────────────────┘
 ```
 
-Each link in the above picture is looked up in the [encrypted HAMT](FIXME), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
+Each link in the above picture is looked up in the [encrypted HAMT](#211-data-types), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
 
+Note that holding the decryption pointer to this particular directory MUST NOT grant access to sibling or parent nodes, nor to other structures rooted in the private forest.
 
-## 3.2 
+### 3.2.4.1 Temporal Hierarchy
 
-A key structure diagram exploring how hierarchical read access works:
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read heirarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 
-| Line   | Meaning           |
+| Arrow  | Meaning           |
 |--------|-------------------| 
 | `╴╴╴►` | Derive via SHA    |
 | `───►` | Contains Key      |
 | `═══►` | Increment Ratchet | 
 
 ```
-                                                      Revisions
-        ╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴►
-
         ┌  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
         │  ║                ║                   ║                ║                   ║                ║
      ═════►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
@@ -286,10 +285,10 @@ It's possible to share the content key of a subdirectory which allows you to dec
         │  ║                ║         │         ║                ║         │         ║                ║         │
         │  ║  Docs/         ╠═════════╪════════►║  Docs/         ╠═════════╪════════►║  Docs/         ║         │
         │  ║  Revision: 0   ║         │         ║  Revision: 1   ║         │         ║  Revision: 2   ║         │
-        │  ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │
-        │  ╚════════════════╝     ╷   │         ╚════════╤═══════╝     ╷   │         ╚════════╤═══════╝     ╷   │
-   Docs │                         ╷   │                  │             ╷   │                  │             ╷   │
-        │                         ▼   ▼                  │             ▼   ▼                  │             ▼   ▼
+        │  ║                ╟╴╴╴╴╮    │         ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │
+        │  ╚════════════════╝    ╷    │         ╚════════╤═══════╝     ╷   │         ╚════════╤═══════╝     ╷   │
+   Docs │                        ╷    │                  │             ╷   │                  │             ╷   │
+        │                        ▼    ▼                  │             ▼   ▼                  │             ▼   ▼
         │                    ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
         │                    │               │           │         │               │          │        │               │
         │                    │  Docs/        │           │         │  Docs/        │          │        │  Docs/        │
@@ -305,10 +304,10 @@ It's possible to share the content key of a subdirectory which allows you to dec
         │                                        ║                ║        │          ║                ║        │
         │                                        ║  Note.md       ╠════════╪═════════►║  Note.md       ║        │
         │                                        ║  Revision: 0   ║        │          ║  Revision: 1   ║        │
-        │                                        ║                ╟╴╴╴╴╴╮  │          ║                ╟╴╴╴╴─╮  │
-        │                                        ╚════════════════╝     ╷  │          ╚════════════════╝     ╷  │
-Note.md │                                                               ╷  │                                 ╷  │
-        │                                                               ▼  ▼                                 ▼  ▼
+        │                                        ║                ╟╴╴╴╮    │          ║                ╟╴╴─╮    │
+        │                                        ╚════════════════╝   ╷    │          ╚════════════════╝   ╷    │
+Note.md │                                                             ╷    │                               ╷    │
+        │                                                             ▼    ▼                               ▼    ▼
         │                                                         ┌──Content Key──┐                    ┌──Content Key──┐
         │                                                         │               │                    │               │
         │                                                         │  Note.md      │                    │  Note.md      │
@@ -318,19 +317,19 @@ Note.md │                                                               ╷  �
         
 ```
 
-A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
+In the above diagram, newer revisions of nodes progress left-to-right. The file hierarchy still runs top-to-bottom: subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 
-Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
+Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content heirarchy. The primary difference is that access to _only_ a content key does not grant access to oher revisions, wheer having access to a skip ratchet includes the next revisions and the ability to derive the content key.
 
-Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
+### 3.2.4.2 Node Key Structure
 
-It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
+A viewing agent may be able to view more than a single revisions of a node. This informaion must be kept somewhere that some agenst would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "node key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
-### 3.2.3 Node Key Structure
-
-A viewing agent may be able to view more than a single version of a file.
-
-Below is a diagram representing the inner structure of a single cleartext node and its keys.
+The skip ratchet is the single source of truth for generating the decryption key. Knowlege of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
+* Generate the content key for the current node
+* Generate decryption pointers for furture versions of this node
+* Access to decryption pointers to all child nodes
+* Access to the skip ratchets for all child nodes
 
 ```
                                    ┌────────────┐
@@ -351,83 +350,65 @@ Below is a diagram representing the inner structure of a single cleartext node a
 ╷              ▼                          ▼                                     ▼
 ╷  ┌────Private Header─────┐   ┌─────Temporal Header─────┐   ┌──────────Private Content───────────┐
 ╷  │                       │   │                         │   │                                    │
-╷  │                       │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │
-╷  │  ┌──────────────┐     │   │   │                     ╷   ╷                     │ │          │ │
-╷  │  │              │     │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │ │ Metadata │ │
-╰╶╶┼╶╶┤ Skip Ratchet │     │   │   │  │              │   ╷   ╷    │             │  │ │          │ │
-   │  │              │     │   │   │  │  Documents   │   ╷   ╷    │  Documents  │  │ └──────────┘ │
-   │  └──────────────┘     │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
-   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
-   │  ┌─────────────────┐  │   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
-   │  │                 │  │   │   │                     ╷   ╷                     │              │
-   │  │ Bare Namefilter │  │   │   └─────────────────────┼───┼─────────────────────┘              │
-   │  │                 │  │   │                         │   │                                    │
+╷  │  ┌─────────────────┐  │   │   ┌─────────────────────┼───┼───────Documents/────┐ ┌──────────┐ │
+╷  │  │                 │  │   │   │                     ╷   ╷                     │ │          │ │
+╰╶╶┼╶╶┤   Skip Ratchet  │  │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │ │ Metadata │ │
+   │  │                 │  │   │   │  │              │   ╷   ╷    │             │  │ │          │ │
+   │  └─────────────────┘  │   │   │  │  Documents   │   ╷   ╷    │  Documents  │  │ └──────────┘ │
+   │                       │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   │  ┌─────────────────┐  │   │   │  │              │   ╷   ╷    │             │  │              │
+   │  │                 │  │   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
+   │  │ Bare Namefilter │  │   │   │                     ╷   ╷                     │              │
+   │  │                 │  │   │   └─────────────────────┼───┼─────────────────────┘              │
    │  └─────────────────┘  │   │                         │   │                                    │
-   │                       │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │
-   │  ┌──────────┐         │   │   │                     ╷   ╷                     │              │
-   │  │          │         │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │              │
-   │  │ i-number │         │   │   │  │              │   ╷   ╷    │             │  │              │
-   │  │          │         │   │   │  │     Apps     │   ╷   ╷    │  Documents  │  │              │
-   │  └──────────┘         │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
-   │                       │   │   │  │              │   ╷   ╷    │             │  │              │
-   └───────────────────────┘   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
+   │                       │   │                         │   │                                    │
+   │  ┌─────────────────┐  │   │   ┌─────────────────────┼───┼─────────Apps/───────┐              │
+   │  │                 │  │   │   │                     ╷   ╷                     │              │
+   │  │    i-number     │  │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │              │
+   │  │                 │  │   │   │  │              │   ╷   ╷    │             │  │              │
+   │  └─────────────────┘  │   │   │  │     Apps     │   ╷   ╷    │  Documents  │  │              │
+   │                       │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   └───────────────────────┘   │   │  │              │   ╷   ╷    │             │  │              │
+                               │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
                                │   │                     ╷   ╷                     │              │
                                │   └─────────────────────┼───┼─────────────────────┘              │
                                │                         │   │                                    │
                                └─────────────────────────┘   └────────────────────────────────────┘
 ```
 
-FIXME more storytelling abouyt the diagram here would be helpful
-
-FIXME single source of truth for keys
-
-FIXME explain how to walk the two parallel paths (headers & content) using above diagram
-
+FIXME why store the child's skip ratchet when we could store the smaller node key, and look up the skip ratchet state at the next temporal header node?
 
 ## 3.2 Cleartext Files
 
 The decrypted (cleartext) file layer is very straightforward: it follows the exact interface as public WNFS files and directories. The primary difference is that while the public file system MUST form a DAG by its hash-linked structure, special care MUST be taken so that the private file system does not form pointer cycles.
 
-### 3.2.1 Backwards Secrecy
-
-FIXME add access control semantics.
-
 # 4 Algorithms
 
-All algorithms assume to have access to a `PrivateForest` in their context.
+All algorithms MUST have access to a `PrivateForest` in their context.
 
-## 4.1 Namefilter Hash Resolving
+## 4.1 Namefilter Hash Resolution
 
 `resolveHashedKey: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
 
-The private file system is a pointer machine, where pointers are hashes of namefilters.
+The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter, the private node header, and a list of at least one private node.
 
-To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair will give you the full namefilter as well as the private node header and a list of at least one private directory.
+Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
-Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` gets split into the nibbles `0xf`, `0x1`, `0x9`, etc.
+To split bytes into nibbles, first take the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This method matches the common hex encoding of bytestrings and reading the hex digits off one-by-one in most languages.
 
-The nibble order is first taking the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This way this matches the usual hex encoding of byte-strings and reading the hex digits off one-by-one.
-
-Each nibble is used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as
+Each nibble MUST be used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as:
 
 $$\textsf{index} = \textsf{popcount}(bitmask \land ((1 \ll nibble) - 1))$$
 
-If the child is a Node, repeat the process of with the next nibble.
+If the child is a `Node`, repeat the process of with the next nibble.
 
 If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
-
 
 ## 4.2 Private Versioning
 
 `toVersioned : (Namefilter, RevisionKey) -> Namefilter`
 
-Every private file or directory implicitly links to the name (namefilter) of its next version.
-
-These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`.
-
-Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead.
-
-Then, the new namefilter is:
+Every private file or directory implicitly links to the name (namefilter) of its next version. These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`. Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead. Then, the new namefilter is:
 
 $$saturate(add(deriveKey(inc^n(ratchet)), bareName))$$
 
@@ -437,32 +418,30 @@ Where
 - $deriveKey$ refers to the [skip ratchet `deriveKey` operation](/spec/skip-ratchet.md#Key-Derivation) and
 - $inc$ refers to the [skip ratchet increase operation](/spec/skip-ratchet.md#Increasing)
 
-It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of the skip ratchet skip ahead versions instead of having to skip one-by-one. When looking for the most recent version of a file, we recommend first skipping to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found.
-
+Due to the skip ratchet, it is possible to skip ahead by more than one revision at a time. To do so, choose any $n$ in $inc^n(ratchet)$. When looking for the most recent version of a file, it is RECOMMENDED to first skip to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found. A common algorithm for this is [exponential search](https://en.wikipedia.org/wiki/Exponential_search).
 
 ## 4.3 Path Resolution
 
 `resolvePath : (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
 
-Paths in the private file system need to be resolved relative to a directory to resolve the path from.
+Paths in the private file system MUST be resolved relative to a parent directory. This directory MAY be at the current revision, or MAY be at an earlier version.
 
-Path resolving can happen in three modes:
-- Resolve the current snapshot: You only resolve the current snapshot of a version. This only requires a content key for decryption.
-- Seeking: For each path segment, you look up the most recent version you can find (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key
-- Seeking & repairing: Similar to seeking, this mode will look for the most recent version of a file and once it found it and in case it's not the same as what the parent refers to, it'll repair the parent's link to link to the most recent revision.
+Path resolution can happen in three modes:
+1. Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a content key for decryption.
+2. Seek: For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
+3. Seek & Repair: Similar to seeking, this mode searches for the latest version of a file. Once it is found, and in the case that it's not the same as what the parent refers to, it'll repair the parent's link to link to the most recent revision. FIXME BFT dangers? Defensive programming?
 
-In all of these cases the next path segment's directory or file's hash of the namefilter can be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking the private node up as described in [Namefilter Hash Resolving](#Namefilter-Hash-Resolving) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
+In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
-
 
 ## 4.4 Sharded File Content Access
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
+Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
 
-Since external content is separate from the header, it needs a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed.
+Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed.
 
 External content namefilters are defined thus:
 
@@ -487,24 +466,26 @@ const segmentNames = (file) => {
 
 `merge : Array<PrivateForest> -> PrivateForest`
 
-The private forest forms a join-semilattice with the `merge` ($\land$) function as the semilattice operation:
-The merge operation is
-- associative: $(a \land b) \land c = a \land (b \land c)$
-- commutative: $a \land b = b \land a$
-- idempotent: $a \land a = a$
 
-The merge operation has an identity element which is the empty HAMT.
+The private forest forms a join-semilattice via the `merge` ($\land$) operation. `merge` is thus:
+- [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
+- [Commutative](https://en.wikipedia.org/wiki/Commutative_property): $a \land b = b \land a$
+- [Idempotent](https://en.wikipedia.org/wiki/Idempotence): $a \land a = a$
 
-It is sufficient to describe a two-way merge function, as it can be extended to an $n$-ary algorithm by reducing the array of forests using the two-way merge. However, an implementation may decide to implement a more efficient $n$-ary merge.
+The identity element is the empty HAMT.
 
-When the two `PrivateForest`s to merge have the same CID, they're equal and thus nothing has to be done. This gives the merge algorithm the idempotence property.
+THese properties are very helpful in the case of an n-ary merge: the merge may be performed in any order, and either in a simple pipeline or with a more sophisticated merge mechanism.
+
+Merklization is also helpful for performance. When the two `PrivateForest`s being merged have the same CID, they're equal and thus nothing has to be done (thanks to idempotence). This also applies recursively: if a HAMT branch or leaf have the same CID, treat both as one node (idempotence).
 
 Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. At each level:
 - Find the difference between the `Node` bitmasks. The resulting bitmask is simply the binary-or of the input bitmasks.
-- Figure out which children one `Node` adds over the other. Keep the superset of both sets of children.
+- Figure out which children one `Node` adds over the other. Keep the superset of both sets of children (this is an additive merge)
 - Recursively apply this algorithm on matching pairs of children nodes, unless they have the same CID.
-- When merging buckets of values, merge them by matching keys in the bucket entries. Merge the values of matching keys by merging the CID lists using set semantics and keep the CID list sorted. Key-value pairs that only appear in one of the inputs are kept as-is. If the bucket gets bigger than the normal bucket size, split the bucket into its own node, as per its normal splitting semantics.
+- When merging buckets of values, match the keys in the bucket entries. Merge the values of matching keys by merging the CID lists using set semantics and keep the CID list sorted. Key-value pairs that only appear in one of the inputs are kept as-is. If the bucket gets bigger than the normal bucket size, split the bucket into its own node, as per its normal splitting semantics described earlier in the document.
 
-The private forest merge algorithm thus works completely on the encrypted layer and can be done by a third party that doesn't have read access to the private file system at all. However, there is some complexity involved when reading files. It's possible multiple "conflicting" file writes exist at a single revision. In these cases, we need to do some simple tie-breaking and may just choose the smallest CID.
+### 4.5.1 Blind Merge
+
+The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a tradeoff, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
  [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.
