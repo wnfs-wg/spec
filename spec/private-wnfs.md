@@ -26,10 +26,10 @@ Encryption adds another dimension to a file system: visibility. The data and fil
 └─────────────────┴─────────────────┘
 ```
 
-Broadly speaking, there is a "decrypted" layer and a "encrypted" levels
+Broadly speaking, there is a "decrypted" layer and a "encrypted" layer.
 
-- The "decrypted" level defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
-- The "encrypted" level defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
+- The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
+- The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
 These all form graphs, where the nodes and links have different meanings per layer. The 
 
