@@ -355,7 +355,7 @@ The skip ratchet is the single source of truth for generating the decryption key
 ╰╶╶┼╶╶┤   Skip Ratchet  │  │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │ │ Metadata │ │
    │  │                 │  │   │   │  │              │   ╷   ╷    │             │  │ │          │ │
    │  └─────────────────┘  │   │   │  │  Documents   │   ╷   ╷    │  Documents  │  │ └──────────┘ │
-   │                       │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   │                       │   │   │  │  Node Key    │   ╷   ╷    │ Content Key │  │              │
    │  ┌─────────────────┐  │   │   │  │              │   ╷   ╷    │             │  │              │
    │  │                 │  │   │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
    │  │ Bare Namefilter │  │   │   │                     ╷   ╷                     │              │
@@ -367,7 +367,7 @@ The skip ratchet is the single source of truth for generating the decryption key
    │  │    i-number     │  │   │   │  ┌──────────────┐   ╷   ╷    ┌─────────────┐  │              │
    │  │                 │  │   │   │  │              │   ╷   ╷    │             │  │              │
    │  └─────────────────┘  │   │   │  │     Apps     │   ╷   ╷    │  Documents  │  │              │
-   │                       │   │   │  │ Skip Ratchet │   ╷   ╷    │ Content Key │  │              │
+   │                       │   │   │  │   Node Key   │   ╷   ╷    │ Content Key │  │              │
    └───────────────────────┘   │   │  │              │   ╷   ╷    │             │  │              │
                                │   │  └──────────────┘   ╷   ╷    └─────────────┘  │              │
                                │   │                     ╷   ╷                     │              │
@@ -375,8 +375,6 @@ The skip ratchet is the single source of truth for generating the decryption key
                                │                         │   │                                    │
                                └─────────────────────────┘   └────────────────────────────────────┘
 ```
-
-FIXME why store the child's skip ratchet when we could store the smaller node key, and look up the skip ratchet state at the next temporal header node?
 
 ## 3.2 Cleartext Files
 
