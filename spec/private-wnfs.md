@@ -6,22 +6,22 @@ The private file system provides granular control over read access along two dim
 
 # 1 Terminology
 
-Encryption adds another dimension to a file system. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
+Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
 
 ```
- ┌───Visibility──┐ ┌─────Layer─────┐
+┌───Visibility───┐ ┌──────Noun──────┐
 
 ┌─────────────────┬─────────────────┐
 │                 │                 │
 │                 │       File      │
 │                 │                 │
-│   Decrypted     ├─────────────────┤
+│    Decrypted    ├─────────────────┤
 │                 │                 │
-│                 │       Data      │
 │                 │                 │
-├─────────────────┼─────────────────┤
 │                 │                 │
-│   Encrypted     │       Data      │
+├─────────────────┤       Data      │
+│                 │                 │
+│    Encrypted    │                 │
 │                 │                 │
 └─────────────────┴─────────────────┘
 ```
@@ -31,15 +31,17 @@ Broadly speaking, there is a "decrypted" layer and a "encrypted" levels
 - The "decrypted" level defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
 - The "encrypted" level defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-| Visibility | Layer | Nodes       | Links      |
-|------------|-------|-------------|------------|
-| Decrypted  | File  | WNFS File   | File Paths |
-| Decrypted  | Data  | CBOR Object | Namefilter |
-| Encrypted  | Data  | IPLD Block  | CID        |
+These all form graphs, where the nodes and links have different meanings per layer. The 
+
+| Visibility | Layer | Node        | Link             |
+|------------|-------|-------------|------------------|
+| Decrypted  | File  | WNFS File   | File Path        |
+| Decrypted  | Data  | CBOR Object | Namefilter + Key |
+| Encrypted  | Data  | IPLD Block  | CID              |
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a Merklized [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the filesystem. The file system structure will be ["rediscovered" in the decrypted layer (§FIXME)](#FIXME).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the filesystem. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
 A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -51,7 +53,7 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 ### 2.1.1 Data Types
 
-The container type MUST be a CBOR-encoded Merkle HAMT. The keys MUST be namefilter for the corresponding private node. The values MUST be a set of ciphertexts.
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-fomatted binary blobs.
 
 All values in the Merkle HAMT MUST be sorted in lexicographic ascending order by CID.
 
@@ -64,19 +66,46 @@ type HAMT<K, V> = {
   root: Node<K, V>
 }
 
-type Node<K, V> =
-  [ ByteArray<2> // bitmask
-  , Array<Entry<K, V>> // Entries
-  ]
+type Node<K, V> = [
+  ByteArray<2>, // Bitmask Key
+  Array<Entry<K, V>> // Entries
+]
 
 type Entry<K, V>
-  = CID<CBOR<Node<K, V>>>
-  | Array<[K, V]> // bucket of values
+  = CID<CBOR<Node<K, V>>> // Subentry sharding
+  | Array<[K, V]> // Bucket of values
 ```
 
-# 3 Decrypted Layer
+In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit. <!-- FIXME @matheus plz confirm -->
 
-The decrypted layer has two sublayers: a cleartext data sublayer, and a cleartext file sublayer.
+## 2.2 Ciphertext Files
+
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the bucket.
+
+```
+                               ┌───Index────┐
+                               │            │
+          ╭╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶►│   Hashed   │
+          ╵                    │ Namefilter │
+          ╵                    │            │
+          ╵                    └─────┬──────┘
+          ╵                          │
+          ╵                          ▼
+┌─────────┼────────────────────────Bucket───────────────────────────────────────┐
+│         ╷                                                                     │
+│  ┌──────┴───────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │              │  │              │  │              │  │              │       │
+│  │   Expanded   │  │  Ciphertext  │  │  Ciphertext  │  │  Ciphertext  │  ...  │
+│  │  Namefilter  │  │    Node A    │  │    Node B    │  │    Node C    │       │
+│  │              │  │              │  │              │  │              │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘       │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
+
+# 3 Decrypted
+
+The decrypted layer has two sublayers: a cleartext data layer, and a cleartext file layer.
 
 ## 3.1 Cleartext Data 
 
@@ -255,11 +284,11 @@ A key structure diagram exploring how hierarchical read access works:
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 
-| Line   | Meaning          |
-| ------ | ---------------- | 
-| `╴╴╴►` | Derive via SHA   |
-| `───►` | Contains Key     |
-| `═══►` | Contains Ratchet | 
+| Line   | Meaning           |
+|--------|-------------------| 
+| `╴╴╴►` | Derive via SHA    |
+| `───►` | Contains Key      |
+| `═══►` | Increment Ratchet | 
 
 ```
                                                       Revisions
@@ -270,19 +299,19 @@ It's possible to share the content key of a subdirectory which allows you to dec
      ═════►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
         │  ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
         │  ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮
-        │  ╚═══════╦════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
-   Root │          ║              ╷                      │             ╷                      │             ╷
-        │          ║              ▼                      │             ▼                      │             ▼
-        │          ║          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
-        │          ║          │               │          │         │               │          │         │               │
-        │          ║          │  Root         │          │         │  Root         │          │         │  Root         │
-        │          ║          │  Revision: 4  │          │         │  Revision: 5  │          │         │  Revision: 6  │
-        │          ║          │               │          │         │               │          │         │               │
-        └          ║          └───────┬───────┘          │         └───────┬───────┘          │         └───────┬───────┘
-                   ║                  │                  │                 │                  │                 │
-                   ║                  │                  │                 │                  │                 │
-                   ║                  │                  │                 │                  │                 │
-                   ║                  │                  │                 │                  │                 │
+        │  ╚═══════╤════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
+   Root │          │              ╷                      │             ╷                      │             ╷
+        │          │              ▼                      │             ▼                      │             ▼
+        │          │          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
+        │          │          │               │          │         │               │          │         │               │
+        │          │          │  Root         │          │         │  Root         │          │         │  Root         │
+        │          │          │  Revision: 4  │          │         │  Revision: 5  │          │         │  Revision: 6  │
+        │          │          │               │          │         │               │          │         │               │
+        └          │          └───────┬───────┘          │         └───────┬───────┘          │         └───────┬───────┘
+                   │                  │                  │                 │                  │                 │
+                   │                  │                  │                 │                  │                 │
+                   │                  │                  │                 │                  │                 │
+                   │                  │                  │                 │                  │                 │
                    ▼                  │                  ▼                 │                  ▼                 │
         ┌  ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │
         │  ║                ║         │         ║                ║         │         ║                ║         │
