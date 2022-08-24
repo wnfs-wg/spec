@@ -76,7 +76,7 @@ type Entry<K, V>
   | Array<[K, V]> // Bucket of values
 ```
 
-In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit. <!-- FIXME @matheus plz confirm -->
+In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit. FIXME @matheus plz confirm.
 
 ## 2.2 Ciphertext Files
 
@@ -152,16 +152,18 @@ type PrivateFile = {
 
   // USERLAND
   metadata: Metadata
-  content: ByteArray | { // FIXME what is the SR here for? Is this a tombstone? If so, is that not a different node type?
-    ratchet: SkipRatchet 
-    count: Uint64
-  }
+  content: ByteArray | ExternalContent
+}
+
+type ExternalContent = {
+  ratchet: SkipRatchet 
+  count: Uint64
 }
 ```
 
 ### 3.2.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to the key structure (FIXME) section for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [§3.2.3 Pointers & Keys](#323-pointers--keys) for more detail.
 
 ### 3.2.2 Node Metadata
 
@@ -170,6 +172,14 @@ Node metadata is the userland equivalent of the node's header.
 ### 3.2.1 Private File
 
 A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
+
+Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
+
+#### 3.2.1.1 Externalized Content
+
+Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
+
+The skip ratchet counter for externalized content MUST reference the block index, not the version. The skip ratchet for the externalized blocks is generated fresh per revision, where the header maintains the temporal access. For structural sharing between revisions, decryption pointers ("flattened" derived keys) MUST be used in order to not leak non-shared chunks on that same skip ratchet.
 
 ### 3.2.1 Private Directory
 
@@ -437,11 +447,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
-
-Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed.
-
-External content namefilters are defined thus:
+[External content](#3211-externalized-content) namefilters are defined thus:
 
 ```typescript
 const segmentNames = (file) => {
