@@ -175,7 +175,7 @@ A private file MUST contain the actual bytes that represent the file. Files MAY 
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See the FIXME section for more information about the link structure.
+See [§3.2.4 Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
 
 ### 3.2.3 Pointers & Keys
 
