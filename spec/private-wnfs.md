@@ -227,7 +227,7 @@ For example, having a decryption pointer to a directory with the `Documents/` an
                                    ▼                           ▼ 
 ┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
 │                                                   │  │                       │
-│  ┌────Thesis.pdf───┐         ┌─────Notes.md────┐  │  │  ┌───/Hawaii.png───┐  │
+│  ┌────Thesis.pdf───┐         ┌─────Notes.md────┐  │  │  ┌────Hawaii.png───┐  │
 │  │                 │         │                 │  │  │  │                 │  │
 │  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
 │  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
