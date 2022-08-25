@@ -1,0 +1,58 @@
+digraph G {
+    compound = true;
+    edge [colorscheme="set312" color=black];
+    node [shape=box colorscheme="set312" style=filled fillcolor=9 color=black];
+    graph [colorscheme="set312" color=1 style=filled];
+
+    node_key [label = "Node Key"];
+    content_key [label = "Content Key"];
+
+    subgraph cluster_private_header {
+        label = "Private Header";
+        color=3
+
+        skip_ratchet [label="Skip Ratchet"];
+        bare_nf [label="Bare Namefilter"];
+        i_number [label="i-number"]
+
+        skip_ratchet -> bare_nf -> i_number [style=invis];
+    }
+
+    subgraph cluster_temporal_header {
+        label = "Temporal Header";
+
+        apps_header_key [label="Apps Node Key"];
+        docs_header_key [label="Documents Node Key"];
+        invis_header [style=invis];
+
+        invis_header -> apps_header_key -> docs_header_key  [style=invis];
+    }
+
+    subgraph cluster_private_content {
+        label = "Private Content";
+
+        metadata;
+
+        apps_content_key [label="Apps Content Key"];
+        docs_content_key [label="Documents Content Key"];
+
+        metadata -> apps_content_key -> docs_content_key [style=invis];
+    }
+
+    node_key:e -> content_key:n [label=SHA3 style=dashed];
+    node_key:w -> skip_ratchet:w [dir=back style=dashed label="Derive"];
+
+    content_key:e -> metadata [lhead=cluster_private_content];
+
+    node_key -> skip_ratchet:n [lhead=cluster_private_header];
+    node_key -> apps_header_key [lhead=cluster_temporal_header];
+
+    apps_header_key -> apps_content_key [arrowtail=none dir=back];
+    docs_content_key -> docs_header_key [arrowhead=none];
+
+    # Pure Layout
+    content_key:s -> invis_header:n [lhead=cluster_temporal_header style=invis];
+    content_key:s -> skip_ratchet:n [lhead=cluster_temporal_header style=invis];
+    skip_ratchet -> apps_header_key [lhead=cluster_private_header style=invis];
+    apps_header_key -> skip_ratchet [style=invis];
+}
