@@ -11,24 +11,24 @@
 <polygon fill="white" stroke="#000000" points="-4,4 -4,-466 568.59,-466 568.59,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_private_header</title>
-<polygon fill="#de77ae" stroke="#de77ae" points="24.59,-9 24.59,-235 170.59,-235 170.59,-9 24.59,-9"/>
+<path fill="#de77ae" stroke="#de77ae" d="M36.59,-9C36.59,-9 158.59,-9 158.59,-9 164.59,-9 170.59,-15 170.59,-21 170.59,-21 170.59,-223 170.59,-223 170.59,-229 164.59,-235 158.59,-235 158.59,-235 36.59,-235 36.59,-235 30.59,-235 24.59,-229 24.59,-223 24.59,-223 24.59,-21 24.59,-21 24.59,-15 30.59,-9 36.59,-9"/>
 <text text-anchor="middle" x="97.59" y="-219.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="white">Private Header</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_temporal_header</title>
-<polygon fill="#de77ae" stroke="#de77ae" points="178.59,-8 178.59,-234 346.59,-234 346.59,-8 178.59,-8"/>
+<path fill="#de77ae" stroke="#de77ae" d="M190.59,-8C190.59,-8 334.59,-8 334.59,-8 340.59,-8 346.59,-14 346.59,-20 346.59,-20 346.59,-222 346.59,-222 346.59,-228 340.59,-234 334.59,-234 334.59,-234 190.59,-234 190.59,-234 184.59,-234 178.59,-228 178.59,-222 178.59,-222 178.59,-20 178.59,-20 178.59,-14 184.59,-8 190.59,-8"/>
 <text text-anchor="middle" x="262.59" y="-218.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="white">Temporal Header</text>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_private_content</title>
-<polygon fill="#4d9221" stroke="#4d9221" points="366.59,-8 366.59,-234 556.59,-234 556.59,-8 366.59,-8"/>
+<path fill="#4d9221" stroke="#4d9221" d="M378.59,-8C378.59,-8 544.59,-8 544.59,-8 550.59,-8 556.59,-14 556.59,-20 556.59,-20 556.59,-222 556.59,-222 556.59,-228 550.59,-234 544.59,-234 544.59,-234 378.59,-234 378.59,-234 372.59,-234 366.59,-228 366.59,-222 366.59,-222 366.59,-20 366.59,-20 366.59,-14 372.59,-8 378.59,-8"/>
 <text text-anchor="middle" x="461.59" y="-218.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="white">Private Content</text>
 </g>
 <!-- invis_parent -->
 <!-- node_key -->
 <g id="node2" class="node">
 <title>node_key</title>
-<polygon fill="#fde0ef" stroke="#c51b7d" points="148.09,-389 71.09,-389 71.09,-351 148.09,-351 148.09,-389"/>
+<path fill="#fde0ef" stroke="#c51b7d" d="M136.09,-389C136.09,-389 83.09,-389 83.09,-389 77.09,-389 71.09,-383 71.09,-377 71.09,-377 71.09,-363 71.09,-363 71.09,-357 77.09,-351 83.09,-351 83.09,-351 136.09,-351 136.09,-351 142.09,-351 148.09,-357 148.09,-363 148.09,-363 148.09,-377 148.09,-377 148.09,-383 142.09,-389 136.09,-389"/>
 <text text-anchor="middle" x="109.59" y="-373.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Node Key</text>
 <text text-anchor="middle" x="109.59" y="-358.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">🔑</text>
 </g>
@@ -41,7 +41,7 @@
 <!-- content_key -->
 <g id="node3" class="node">
 <title>content_key</title>
-<polygon fill="#e6f5d0" stroke="#4d9221" points="463.09,-300 364.09,-300 364.09,-262 463.09,-262 463.09,-300"/>
+<path fill="#e6f5d0" stroke="#4d9221" d="M451.09,-300C451.09,-300 376.09,-300 376.09,-300 370.09,-300 364.09,-294 364.09,-288 364.09,-288 364.09,-274 364.09,-274 364.09,-268 370.09,-262 376.09,-262 376.09,-262 451.09,-262 451.09,-262 457.09,-262 463.09,-268 463.09,-274 463.09,-274 463.09,-288 463.09,-288 463.09,-294 457.09,-300 451.09,-300"/>
 <text text-anchor="middle" x="413.59" y="-284.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">Content Key</text>
 <text text-anchor="middle" x="413.59" y="-269.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">🗝</text>
 </g>
@@ -55,7 +55,7 @@
 <!-- skip_ratchet -->
 <g id="node4" class="node">
 <title>skip_ratchet</title>
-<polygon fill="lavender" stroke="blueviolet" points="163.09,-204 56.09,-204 56.09,-166 163.09,-166 163.09,-204"/>
+<path fill="lavender" stroke="blueviolet" d="M151.09,-204C151.09,-204 68.09,-204 68.09,-204 62.09,-204 56.09,-198 56.09,-192 56.09,-192 56.09,-178 56.09,-178 56.09,-172 62.09,-166 68.09,-166 68.09,-166 151.09,-166 151.09,-166 157.09,-166 163.09,-172 163.09,-178 163.09,-178 163.09,-192 163.09,-192 163.09,-198 157.09,-204 151.09,-204"/>
 <text text-anchor="middle" x="109.59" y="-188.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="blueviolet">Skip Ratchet</text>
 <text text-anchor="middle" x="109.59" y="-173.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="blueviolet">⚙️</text>
 </g>
@@ -107,7 +107,7 @@
 <!-- apps_header_key -->
 <g id="node7" class="node">
 <title>apps_header_key</title>
-<polygon fill="#fde0ef" stroke="#c51b7d" points="309.59,-129 195.59,-129 195.59,-91 309.59,-91 309.59,-129"/>
+<path fill="#fde0ef" stroke="#c51b7d" d="M297.59,-129C297.59,-129 207.59,-129 207.59,-129 201.59,-129 195.59,-123 195.59,-117 195.59,-117 195.59,-103 195.59,-103 195.59,-97 201.59,-91 207.59,-91 207.59,-91 297.59,-91 297.59,-91 303.59,-91 309.59,-97 309.59,-103 309.59,-103 309.59,-117 309.59,-117 309.59,-123 303.59,-129 297.59,-129"/>
 <text text-anchor="middle" x="252.59" y="-113.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Apps Node Key</text>
 <text text-anchor="middle" x="252.59" y="-98.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">🔑</text>
 </g>
@@ -125,7 +125,7 @@
 <!-- docs_header_key -->
 <g id="node8" class="node">
 <title>docs_header_key</title>
-<polygon fill="#fde0ef" stroke="#c51b7d" points="338.59,-54 186.59,-54 186.59,-16 338.59,-16 338.59,-54"/>
+<path fill="#fde0ef" stroke="#c51b7d" d="M326.59,-54C326.59,-54 198.59,-54 198.59,-54 192.59,-54 186.59,-48 186.59,-42 186.59,-42 186.59,-28 186.59,-28 186.59,-22 192.59,-16 198.59,-16 198.59,-16 326.59,-16 326.59,-16 332.59,-16 338.59,-22 338.59,-28 338.59,-28 338.59,-42 338.59,-42 338.59,-48 332.59,-54 326.59,-54"/>
 <text text-anchor="middle" x="262.59" y="-38.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Documents Node Key</text>
 <text text-anchor="middle" x="262.59" y="-23.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">🔑</text>
 </g>
@@ -133,7 +133,7 @@
 <!-- apps_content_key -->
 <g id="node11" class="node">
 <title>apps_content_key</title>
-<polygon fill="#e6f5d0" stroke="#4d9221" points="512.09,-129 375.09,-129 375.09,-91 512.09,-91 512.09,-129"/>
+<path fill="#e6f5d0" stroke="#4d9221" d="M500.09,-129C500.09,-129 387.09,-129 387.09,-129 381.09,-129 375.09,-123 375.09,-117 375.09,-117 375.09,-103 375.09,-103 375.09,-97 381.09,-91 387.09,-91 387.09,-91 500.09,-91 500.09,-91 506.09,-91 512.09,-97 512.09,-103 512.09,-103 512.09,-117 512.09,-117 512.09,-123 506.09,-129 500.09,-129"/>
 <text text-anchor="middle" x="443.59" y="-113.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">Apps Content Key</text>
 <text text-anchor="middle" x="443.59" y="-98.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">🗝</text>
 </g>
@@ -147,7 +147,7 @@
 <!-- docs_content_key -->
 <g id="node12" class="node">
 <title>docs_content_key</title>
-<polygon fill="#e6f5d0" stroke="#4d9221" points="548.59,-54 374.59,-54 374.59,-16 548.59,-16 548.59,-54"/>
+<path fill="#e6f5d0" stroke="#4d9221" d="M536.59,-54C536.59,-54 386.59,-54 386.59,-54 380.59,-54 374.59,-48 374.59,-42 374.59,-42 374.59,-28 374.59,-28 374.59,-22 380.59,-16 386.59,-16 386.59,-16 536.59,-16 536.59,-16 542.59,-16 548.59,-22 548.59,-28 548.59,-28 548.59,-42 548.59,-42 548.59,-48 542.59,-54 536.59,-54"/>
 <text text-anchor="middle" x="461.59" y="-38.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">Documents Content Key</text>
 <text text-anchor="middle" x="461.59" y="-23.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">🗝</text>
 </g>
