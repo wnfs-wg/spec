@@ -6,7 +6,6 @@ digraph G {
     compound = true
     fontname = "Helvetica"
     rankdir = "LR"
-    constraint = false
 
     edge [
         colorscheme = "piyg11"
@@ -14,7 +13,7 @@ digraph G {
     ];
 
     node [
-        shape = record
+        shape = plaintext
         style = filled
         colorscheme = "piyg11"
         fontname = "Helvetica"
@@ -35,16 +34,85 @@ digraph G {
     # NODES #
     #########
 
-    root_skip_4 [label = "Skip Ratchet ⚙️ \l | ️Path: / \l | Revision: 4 \l"]
-    root_skip_5 [label = "Skip Ratchet ⚙️ \l | Path: / \l | Revision: 5 \l"]
-    root_skip_6 [label = "Skip Ratchet ⚙️ \l | Path: / \l | Revision: 6 \l"]
+    root_skip_4 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;4</td></tr>
+            </table>
+        >
+    ]
 
-    docs_skip_0 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 0 \l"]
-    docs_skip_1 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 1 \l"]
-    docs_skip_2 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 2 \l"]
+    root_skip_5 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;5</td></tr>
+            </table>
+        >
+    ]
 
-    notes_skip_0 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
-    notes_skip_1 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/Notes.md \l | Revision: 1 \l"]
+    root_skip_6 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_2 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
+            </table>
+        >
+    ]
+
+    notes_skip_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    notes_skip_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
 
     node [
         color = 10
@@ -52,16 +120,85 @@ digraph G {
         fillcolor = 7
     ]
 
-    root_content_4 [label = "Content Key 🔑 \l | Path: / \l | Revision: 4 \l"]
-    root_content_5 [label = "Content Key 🔑 \l | Path: / \l | Revision: 5 \l"]
-    root_content_6 [label = "Content Key 🔑 \l | Path: / \l | Revision: 6 \l"]
+    root_content_4 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;4</td></tr>
+            </table>
+        >
+    ]
 
-    docs_content_0 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 0 \l"]
-    docs_content_1 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 1 \l"]
-    docs_content_2 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 1 \l"]
+    root_content_5 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;5</td></tr>
+            </table>
+        >
+    ]
 
-    notes_content_0 [label = "Content Key 🔑 \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
-    notes_content_1 [label = "Content Key 🔑 \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
+    root_content_6 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_2 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
+            </table>
+        >
+    ]
+
+    notes_content_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    notes_content_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
 
     {rank=same root_skip_4 docs_skip_0}
 
@@ -76,42 +213,42 @@ digraph G {
     # EDGES #
     #########
 
-    root_skip_4:e -> root_skip_5:w [color = 2 minlen = 2 weight = 100]
-    root_skip_5:e -> root_skip_6:w [color = 2 minlen = 2 weight = 100]
+    root_skip_4 -> root_skip_5 [color = 2 minlen = 2 weight = 100]
+    root_skip_5 -> root_skip_6 [color = 2 minlen = 2 weight = 100]
 
-    root_skip_4:s -> root_content_4:n [color = 10 style = dashed]
-    root_skip_5:s -> root_content_5:n [color = 10 style = dashed]
-    root_skip_6:s -> root_content_6:n [color = 10 style = dashed]
+    root_skip_4:s -> root_content_4:w [color = 10 style = dashed]
+    root_skip_5:s -> root_content_5:w [color = 10 style = dashed]
+    root_skip_6:s -> root_content_6:w [color = 10 style = dashed]
 
     ## Docs ##
 
-    docs_skip_0:e -> docs_skip_1:w [color = 2 weight = 100]
-    docs_skip_1:e -> docs_skip_2:w [color = 2 weight = 100]
+    docs_skip_0 -> docs_skip_1 [color = 2 weight = 100]
+    docs_skip_1 -> docs_skip_2 [color = 2 weight = 100]
 
-    docs_skip_0:s -> docs_content_0:n [color = 10 style = dashed]
-    docs_skip_1:s -> docs_content_1:n [color = 10 style = dashed]
-    docs_skip_2:s -> docs_content_2:n [color = 10 style = dashed]
+    docs_skip_0:s -> docs_content_0:w [color = 10 style = dashed]
+    docs_skip_1:s -> docs_content_1:w [color = 10 style = dashed]
+    docs_skip_2:s -> docs_content_2:w [color = 10 style = dashed]
 
     ## Root -> Docs ##
 
-    root_skip_4:s -> docs_skip_0:n [color = 2]
+    root_skip_4:s -> docs_skip_0:n [color = 2 minlen = 12]
     root_skip_5:s -> docs_skip_1:n [color = 2]
     root_skip_6:s -> docs_skip_2:n [color = 2]
 
-    root_content_4:s -> docs_content_0:n [color = 10 style = dashed]
-    root_content_5:s -> docs_content_1:n [color = 10 style = dashed]
-    root_content_6:s -> docs_content_2:n [color = 10 style = dashed]
+    root_content_4:s -> docs_content_0:n [color = 10 minlen = 12]
+    root_content_5:s -> docs_content_1:n [color = 10 minlen = 12]
+    root_content_6:s -> docs_content_2:n [color = 10 minlen = 12]
 
     ## Notes ##
 
-    notes_skip_0:e -> notes_skip_1:w [color = 2 weight = 100]
+    notes_skip_0 -> notes_skip_1 [color = 2 weight = 100]
 
-    notes_skip_0:s -> notes_content_0:n [color = 10 style = dashed]
-    notes_skip_1:s -> notes_content_1:n [color = 10 style = dashed]
+    notes_skip_0:s -> notes_content_0:w [color = 10 style = dashed]
+    notes_skip_1:s -> notes_content_1:w [color = 10 style = dashed weight = 100]
 
     ## Docs -> Notes ##
 
-    docs_skip_1 -> notes_skip_0 [color = 2]
+    docs_skip_1 -> notes_skip_0 [color = 2 minlen = 12]
     docs_skip_2 -> notes_skip_1 [color = 2]
 
     docs_content_1 -> notes_content_0 [color = 10]
