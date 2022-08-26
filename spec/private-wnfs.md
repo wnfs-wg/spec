@@ -191,14 +191,7 @@ See [§3.2.4 Read Hierarchy](#324-read-hierarchy) for more information about the
 
 Keys are always attached to pointers to some data.
 
-```
-┌──Decryption Pointer──┐
-│                      │
-│     Namefilter &     │
-│     Content Key      │
-│                      │
-└──────────────────────┘
-```
+![](./diagrams/decryption_pointer.svg)
 
 #### 3.2.3.1 Node Key
 

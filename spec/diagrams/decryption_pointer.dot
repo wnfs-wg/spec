@@ -24,9 +24,9 @@ digraph G {
     ];
 
     graph [
-        colorscheme="piyg11"
-        color=10
-        style = filled
+        colorscheme = "piyg11"
+        color = 10
+        style = "rounded,filled"
         fontcolor=white
     ];
 
