@@ -341,7 +341,7 @@ The skip ratchet is the single source of truth for generating the decryption key
 * Access to decryption pointers to all child nodes
 * Access to the skip ratchets for all child nodes
 
-![](./diagrams/decryption_pointer.svg)
+![](./diagrams/node_key_layout.svg)
 
 ## 3.2 Cleartext Files
 
