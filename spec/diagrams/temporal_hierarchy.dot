@@ -34,6 +34,39 @@ digraph G {
     # NODES #
     #########
 
+    subgraph cluster_legend {
+        label = "Legend"
+        colorscheme = purples9
+
+        color = 7
+        fillcolor = 2
+        fontcolor = 7
+
+        node [
+            colorscheme = purples9
+            style = none
+            fillcolor = invis
+            fontcolor = 7
+        ]
+
+        edge [
+            colorscheme = purples9
+            color = 7
+        ]
+
+        sha [label = "Derive via SHA"]
+        key [label = "Contains key"]
+        inc [label = "Increment Ratchet"]
+
+        sha_end [style = invis]
+        key_end [style = invis]
+        inc_end [style = invis]
+
+        sha -> sha_end [style = dashed]
+        key -> key_end
+        inc -> inc_end [penwidth = 2]
+    }
+
     start_time [style = invis]
     end_time [style = invis]
     start_time -> end_time [label = "Time" style = dashed weight = 100]
@@ -69,7 +102,7 @@ digraph G {
     root_skip_6 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
             </table>
@@ -79,7 +112,7 @@ digraph G {
     docs_skip_0 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
             </table>
@@ -89,7 +122,7 @@ digraph G {
     docs_skip_1 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
             </table>
@@ -99,7 +132,7 @@ digraph G {
     docs_skip_2 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
             </table>
@@ -109,7 +142,7 @@ digraph G {
     notes_skip_0 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
             </table>
@@ -119,7 +152,7 @@ digraph G {
     notes_skip_1 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Skip Ratchet ⚙️</td></tr>
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
             </table>
@@ -135,7 +168,7 @@ digraph G {
     root_content_4 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;4</td></tr>
             </table>
@@ -145,7 +178,7 @@ digraph G {
     root_content_5 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;5</td></tr>
             </table>
@@ -155,7 +188,7 @@ digraph G {
     root_content_6 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
             </table>
@@ -165,7 +198,7 @@ digraph G {
     docs_content_0 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
             </table>
@@ -175,7 +208,7 @@ digraph G {
     docs_content_1 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
             </table>
@@ -185,7 +218,7 @@ digraph G {
     docs_content_2 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
             </table>
@@ -195,17 +228,21 @@ digraph G {
     notes_content_0 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
             </table>
         >
+
+        color = 10
+        fillcolor = 7
+        fontcolor = 10
     ]
 
     notes_content_1 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
-                <tr><td align="left">Content Key 🔑</td></tr>
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
                 <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
                 <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
             </table>
@@ -225,8 +262,8 @@ digraph G {
     # EDGES #
     #########
 
-    root_skip_4 -> root_skip_5 [color = 2 minlen = 2 weight = 100]
-    root_skip_5 -> root_skip_6 [color = 2 minlen = 2 weight = 100]
+    root_skip_4 -> root_skip_5 [color = 2 minlen = 2 penwidth = 2 weight = 100]
+    root_skip_5 -> root_skip_6 [color = 2 minlen = 2 penwidth = 2 weight = 100]
 
     root_skip_4:s -> root_content_4:w [color = 10 style = dashed]
     root_skip_5:s -> root_content_5:w [color = 10 style = dashed]
@@ -234,8 +271,8 @@ digraph G {
 
     ## Docs ##
 
-    docs_skip_0 -> docs_skip_1 [color = 2 weight = 100]
-    docs_skip_1 -> docs_skip_2 [color = 2 weight = 100]
+    docs_skip_0 -> docs_skip_1 [color = 2 penwidth = 2weight = 100]
+    docs_skip_1 -> docs_skip_2 [color = 2 penwidth = 2weight = 100]
 
     docs_skip_0:s -> docs_content_0:w [color = 10 style = dashed]
     docs_skip_1:s -> docs_content_1:w [color = 10 style = dashed]
@@ -253,7 +290,7 @@ digraph G {
 
     ## Notes ##
 
-    notes_skip_0 -> notes_skip_1 [color = 2 weight = 100]
+    notes_skip_0 -> notes_skip_1 [color = 2 penwidth = 2 weight = 100]
 
     notes_skip_0:s -> notes_content_0:w [color = 10 style = dashed]
     notes_skip_1:s -> notes_content_1:w [color = 10 style = dashed weight = 100]
