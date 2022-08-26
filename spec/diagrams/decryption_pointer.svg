@@ -41,16 +41,16 @@
 <!-- content_key -->
 <g id="node3" class="node">
 <title>content_key</title>
-<polygon fill="#e6f5d0" stroke="#4d9221" points="288.09,-300 189.09,-300 189.09,-262 288.09,-262 288.09,-300"/>
-<text text-anchor="middle" x="238.59" y="-284.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">Content Key</text>
-<text text-anchor="middle" x="238.59" y="-269.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">🗝</text>
+<polygon fill="#e6f5d0" stroke="#4d9221" points="463.09,-300 364.09,-300 364.09,-262 463.09,-262 463.09,-300"/>
+<text text-anchor="middle" x="413.59" y="-284.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">Content Key</text>
+<text text-anchor="middle" x="413.59" y="-269.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">🗝</text>
 </g>
 <!-- node_key&#45;&gt;content_key -->
 <g id="edge7" class="edge">
 <title>node_key:e&#45;&gt;content_key:n</title>
-<path fill="none" stroke="#de77ae" stroke-dasharray="5,2" d="M149.59,-370C196.38,-370 233.1,-352.99 238.03,-310.16"/>
-<polygon fill="#de77ae" stroke="#de77ae" points="241.53,-310.18 238.59,-300 234.54,-309.79 241.53,-310.18"/>
-<text text-anchor="middle" x="251.09" y="-321.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#de77ae">SHA3</text>
+<path fill="none" stroke="#de77ae" stroke-dasharray="5,2" d="M149.59,-370C206.85,-370 391.02,-361.72 411.7,-309.83"/>
+<polygon fill="#de77ae" stroke="#de77ae" points="415.14,-310.48 413.59,-300 408.26,-309.16 415.14,-310.48"/>
+<text text-anchor="middle" x="420.09" y="-321.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#de77ae">SHA3</text>
 </g>
 <!-- skip_ratchet -->
 <g id="node4" class="node">
@@ -76,24 +76,24 @@
 <!-- node_key&#45;&gt;invis_header -->
 <g id="edge12" class="edge">
 <title>node_key&#45;&gt;invis_header</title>
-<path fill="none" stroke="#de77ae" d="M121,-350.93C134.71,-329.43 158.61,-292.6 180.59,-262 185.22,-255.55 190.17,-248.88 195.16,-242.28"/>
-<polygon fill="#de77ae" stroke="#de77ae" points="198.19,-244.07 201.47,-234 192.62,-239.83 198.19,-244.07"/>
+<path fill="none" stroke="#de77ae" d="M123.83,-350.78C143.43,-325.7 179.6,-279.4 208.63,-242.26"/>
+<polygon fill="#de77ae" stroke="#de77ae" points="211.68,-244.03 215.08,-234 206.17,-239.72 211.68,-244.03"/>
 </g>
 <!-- content_key&#45;&gt;skip_ratchet -->
 <!-- content_key&#45;&gt;invis_header -->
 <!-- metadata -->
 <g id="node10" class="node">
 <title>metadata</title>
-<polygon fill="#e6f5d0" stroke="#4d9221" points="461.09,-203 390.09,-203 390.09,-167 467.09,-167 467.09,-197 461.09,-203"/>
-<polyline fill="none" stroke="#4d9221" points="461.09,-203 461.09,-197 "/>
-<polyline fill="none" stroke="#4d9221" points="467.09,-197 461.09,-197 "/>
-<text text-anchor="middle" x="428.59" y="-181.3" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">metadata</text>
+<polygon fill="#e6f5d0" stroke="#4d9221" points="446.09,-203 375.09,-203 375.09,-167 452.09,-167 452.09,-197 446.09,-203"/>
+<polyline fill="none" stroke="#4d9221" points="446.09,-203 446.09,-197 "/>
+<polyline fill="none" stroke="#4d9221" points="452.09,-197 446.09,-197 "/>
+<text text-anchor="middle" x="413.59" y="-181.3" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#4d9221">metadata</text>
 </g>
 <!-- content_key&#45;&gt;metadata -->
 <g id="edge10" class="edge">
-<title>content_key:e&#45;&gt;metadata</title>
-<path fill="none" stroke="#4d9221" d="M289.59,-281C323.12,-281 354.5,-261.93 378.94,-240.88"/>
-<polygon fill="#4d9221" stroke="#4d9221" points="381.51,-243.28 386.62,-234 376.84,-238.06 381.51,-243.28"/>
+<title>content_key:s&#45;&gt;metadata</title>
+<path fill="none" stroke="#4d9221" d="M413.59,-262C413.59,-256.2 413.59,-250.15 413.59,-244.11"/>
+<polygon fill="#4d9221" stroke="#4d9221" points="417.09,-244 413.59,-234 410.09,-244 417.09,-244"/>
 </g>
 <!-- bare_nf -->
 <g id="node5" class="node">
@@ -107,9 +107,9 @@
 <!-- apps_header_key -->
 <g id="node7" class="node">
 <title>apps_header_key</title>
-<polygon fill="#fde0ef" stroke="#c51b7d" points="300.59,-129 186.59,-129 186.59,-91 300.59,-91 300.59,-129"/>
-<text text-anchor="middle" x="243.59" y="-113.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Apps Node Key</text>
-<text text-anchor="middle" x="243.59" y="-98.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">🔑</text>
+<polygon fill="#fde0ef" stroke="#c51b7d" points="309.59,-129 195.59,-129 195.59,-91 309.59,-91 309.59,-129"/>
+<text text-anchor="middle" x="252.59" y="-113.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Apps Node Key</text>
+<text text-anchor="middle" x="252.59" y="-98.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">🔑</text>
 </g>
 <!-- skip_ratchet&#45;&gt;apps_header_key -->
 <!-- i_number -->
@@ -140,7 +140,7 @@
 <!-- apps_header_key&#45;&gt;apps_content_key -->
 <g id="edge13" class="edge">
 <title>apps_header_key&#45;&gt;apps_content_key</title>
-<path fill="none" stroke="black" stroke-width="3" stroke-dasharray="5,2" d="M300.62,-110C325.38,-110 350.14,-110 374.9,-110"/>
+<path fill="none" stroke="black" stroke-width="3" stroke-dasharray="5,2" d="M309.67,-110C331.47,-110 353.26,-110 375.06,-110"/>
 </g>
 <!-- invis_header&#45;&gt;apps_header_key -->
 <!-- metadata&#45;&gt;apps_content_key -->
