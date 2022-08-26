@@ -47,7 +47,7 @@
 <!-- ellipsis_start -->
 <g id="node3" class="node">
 <title>ellipsis_start</title>
-<polygon fill="#4d9221" stroke="#000000" points="70,-52 16,-52 16,-16 70,-16 70,-52"/>
+<polygon fill="#000000" stroke="#000000" points="70,-52 16,-52 16,-16 70,-16 70,-52"/>
 <text text-anchor="middle" x="43" y="-30.3" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#e6f5d0">...</text>
 </g>
 <!-- expanded_namefilter&#45;&gt;ellipsis_start -->
