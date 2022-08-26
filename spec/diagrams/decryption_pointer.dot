@@ -15,7 +15,7 @@ digraph G {
     node [
         shape = box
         colorscheme = "piyg11"
-        style = filled
+        style = "rounded,filled"
         fillcolor = 5
         color = black
         fontname = "Helvetica"
