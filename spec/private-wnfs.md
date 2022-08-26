@@ -251,16 +251,29 @@ Due to the skip ratchet, it is possible to skip ahead by more than one revision 
 
 Paths in the private file system MUST be resolved relative to a parent directory. This directory MAY be at the current revision, or MAY be at an earlier version.
 
-Path resolution can happen in three modes:
-1. Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a content key for decryption.
-2. Seek: For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
-    * i. Root: A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly nessesary, as this always starts from the parent's link which moves forward monotonically.
+Path resolution can happen in three modes: "current", "seek", and "attach".
+
+### 4.3.1 Current Snapshot
+
+Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a content key for decryption.
+
+### 4.3.2 Seek
+
+For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
+
+#### 4.3.2.1 Attach
+
+A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly nessesary, as this always starts from the parent's link which moves forward monotonically.
 
 In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
 
-FIXME @expede to add diagram from slides about rooting
+##### 4.3.2.1.1 Example
+
+To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents. 
+
+![](./diagrams/attach.svg)
 
 ## 4.4 Sharded File Content Access
 
