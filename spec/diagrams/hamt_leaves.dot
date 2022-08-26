@@ -53,7 +53,7 @@ digraph G {
 
         expanded_namefilter [label = "Expanded Namefilter"]
 
-        ellipsis_start [label = "..." fontcolor = 7 shape = plaintext fillcolor = 10]
+        ellipsis_start [label = "..." fontcolor = 7 shape = plaintext fillcolor = invis color = invis]
         ciphertext_a [label = "Ciphertext A" shape = note]
         ciphertext_b [label = "Ciphertext B" shape = note]
         ciphertext_c [label = "Ciphertext C" shape = note]
