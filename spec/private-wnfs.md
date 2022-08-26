@@ -8,23 +8,7 @@ The private file system provides granular control over read access along two dim
 
 Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
 
-```
-┌───Visibility───┐ ┌──────Noun──────┐
-
-┌─────────────────┬─────────────────┐
-│                 │                 │
-│                 │       File      │
-│                 │                 │
-│    Decrypted    ├─────────────────┤
-│                 │                 │
-│                 │                 │
-│                 │                 │
-├─────────────────┤       Data      │
-│                 │                 │
-│    Encrypted    │                 │
-│                 │                 │
-└─────────────────┴─────────────────┘
-```
+![](./diagrams/layer_dimensions.svg)
 
 Broadly speaking, there is a "decrypted" layer and a "encrypted" layer.
 
