@@ -358,6 +358,8 @@ In all of these cases the next path segment's directory or file's hash of the na
 
 If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
 
+FIXME @expede to add diagram from slides about rooting
+
 ## 4.4 Sharded File Content Access
 
 `getShards : PrivateFile -> Array<Namefilter>`
