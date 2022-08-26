@@ -5,13 +5,12 @@ digraph G {
 
     compound = true
     fontname = "Helvetica"
-
     rankdir = "LR"
+    constraint = false
 
     edge [
         colorscheme = "piyg11"
         fontname = "Helvetica"
-        // minlen = 3
     ];
 
     node [
@@ -65,6 +64,7 @@ digraph G {
     notes_content_1 [label = "Content Key 🔑 \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
 
     {rank=same root_skip_4 docs_skip_0}
+
     {rank=same root_skip_5 docs_skip_1 notes_skip_0}
     {rank=same root_skip_6 docs_skip_2 notes_skip_1}
 
@@ -76,21 +76,21 @@ digraph G {
     # EDGES #
     #########
 
-    root_skip_4:e -> root_skip_5:w [color = 2 minlen = 2]
-    root_skip_5:e -> root_skip_6:w [color = 2 minlen = 2]
+    root_skip_4:e -> root_skip_5:w [color = 2 minlen = 2 weight = 100]
+    root_skip_5:e -> root_skip_6:w [color = 2 minlen = 2 weight = 100]
 
-    root_skip_4:s -> root_content_4:n [color = 2]
-    root_skip_5:s -> root_content_5:n [color = 2]
-    root_skip_6:s -> root_content_6:n [color = 2]
+    root_skip_4:s -> root_content_4:n [color = 10 style = dashed]
+    root_skip_5:s -> root_content_5:n [color = 10 style = dashed]
+    root_skip_6:s -> root_content_6:n [color = 10 style = dashed]
 
     ## Docs ##
 
-    docs_skip_0:e -> docs_skip_1:w [color = 2]
-    docs_skip_1:e -> docs_skip_2:w [color = 2]
+    docs_skip_0:e -> docs_skip_1:w [color = 2 weight = 100]
+    docs_skip_1:e -> docs_skip_2:w [color = 2 weight = 100]
 
-    docs_skip_0:s -> docs_content_0:n [color = 2]
-    docs_skip_1:s -> docs_content_1:n [color = 2]
-    docs_skip_2:s -> docs_content_2:n [color = 2]
+    docs_skip_0:s -> docs_content_0:n [color = 10 style = dashed]
+    docs_skip_1:s -> docs_content_1:n [color = 10 style = dashed]
+    docs_skip_2:s -> docs_content_2:n [color = 10 style = dashed]
 
     ## Root -> Docs ##
 
@@ -98,16 +98,16 @@ digraph G {
     root_skip_5:s -> docs_skip_1:n [color = 2]
     root_skip_6:s -> docs_skip_2:n [color = 2]
 
-    root_content_4:s -> docs_content_0:n [color = 2]
-    root_content_5:s -> docs_content_1:n [color = 2]
-    root_content_6:s -> docs_content_2:n [color = 2]
+    root_content_4:s -> docs_content_0:n [color = 10 style = dashed]
+    root_content_5:s -> docs_content_1:n [color = 10 style = dashed]
+    root_content_6:s -> docs_content_2:n [color = 10 style = dashed]
 
     ## Notes ##
 
-    notes_skip_0:e -> notes_skip_1:w [color = 2]
+    notes_skip_0:e -> notes_skip_1:w [color = 2 weight = 100]
 
-    notes_skip_0:s -> notes_content_0:n [color = 2]
-    notes_skip_1:s -> notes_content_1:n [color = 2]
+    notes_skip_0:s -> notes_content_0:n [color = 10 style = dashed]
+    notes_skip_1:s -> notes_content_1:n [color = 10 style = dashed]
 
     ## Docs -> Notes ##
 
@@ -116,16 +116,4 @@ digraph G {
 
     docs_content_1 -> notes_content_0 [color = 10]
     docs_content_2 -> notes_content_1 [color = 10]
-
-    ###########
-    ## HACKS ##
-    ###########
-
-    // root_content_4 -> foo0 -> root_skip_5
-    // root_content_5 -> foo1 -> root_skip_6
-
-    // docs_content_0 -> foo2 -> docs_skip_1
-    // docs_content_1 -> foo3 -> docs_skip_2
-
-    // notes_content_0 -> foo4 -> notes_skip_1
 }
