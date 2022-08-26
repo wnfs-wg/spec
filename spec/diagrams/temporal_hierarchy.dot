@@ -1,0 +1,131 @@
+digraph G {
+    #########
+    # SETUP #
+    #########
+
+    compound = true
+    fontname = "Helvetica"
+
+    rankdir = "LR"
+
+    edge [
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+        // minlen = 3
+    ];
+
+    node [
+        shape = record
+        style = filled
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+
+        color = 2
+        fontcolor = 2
+        fillcolor = 5
+    ];
+
+    graph [
+        colorscheme = "piyg11"
+        color = 10
+        style = "rounded,filled"
+        fontcolor = 7
+    ];
+
+    #########
+    # NODES #
+    #########
+
+    root_skip_4 [label = "Skip Ratchet ⚙️ \l | ️Path: / \l | Revision: 4 \l"]
+    root_skip_5 [label = "Skip Ratchet ⚙️ \l | Path: / \l | Revision: 5 \l"]
+    root_skip_6 [label = "Skip Ratchet ⚙️ \l | Path: / \l | Revision: 6 \l"]
+
+    docs_skip_0 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 0 \l"]
+    docs_skip_1 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 1 \l"]
+    docs_skip_2 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/ \l | Revision: 2 \l"]
+
+    notes_skip_0 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
+    notes_skip_1 [label = "Skip Ratchet ⚙️ \l | Path: /Documents/Notes.md \l | Revision: 1 \l"]
+
+    node [
+        color = 10
+        fontcolor = 10
+        fillcolor = 7
+    ]
+
+    root_content_4 [label = "Content Key 🔑 \l | Path: / \l | Revision: 4 \l"]
+    root_content_5 [label = "Content Key 🔑 \l | Path: / \l | Revision: 5 \l"]
+    root_content_6 [label = "Content Key 🔑 \l | Path: / \l | Revision: 6 \l"]
+
+    docs_content_0 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 0 \l"]
+    docs_content_1 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 1 \l"]
+    docs_content_2 [label = "Content Key 🔑 \l | Path: /Documents/ \l | Revision: 1 \l"]
+
+    notes_content_0 [label = "Content Key 🔑 \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
+    notes_content_1 [label = "Content Key 🔑 \l | Path: /Documents/Notes.md \l | Revision: 0 \l"]
+
+    {rank=same root_skip_4 docs_skip_0}
+    {rank=same root_skip_5 docs_skip_1 notes_skip_0}
+    {rank=same root_skip_6 docs_skip_2 notes_skip_1}
+
+    {rank=same root_content_4 docs_content_0}
+    {rank=same root_content_5 docs_content_1 notes_content_0}
+    {rank=same root_content_6 docs_content_2 notes_content_1}
+
+    #########
+    # EDGES #
+    #########
+
+    root_skip_4:e -> root_skip_5:w [color = 2 minlen = 2]
+    root_skip_5:e -> root_skip_6:w [color = 2 minlen = 2]
+
+    root_skip_4:s -> root_content_4:n [color = 2]
+    root_skip_5:s -> root_content_5:n [color = 2]
+    root_skip_6:s -> root_content_6:n [color = 2]
+
+    ## Docs ##
+
+    docs_skip_0:e -> docs_skip_1:w [color = 2]
+    docs_skip_1:e -> docs_skip_2:w [color = 2]
+
+    docs_skip_0:s -> docs_content_0:n [color = 2]
+    docs_skip_1:s -> docs_content_1:n [color = 2]
+    docs_skip_2:s -> docs_content_2:n [color = 2]
+
+    ## Root -> Docs ##
+
+    root_skip_4:s -> docs_skip_0:n [color = 2]
+    root_skip_5:s -> docs_skip_1:n [color = 2]
+    root_skip_6:s -> docs_skip_2:n [color = 2]
+
+    root_content_4:s -> docs_content_0:n [color = 2]
+    root_content_5:s -> docs_content_1:n [color = 2]
+    root_content_6:s -> docs_content_2:n [color = 2]
+
+    ## Notes ##
+
+    notes_skip_0:e -> notes_skip_1:w [color = 2]
+
+    notes_skip_0:s -> notes_content_0:n [color = 2]
+    notes_skip_1:s -> notes_content_1:n [color = 2]
+
+    ## Docs -> Notes ##
+
+    docs_skip_1 -> notes_skip_0 [color = 2]
+    docs_skip_2 -> notes_skip_1 [color = 2]
+
+    docs_content_1 -> notes_content_0 [color = 10]
+    docs_content_2 -> notes_content_1 [color = 10]
+
+    ###########
+    ## HACKS ##
+    ###########
+
+    // root_content_4 -> foo0 -> root_skip_5
+    // root_content_5 -> foo1 -> root_skip_6
+
+    // docs_content_0 -> foo2 -> docs_skip_1
+    // docs_content_1 -> foo3 -> docs_skip_2
+
+    // notes_content_0 -> foo4 -> notes_skip_1
+}
