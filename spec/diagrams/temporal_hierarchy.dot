@@ -34,6 +34,18 @@ digraph G {
     # NODES #
     #########
 
+    start_time [style = invis]
+    end_time [style = invis]
+    start_time -> end_time [label = "Time" style = dashed weight = 100]
+    start_time -> root_skip_4 [style=invis]
+
+    start_space [style = invis]
+    end_space [style = invis]
+    start_space -> end_space [label = "File Hierarchy" style = dashed]
+    start_space -> root_skip_4 [weight = 100 style = invis]
+    end_space -> notes_content_0 [weight = 100 style = invis]
+    {rank=same start_space end_space}
+
     root_skip_4 [
         label=<
             <table border="0" cellborder="1" cellspacing="0">
@@ -200,14 +212,14 @@ digraph G {
         >
     ]
 
-    {rank=same root_skip_4 docs_skip_0}
+    {rank=same root_skip_4 docs_skip_0 start_time}
 
     {rank=same root_skip_5 docs_skip_1 notes_skip_0}
     {rank=same root_skip_6 docs_skip_2 notes_skip_1}
 
     {rank=same root_content_4 docs_content_0}
     {rank=same root_content_5 docs_content_1 notes_content_0}
-    {rank=same root_content_6 docs_content_2 notes_content_1}
+    {rank=same root_content_6 docs_content_2 notes_content_1 end_time}
 
     #########
     # EDGES #
