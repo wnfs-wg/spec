@@ -66,26 +66,7 @@ In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive ty
 
 The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the bucket.
 
-```
-                               ┌───Index────┐
-                               │            │
-          ╭╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶►│   Hashed   │
-          ╵                    │ Namefilter │
-          ╵                    │            │
-          ╵                    └─────┬──────┘
-          ╵                          │
-          ╵                          ▼
-┌─────────┼────────────────────────Bucket───────────────────────────────────────┐
-│         ╷                                                                     │
-│  ┌──────┴───────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │              │  │              │  │              │  │              │       │
-│  │   Expanded   │  │  Ciphertext  │  │  Ciphertext  │  │  Ciphertext  │  ...  │
-│  │  Namefilter  │  │    Node A    │  │    Node B    │  │    Node C    │       │
-│  │              │  │              │  │              │  │              │       │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘       │
-│                                                                               │
-└───────────────────────────────────────────────────────────────────────────────┘
-```
+![](./diagrams/hamt_leaves.svg)
 
 # 3 Decrypted
 
