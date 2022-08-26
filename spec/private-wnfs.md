@@ -172,45 +172,7 @@ Access in WNFS is fundamentally hierarchical. Access granted to a single node in
 
 For example, having a decryption pointer to a directory with the `Documents/` and `Images/` directories could look something like this:
 
-```
-                                       ┌────External────┐
-                                       │                │
-                                       │  Namefilter &  │
-                                       │  Content Key   │
-                                       │                │
-                                       └────────┬───────┘
-                                                │
-                                                ▼
-                       ┌─────────────────Private Directory────────────────┐
-                       │                                                  │
-                       │  ┌───Documents/───┐          ┌─────Images/────┐  │
-                       │  │                │          │                │  │
-                       │  │  Namefilter &  │          │  Namefilter &  │  │
-                       │  │  Content Key   │          │  Content Key   │  │
-                       │  │                │          │                │  │
-                       │  └────────┬───────┘          └────────┬───────┘  │
-                       │           │                           │          │
-                       └───────────┼───────────────────────────┼──────────┘
-                                   │                           │
-                                   ▼                           ▼ 
-┌──────────────────Private Directory────────────────┐  ┌───Private Directory───┐
-│                                                   │  │                       │
-│  ┌────Thesis.pdf───┐         ┌─────Notes.md────┐  │  │  ┌────Hawaii.png───┐  │
-│  │                 │         │                 │  │  │  │                 │  │
-│  │   Namefilter &  │         │   Namefilter &  │  │  │  │   Namefilter &  │  │
-│  │   Content Key   │         │   Content Key   │  │  │  │   Content Key   │  │
-│  │                 │         │                 │  │  │  │                 │  │
-│  └───────┬─────────┘         └────────┬────────┘  │  │  └────────┬────────┘  │
-│          │                            │           │  │           │           │
-└──────────┼────────────────────────────┼───────────┘  └───────────┼───────────┘
-           │                            │                          │
-           ▼                            ▼                          ▼
-   ┌──Private File──┐           ┌──Private File──┐         ┌──Private File──┐
-   │                │           │                │         │                │
-   │    Content     │           │    Content     │         │    Content     │
-   │                │           │                │         │                │
-   └────────────────┘           └────────────────┘         └────────────────┘
-```
+![](./diagrams/read_hierarchy.svg)
 
 Each link in the above picture is looked up in the [encrypted HAMT](#211-data-types), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
 
