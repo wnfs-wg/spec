@@ -185,67 +185,7 @@ Being a versioned file system, private nodes also have read control in the tempo
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 
-| Arrow  | Meaning           |
-|--------|-------------------| 
-| `╴╴╴►` | Derive via SHA    |
-| `───►` | Contains Key      |
-| `═══►` | Increment Ratchet | 
-
-```
-        ┌  ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗                   ╔══Skip Ratchet══╗
-        │  ║                ║                   ║                ║                   ║                ║
-     ═══╪═►║  Root          ╠══════════════════►║  Root          ╠══════════════════►║  Root          ║
-        │  ║  Revision: 4   ║                   ║  Revision: 5   ║                   ║  Revision: 6   ║
-        │  ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮             ║                ╟╴╴╴╴╴╮
-        │  ╚═══════╤════════╝     ╷             ╚════════╤═══════╝     ╷             ╚════════╤═══════╝     ╷
-   Root │          │              ╷                      │             ╷                      │             ╷
-        │          │              ▼                      │             ▼                      │             ▼
-        │          │          ┌──Content Key──┐          │         ┌──Content Key──┐          │         ┌──Content Key──┐
-        │          │          │               │          │         │               │          │         │               │
-        │          │          │  Root         │          │         │  Root         │          │         │  Root         │
-        │          │          │  Revision: 4  │          │         │  Revision: 5  │          │         │  Revision: 6  │
-        │          │          │               │          │         │               │          │         │               │
-        └          │          └───────┬───────┘          │         └───────┬───────┘          │         └───────┬───────┘
-                   │                  │                  │                 │                  │                 │
-                   │                  │                  │                 │                  │                 │
-                   │                  │                  │                 │                  │                 │
-                   │                  │                  │                 │                  │                 │
-                   ▼                  │                  ▼                 │                  ▼                 │
-        ┌  ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │         ╔══Skip Ratchet══╗         │
-        │  ║                ║         │         ║                ║         │         ║                ║         │
-        │  ║  Docs/         ╠═════════╪════════►║  Docs/         ╠═════════╪════════►║  Docs/         ║         │
-        │  ║  Revision: 0   ║         │         ║  Revision: 1   ║         │         ║  Revision: 2   ║         │
-        │  ║                ╟╴╴╴╴╮    │         ║                ╟╴╴╴╴╴╮   │         ║                ╟╴╴╴╴╴╮   │
-        │  ╚════════════════╝    ╷    │         ╚════════╤═══════╝     ╷   │         ╚════════╤═══════╝     ╷   │
-   Docs │                        ╷    │                  │             ╷   │                  │             ╷   │
-        │                        ▼    ▼                  │             ▼   ▼                  │             ▼   ▼
-        │                    ┌──Content Key──┐           │         ┌──Content Key──┐          │        ┌──Content Key──┐
-        │                    │               │           │         │               │          │        │               │
-        │                    │  Docs/        │           │         │  Docs/        │          │        │  Docs/        │
-        │                    │  Revision: 0  │           │         │  Revision: 1  │          │        │  Revision: 2  │
-        │                    │               │           │         │               │          │        │               │
-        └                    └───────────────┘           │         └───────┬───────┘          │        └────────┬──────┘
-                                                         │                 │                  │                 │
-                                                         │                 │                  │                 │
-                                                         │                 │                  │                 │
-                                                         │                 │                  │                 │
-                                                         ▼                 │                  ▼                 │
-        ┌                                        ╔══Skip Ratchet══╗        │          ╔══Skip Ratchet══╗        │
-        │                                        ║                ║        │          ║                ║        │
-        │                                        ║  Note.md       ╠════════╪═════════►║  Note.md       ║        │
-        │                                        ║  Revision: 0   ║        │          ║  Revision: 1   ║        │
-        │                                        ║                ╟╴╴╴╮    │          ║                ╟╴╴─╮    │
-        │                                        ╚════════════════╝   ╷    │          ╚════════════════╝   ╷    │
-Note.md │                                                             ╷    │                               ╷    │
-        │                                                             ▼    ▼                               ▼    ▼
-        │                                                         ┌──Content Key──┐                    ┌──Content Key──┐
-        │                                                         │               │                    │               │
-        │                                                         │  Note.md      │                    │  Note.md      │
-        │                                                         │  Revision: 0  │                    │  Revision: 1  │
-        │                                                         │               │                    │               │
-        └                                                         └───────────────┘                    └───────────────┘
-        
-```
+![](./diagrams/temporal_hierarchy.svg)
 
 In the above diagram, newer revisions of nodes progress left-to-right. The file hierarchy still runs top-to-bottom: subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 
