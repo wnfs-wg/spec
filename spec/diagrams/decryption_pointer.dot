@@ -86,10 +86,11 @@ digraph G {
     #########
 
     node_key:e -> content_key:n [
-        label="SHA3"
-        style=dashed
-        color=3
-        fontcolor=3
+        label = "SHA3"
+        style = dashed
+        color = 3
+        fontcolor = 3
+        weight = 0.5
     ]
 
     node_key:w -> skip_ratchet:w [
@@ -101,7 +102,11 @@ digraph G {
     ]
 
     invis_parent -> node_key [color = lightgray weight = 10]
-    content_key:e -> metadata [lhead = cluster_private_content color=10]
+    content_key:s -> metadata [
+        lhead = cluster_private_content
+        color = 10
+        weight = 18
+    ]
 
     node_key -> skip_ratchet [lhead = cluster_private_header color = 3 weight=10]
     node_key -> invis_header [lhead = cluster_temporal_header color = 3]
