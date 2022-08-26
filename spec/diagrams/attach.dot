@@ -30,7 +30,7 @@ digraph G {
     #########
 
     subgraph cluster_main {
-        label = "Revision 0"
+        label = "Revision 0\nOriginal"
 
         a [label = "Root" shape = box]
         c [label = "Docs/"]
@@ -77,9 +77,13 @@ digraph G {
     # EDGES #
     #########
 
-    edge [penwidth = 2 ]
+    edge [
+        penwidth = 3
+        color = cornflowerblue
+    ]
 
     o -> k
+    o -> f
     n -> d
 
     edge [

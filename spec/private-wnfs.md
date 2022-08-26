@@ -60,7 +60,7 @@ type Entry<K, V>
   | Array<[K, V]> // Bucket of values
 ```
 
-In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit. FIXME @matheus plz confirm.
+In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit.
 
 ## 2.2 Ciphertext Files
 
