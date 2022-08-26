@@ -17,13 +17,13 @@
 <!-- namefilter -->
 <g id="node1" class="node">
 <title>namefilter</title>
-<path fill="#fde0ef" stroke="#c51b7d" d="M214,-52C214,-52 146,-52 146,-52 140,-52 134,-46 134,-40 134,-40 134,-28 134,-28 134,-22 140,-16 146,-16 146,-16 214,-16 214,-16 220,-16 226,-22 226,-28 226,-28 226,-40 226,-40 226,-46 220,-52 214,-52"/>
+<polygon fill="#fde0ef" stroke="#c51b7d" points="226,-52 134,-52 134,-16 226,-16 226,-52"/>
 <text text-anchor="middle" x="180" y="-30.3" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Namefilter</text>
 </g>
 <!-- content_key -->
 <g id="node2" class="node">
 <title>content_key</title>
-<path fill="#fde0ef" stroke="#c51b7d" d="M103.5,-52C103.5,-52 28.5,-52 28.5,-52 22.5,-52 16.5,-46 16.5,-40 16.5,-40 16.5,-28 16.5,-28 16.5,-22 22.5,-16 28.5,-16 28.5,-16 103.5,-16 103.5,-16 109.5,-16 115.5,-22 115.5,-28 115.5,-28 115.5,-40 115.5,-40 115.5,-46 109.5,-52 103.5,-52"/>
+<polygon fill="#fde0ef" stroke="#c51b7d" points="115.5,-52 16.5,-52 16.5,-16 115.5,-16 115.5,-52"/>
 <text text-anchor="middle" x="66" y="-30.3" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#c51b7d">Content Key</text>
 </g>
 </g>
