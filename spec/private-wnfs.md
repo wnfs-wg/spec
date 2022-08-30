@@ -49,7 +49,7 @@ type PrivateForest =
     Namefilter,
     // Map Value: a set of links to encrypted node contents.
     // CIDs must be deduplicated and in ascending order
-    Array<CID<ByteArray>>
+    BTreeSet<CID<ByteArray>>
   >>
 
 type HAMT<K, V> = {
@@ -133,7 +133,7 @@ All algorithms assume to have access to a `PrivateForest` in their context.
 
 ### Namefilter Hash Resolving
 
-`: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
+`: Hash<Namefilter> -> (Namefilter, Array<Encrypted<PrivateNode>>)`
 
 The private file system is a pointer machine, where pointers are hashes of namefilters.
 
@@ -205,9 +205,9 @@ External content namefilters are defined thus:
 const segmentNames = (file) => {
   const { bareNamefilter, content: { ratchet, count } } = file.header
   const key = ratchet.toBytes()
-  
+
   let names = []
-  for (i = 0; i < count; i++) {  
+  for (i = 0; i < count; i++) {
     names[i] = bareNamefilter
                  .addBare(sha3(key))
                  .addBare(sha3(`${key}${i}`))
