@@ -15,9 +15,9 @@
 <text text-anchor="middle" x="192" y="-251.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#fde0ef">Index</text>
 </g>
 <g id="clust2" class="cluster">
-<title>cluster_bucket</title>
+<title>cluster_multientry</title>
 <path fill="#4d9221" stroke="#4d9221" d="M20,-8C20,-8 368,-8 368,-8 374,-8 380,-14 380,-20 380,-20 380,-143 380,-143 380,-149 374,-155 368,-155 368,-155 20,-155 20,-155 14,-155 8,-149 8,-143 8,-143 8,-20 8,-20 8,-14 14,-8 20,-8"/>
-<text text-anchor="middle" x="194" y="-139.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#e6f5d0">Bucket</text>
+<text text-anchor="middle" x="194" y="-139.8" font-family="Helvetica,sans-Serif" font-size="14.00" fill="#e6f5d0">Multi&#45;Valued Entry</text>
 </g>
 <!-- hashed_namefilter -->
 <g id="node1" class="node">
