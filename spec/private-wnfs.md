@@ -51,7 +51,7 @@ type HAMT<K, V> = {
 }
 
 type SparseNode<K, V> = [
-  ByteArray<2>, // Bitmask Key
+  ByteArray<2>, // Sparse Index
   Array<Entry<K, V>> // Entries
 ]
 
