@@ -110,7 +110,8 @@ type PrivateDirectory = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
-  // userland:
+
+  // USERLAND
   metadata: Metadata
   entries: Record<string, {
     contentKey: Key // hash(deriveKey(entryRatchet))
