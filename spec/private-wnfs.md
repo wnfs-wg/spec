@@ -47,24 +47,36 @@ type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
 type HAMT<K, V> = {
   structure: "hamt"
   version: "0.1.0"
-  root: Node<K, V>
+  root: SparseNode<K, V>
 }
 
-type Node<K, V> = [
+type SparseNode<K, V> = [
   ByteArray<2>, // Bitmask Key
   Array<Entry<K, V>> // Entries
 ]
 
 type Entry<K, V>
-  = CID<CBOR<Node<K, V>>> // Subentry sharding
-  | Array<[K, V]> // Bucket of values
+  = CID<CBOR<SparseNode<K, V>>> // Child node
+  | Array<[K, V]> // Leaf values
 ```
 
-In the above, note that `Node<K, V>` and `Entry<K, V>` are mutually recursive types. This permits the sharding of entries beyond the default IPLD link limit.
+Note that `Node<K, V>` and `Entry<K, V>` are mutually recursive.
+
+#### 2.1.1.1 `SparseNode`
+
+The core HAMT sparse association of a bitmask to an array of links. This layout removes the need to list all blank links in the array, which is more efficient.
+
+#### 2.1.1.2 `Bucket`
+
+A space optimization delaying the creation of additional layers until 3 collisions occur.
+
+#### 2.1.1.3 `Entry`
+
+A multivalued leaf node, containing a file data and write conflicts.
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the bucket.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
 
 ![](./diagrams/hamt_leaves.svg)
 
