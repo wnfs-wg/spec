@@ -1,0 +1,111 @@
+digraph G {
+    #########
+    # SETUP #
+    #########
+
+    compound = true
+    fontname = "Helvetica"
+
+    edge [
+        colorscheme = "pastel28"
+        fontname = "Helvetica"
+    ];
+
+    node [
+        shape = plaintext
+        style = "rounded,filled"
+        fillcolor = white
+        shape = box
+    ];
+
+    graph [
+        colorscheme = "pastel28"
+        style = "rounded,filled"
+        color = 1
+        fontcolor = black
+    ];
+
+    #########
+    # NODES #
+    #########
+
+    subgraph cluster_main {
+        label = "Revision 0\nOriginal"
+
+        edge [minlen = 2]
+
+        a [label = "Root" shape = box]
+        c [label = "Docs/"]
+        d [label = "Music/"]
+        y [label = "ligeti.mp3"]
+        z [label = "sevish.mp3"]
+        e [label = "Todos/"]
+
+        f [style = invis]
+
+        a -> {c d}
+        c -> e
+        d -> {y z}
+    }
+
+    subgraph cluster_rev1 {
+        label = "Revision 1\nPartial"
+        fillcolor = 3
+
+        i [label = "Todos/"]
+        j [label = "groceries.org"]
+
+        i -> j
+    }
+
+    subgraph cluster_rev2 {
+        label = "Revision 2\nPartial"
+        fillcolor = 4
+
+        k [label = "Todos/"]
+        l [label = "groceries.org"]
+        m [label = "shopping.md"]
+
+        k -> {l m}
+    }
+
+    subgraph cluster_attach {
+        label = "Revision 3\nAttached, Complete"
+        fillcolor = 2
+
+        o [label = "Docs/"]
+        n [label = "New Root" shape = box]
+
+        n -> o
+    }
+
+    #########
+    # EDGES #
+    #########
+
+    edge [penwidth = 2]
+
+    o -> k
+    n -> d
+
+    edge [
+        style = dashed
+        fontcolor = grey
+        color = grey
+        label = "prev"
+    ]
+
+    i -> e [weight = 100]
+    k -> i [weight = 100 minlen = 5]
+    n -> a [weight = 100]
+    o -> c
+    l -> j [minlen = 2]
+
+    #########
+    # HACKS #
+    #########
+
+    i -> l [style = invis]
+    j -> l [style = invis]
+    j -> l [weight = 100 style = invis]
+}

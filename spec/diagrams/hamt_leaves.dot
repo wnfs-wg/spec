@@ -1,0 +1,76 @@
+digraph G {
+    #########
+    # SETUP #
+    #########
+
+    compound = true
+    fontname = "Helvetica"
+
+    edge [
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+    ];
+
+    node [
+        shape = box
+        colorscheme = "piyg11"
+        style = filled
+        fillcolor = 7
+        fontname = "Helvetica"
+        color=10
+        fontcolor=10
+    ];
+
+    graph [
+        colorscheme = "piyg11"
+        color = 10
+        style = "rounded,filled"
+        fontcolor=7
+    ];
+
+    ############
+    # CLUSTERS #
+    ############
+
+    subgraph cluster_index {
+        label = "Index"
+
+        color = 2
+        fillcolor = 2
+        fontcolor = 5
+
+        hashed_namefilter [
+            label = "Hashed Namefilter"
+
+            color = 2
+            fillcolor = 5
+            fontcolor = 2
+        ]
+    }
+
+    subgraph cluster_multientry {
+        label = "Multi-Valued Entry"
+
+        expanded_namefilter [label = "Expanded Namefilter"]
+
+        ciphertext_a [label = "Ciphertext A" shape = note]
+        ciphertext_b [label = "Ciphertext B" shape = note]
+        ciphertext_c [label = "Ciphertext C" shape = note]
+
+        expanded_namefilter -> { ciphertext_a ciphertext_b ciphertext_c } [style = invis]
+    }
+
+    hashed_namefilter -> expanded_namefilter [
+        ltail = cluster_index
+        lhead = cluster_multientry
+        minlen = 2
+        color = 2
+    ]
+
+    expanded_namefilter:w -> hashed_namefilter:w [
+        xlabel = "Hash"
+        fontcolor = 11
+        color = 11
+        style = dashed
+    ]
+}

@@ -1,0 +1,222 @@
+digraph G {
+    #########
+    # SETUP #
+    #########
+
+    compound = true
+    fontname = "Helvetica"
+
+    edge [
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+        minlen = 3
+    ];
+
+    node [
+        shape = box
+        colorscheme = "piyg11"
+        style = filled
+        fillcolor = 7
+        fontname = "Helvetica"
+        color = 10
+        fontcolor = 10
+    ];
+
+    graph [
+        colorscheme = "piyg11"
+        color = 10
+        style = "rounded,filled"
+        fontcolor = 7
+    ];
+
+    ############
+    # CLUSTERS #
+    ############
+
+    subgraph cluster_external {
+        label = "External"
+
+        color = 3
+        fillcolor = 3
+        fontcolor = 5
+
+        node [
+            color = 2
+            fontcolor = 2
+            fillcolor = 5
+        ]
+
+        external_namefilter [label = "Namefilter"]
+        external_hidden [label = "" shape = point style = invis]
+        external_content_key [label = "Content Key"]
+    }
+
+    subgraph cluster_entry_dir {
+        label = "Private Directory"
+
+        color = 2
+        fillcolor = 2
+        fontcolor = 5
+
+        subgraph cluster_docs_ptr {
+            label = "Documents/"
+
+            color = 3
+            fillcolor = 3
+            fontcolor = 5
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            docs_namefilter [label = "Namefilter"]
+            docs_ptr_hidden [label = "" shape = point style = invis]
+            docs_content_key [label = "Content Key"]
+        }
+
+        subgraph cluster_images_ptr {
+            label = "Images/"
+
+            color = 3
+            fillcolor = 3
+            fontcolor = 5
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            images_namefilter [label = "Namefilter"]
+            images_ptr_hidden [label = "" shape = point style = invis]
+            images_content_key [label = "Content Key"]
+        }
+    }
+
+    subgraph cluster_docs_dir {
+        label = "Private Directory"
+
+        color = 2
+        fillcolor = 2
+        fontcolor = 5
+
+        subgraph cluster_thesis_ptr {
+            label = "Thesis.tex"
+
+            color = 3
+            fillcolor = 3
+            fontcolor = 5
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            thesis_namefilter [label = "Namefilter"]
+            thesis_ptr_hidden [label = "" shape = point style = invis]
+            thesis_content_key [label = "Content Key"]
+        }
+
+        subgraph cluster_notes_ptr {
+            label = "Notes.md"
+
+            color = 3
+            fillcolor = 3
+            fontcolor = 5
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            notes_namefilter [label = "Namefilter"]
+            notes_ptr_hidden [label = "" shape = point style = invis]
+            notes_content_key [label = "Content Key"]
+        }
+
+        docs_dir_hidden [label = "" shape = point style = invis]
+    }
+
+    subgraph cluster_images_dir {
+        label = "Private Directory"
+
+        color = 2
+        fillcolor = 2
+        fontcolor = 5
+
+        subgraph cluster_hawaii_ptr {
+            label = "hawaii.png"
+
+            color = 3
+            fillcolor = 3
+            fontcolor = 5
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            hawaii_namefilter [label = "Namefilter"]
+            hawaii_ptr_hidden [label = "" shape = point style = invis]
+            hawaii_content_key [label = "Content Key"]
+        }
+    }
+
+    #########
+    # FILES #
+    #########
+
+    subgraph cluster_thesis_file {
+        label = "Private File"
+        thesis_content [label = "Content"]
+    }
+
+    subgraph cluster_notes_file {
+        label = "Private File"
+        notes_content [label = "Content"]
+    }
+
+    subgraph cluster_hawaii_file {
+        label = "Private File"
+        hawaii_content [label = "Content"]
+    }
+
+    #########
+    # EDGES #
+    #########
+
+    external_hidden -> docs_namefilter:e [
+        ltail = cluster_external
+        lhead = cluster_entry_dir
+    ]
+
+    docs_ptr_hidden -> thesis_namefilter [
+        ltail = cluster_docs_ptr
+        lhead = cluster_docs_dir
+    ]
+
+    thesis_ptr_hidden -> thesis_content [
+        ltail = cluster_thesis_ptr
+        lhead = cluster_thesis_file
+    ]
+
+    notes_ptr_hidden -> notes_content [
+        ltail = cluster_notes_ptr
+        lhead = cluster_notes_file
+    ]
+
+    images_ptr_hidden -> hawaii_ptr_hidden [
+        ltail = cluster_images_ptr
+        lhead = cluster_images_dir
+    ]
+
+    hawaii_ptr_hidden -> hawaii_content [
+        ltail = cluster_hawaii_ptr
+        lhead = cluster_hawaii_file
+    ]
+}

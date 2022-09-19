@@ -1,80 +1,94 @@
-# Private WNFS
+# WNFS Private Partition Specification
 
-It makes sense to split the private partition into two layers:
-- The "decrypted" layer that defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
-- The "encrypted" layer that defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
+# 0 Abstract
 
-## Key Structure
+The private file system provides granular control over read access along two dimensions: file hierarchy and time. Access is granted with a backward secret mechanism, where being grated access to a subgraph at a point in time is either a single snapshot point in time, or from that time forward -- but never access to the past of a point of history. Similarly, access to a directory implies access to all children nodes, but not to its parents or sibling nodes. Key sharing is an orthogonal concern, and is accomplished out of band, or via the WNFS shared segment.
 
-![hierarchical key structure](/images/hierarchical_key_structure.png)
+# 1 Terminology
 
-> A key structure diagram exploring how hierarchical read access works:
-> Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
-> It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
->
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
+Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
 
-![key structure](/images/key_structure.png)
+![](./diagrams/layer_dimensions.svg)
 
-> A diagram exploring the revision key structure. Newer versions of files and directories are to the right of their older versions. As in the diagram above, hierarchy still goes from top to bottom, so subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
->
-> - SR: skip ratchet
-> - CK: content key
-> - Yellow lines indicate what box of data keys can en/decrypt.
-> - Dotted, blue lines indicate what data can be derived via one-way functions.
->
-> Knowing the root content key of a directory will only give you access to a single revision of that file or directory, as the next revision will be derived from a separate skip ratchet that can't be derived from the current content key.
->
-> Knowing the root skip ratchet of a directory will give you access to that revision by deriving the content key of from the skip ratchet, and future revisions by stepping the ratchet forward and deriving content keys for those revisions.
-> It's impossible to read previous revisions given a skip ratchet, because it's computationally infeasible to compute the previous revision's skip ratchet.
+Broadly speaking, there is a "decrypted" layer and an "encrypted" layer.
 
-## The Encrypted Layer
+- The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
+- The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-The private file system's encrypted "root" is not the root of the decrypted file system.
+These all form graphs, where the nodes and links have different meanings per layer. The 
 
-A single file system's encrypted root can represent a whole forest of decrypted file system trees. The roots of these trees may be completely unrelated. We refer to them as the `PrivateForest`. Since you may not know what else there is in the forest, we sometimes refer to the it as the "dark forest".
+| Visibility | Layer | Node        | Link             |
+|------------|-------|-------------|------------------|
+| Decrypted  | File  | WNFS File   | File Path        |
+| Decrypted  | Data  | CBOR Object | Namefilter + Key |
+| Encrypted  | Data  | IPLD Block  | CID              |
 
-At the encrypted layer, the private forest is a bunch of private data blocks encrypted with different keys. These blocks are should be smaller than 256 kilobytes in order to comply with default block size restrictions from IPFS. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like, if these files are split into blocks.
+# 2 Encrypted Layer
 
-These blocks of encrypted data are put into a HAMT that encodes a multi-valued hash-map. The HAMT has a node-degree of 16. See [`rationale/hamt.md`](/rationale/hamt.md) for more information about that.
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
-The keys in the HAMT are saturated [namefilter](/spec/namefilter.md)s.
+The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
+## 2.1 Ciphertext Blocks
+
+At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
+
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16[^1], and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys.
+
+### 2.1.1 Data Types
+
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-formatted binary blobs.
+
+All values in the Merkle HAMT MUST be sorted in binary ascending order by CID.
 
 ```typescript
-type PrivateForest =
-  CBOR<HAMT<
-    // Map Key: The namefilter ("name") for that private node
-    Namefilter,
-    // Map Value: a set of links to encrypted node contents.
-    // CIDs must be deduplicated and in ascending order
-    Array<CID<ByteArray>>
-  >>
-
+type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
+  
 type HAMT<K, V> = {
   structure: "hamt"
   version: "0.1.0"
-  root: Node<K, V>
+  root: SparseNode<K, V>
 }
 
-type Node<K, V> =
-  [ ByteArray<2> // bitmask
-  , Array<Entry<K, V>> // Entries
-  ]
+type SparseNode<K, V> = [
+  ByteArray<2>, // Sparse Index
+  Array<Entry<K, V>> // Entries
+]
 
 type Entry<K, V>
-  = CID<CBOR<Node<K, V>>>
-  | Array<[K, V]> // bucket of values
+  = CID<CBOR<SparseNode<K, V>>> // Child node
+  | Array<[K, V]> // Leaf values
 ```
 
-## The Decrypted Layer
+Note that `Node<K, V>` and `Entry<K, V>` are mutually recursive.
 
-The private WNFS borrows the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata).
+#### 2.1.1.1 `SparseNode`
 
-SHA3 hashes of namefilters are the linking scheme used in the decrypted layer.
+The core HAMT sparse association of a bitmask to an array of links. This layout removes the need to list all blank links in the array, which is more efficient.
 
-Encryption keys are derived from a [skip ratchet](/spec/skip.ratchet.md).
+#### 2.1.1.2 `Bucket`
+
+A space optimization delaying the creation of additional layers until 3 collisions occur.
+
+#### 2.1.1.3 `Entry`
+
+A multi-valued leaf node, containing a file data and write conflicts.
+
+## 2.2 Ciphertext Files
+
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
+
+![](./diagrams/hamt_leaves.svg)
+
+# 3 Decrypted
+
+The decrypted (or "cleartext") layer is where the actual structure of the file system is rediscovered out of the encrypted layer.
+
+The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext file layer.
+
+## 3.1 Cleartext Data 
+
+The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
 ```typescript
 type Namefilter = ByteArray<256>
@@ -96,7 +110,8 @@ type PrivateDirectory = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
-  // userland:
+
+  // USERLAND
   metadata: Metadata
   entries: Record<string, {
     contentKey: Key // hash(deriveKey(entryRatchet))
@@ -112,57 +127,126 @@ type PrivateFile = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
-  // userland:
+
+  // USERLAND
   metadata: Metadata
-  content: ByteArray | {
-    ratchet: SkipRatchet
-    count: Uint64
-  }
+  content: ByteArray | ExternalContent
+}
+
+type ExternalContent = {
+  ratchet: SkipRatchet 
+  count: Uint64
 }
 ```
 
+### 3.2.1 Node Headers
 
-Example:
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [§3.2.3 Pointers & Keys](#323-pointers--keys) for more detail.
 
-![block encryption example](/images/encrypted_blocks.png)
+### 3.2.2 Node Metadata
 
+Node metadata is the userland equivalent of the node's header.
 
-## Algorithms
+### 3.2.1 Private File
 
-All algorithms assume to have access to a `PrivateForest` in their context.
+A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
 
-### Namefilter Hash Resolving
+Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
 
-`: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
+#### 3.2.1.1 Externalized Content
 
-The private file system is a pointer machine, where pointers are hashes of namefilters.
+Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
 
-To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair will give you the full namefilter as well as the private node header and a list of at least one private directory.
+The skip ratchet counter for externalized content MUST reference the block index, not the version. The skip ratchet for the externalized blocks is generated fresh per revision, where the header maintains the temporal access. For structural sharing between revisions, decryption pointers ("flattened" derived keys) MUST be used in order to not leak non-shared chunks on that same skip ratchet.
 
-Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` gets split into the nibbles `0xf`, `0x1`, `0x9`, etc.
+### 3.2.1 Private Directory
 
-The nibble order is first taking the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This way this matches the usual hex encoding of byte-strings and reading the hex digits off one-by-one.
+A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-Each nibble is used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as
+See [§3.2.4 Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
+
+### 3.2.3 Pointers & Keys
+
+Keys are always attached to pointers to some data.
+
+![](./diagrams/decryption_pointer.svg)
+
+#### 3.2.3.1 Revision Key
+
+revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+
+#### 3.2.3.2 Content Key
+
+Content keys MUST be derived from the [Revision Key](#3231-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+
+### 3.2.4 Read Hierarchy
+
+Access in WNFS is fundamentally hierarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others). Decryption pointers provide a way to "discover" the structure of the portion of the file system accessible to the viewer. This process is always started from a pointer held by the viewer outside of the file system.
+
+For example, having a decryption pointer to a directory with the `Documents/` and `Images/` directories could look something like this:
+
+![](./diagrams/read_hierarchy.svg)
+
+Each link in the above picture is looked up in the [encrypted HAMT](#211-data-types), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
+
+Note that holding the decryption pointer to this particular directory MUST NOT grant access to sibling or parent nodes, nor to other structures rooted in the private forest.
+
+### 3.2.4.1 Temporal Hierarchy
+
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+
+Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
+It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
+
+![](./diagrams/temporal_hierarchy.svg)
+
+In the above diagram, newer revisions of nodes progress left-to-right. The file hierarchy still runs top-to-bottom: subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
+
+Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a content key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the content key.
+
+### 3.2.4.2 Revision Key Structure
+
+A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+
+The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
+* Generate the content key for the current node
+* Generate decryption pointers for future versions of this node
+* Access to decryption pointers to all child nodes
+* Access to the skip ratchets for all child nodes
+
+![](./diagrams/node_key_layout.svg)
+
+## 3.2 Cleartext Files
+
+The decrypted (cleartext) file layer is very straightforward: it follows the exact interface as public WNFS files and directories. The primary difference is that while the public file system MUST form a DAG by its hash-linked structure, special care MUST be taken so that the private file system does not form pointer cycles.
+
+# 4 Algorithms
+
+All algorithms MUST have access to a `PrivateForest` in their context.
+
+## 4.1 Namefilter Hash Resolution
+
+`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
+
+The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter, the private node header, and a list of at least one private node.
+
+Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
+
+To split bytes into nibbles, first take the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This method matches the common hex encoding of byte strings and reading the hex digits off one-by-one in most languages.
+
+Each nibble MUST be used as an identifier for a `Node`s child `Node`. Starting at the root, find the root `Node`s child by taking the nibble and computing the index of the child node as:
 
 $$\textsf{index} = \textsf{popcount}(bitmask \land ((1 \ll nibble) - 1))$$
 
-If the child is a Node, repeat the process of with the next nibble.
+If the child is a `Node`, repeat the process of with the next nibble.
 
 If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
 
+## 4.2 Private Versioning
 
-### Private Versioning
+`toVersioned : (Namefilter, RevisionKey) -> Namefilter`
 
-`: (Namefilter, RevisionKey) -> Namefilter`
-
-Every private file or directory implicitly links to the name (namefilter) of its next version.
-
-These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`.
-
-Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead.
-
-Then, the new namefilter is:
+Every private file or directory implicitly links to the name (namefilter) of its next version. These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`. Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead. Then, the new namefilter is:
 
 $$saturate(add(deriveKey(inc^n(ratchet)), bareName))$$
 
@@ -172,34 +256,43 @@ Where
 - $deriveKey$ refers to the [skip ratchet `deriveKey` operation](/spec/skip-ratchet.md#Key-Derivation) and
 - $inc$ refers to the [skip ratchet increase operation](/spec/skip-ratchet.md#Increasing)
 
-It is possible to choose $n$ in $inc^n(ratchet)$ and due to the properties of the skip ratchet skip ahead versions instead of having to skip one-by-one. When looking for the most recent version of a file, we recommend first skipping to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found.
+Due to the skip ratchet, it is possible to skip ahead by more than one revision at a time. To do so, choose any $n$ in $inc^n(ratchet)$. When looking for the most recent version of a file, it is RECOMMENDED to first skip to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found. A common algorithm for this is [exponential search](https://en.wikipedia.org/wiki/Exponential_search).
 
+## 4.3 Path Resolution
 
-### Path Resolving
+`resolvePath : (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
 
-`: (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
+Paths in the private file system MUST be resolved relative to a parent directory. This directory MAY be at the current revision, or MAY be at an earlier version.
 
-Paths in the private file system need to be resolved relative to a directory to resolve the path from.
+Path resolution can happen in three modes: "current", "seek", and "attach".
 
-Path resolving can happen in three modes:
-- Resolve the current snapshot: You only resolve the current snapshot of a version. This only requires a content key for decryption.
-- Seeking: For each path segment, you look up the most recent version you can find (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key
-- Seeking & repairing: Similar to seeking, this mode will look for the most recent version of a file and once it found it and in case it's not the same as what the parent refers to, it'll repair the parent's link to link to the most recent revision.
+### 4.3.1 Current Snapshot
 
-In all of these cases the next path segment's directory or file's hash of the namefilter can be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking the private node up as described in [Namefilter Hash Resolving](#Namefilter-Hash-Resolving) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
+Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a content key for decryption.
+
+### 4.3.2 Seek
+
+For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
+
+#### 4.3.2.1 Attach
+
+A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
+
+In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
 
+##### 4.3.2.1.1 Example
 
-### Sharded File Content Access
+To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents. 
 
-`: PrivateFile -> Array<Namefilter>`
+![](./diagrams/attach.svg)
 
-Private file content may be inlined or externalized. Inlined content is decrypted along with the header.
+## 4.4 Sharded File Content Access
 
-Since external content is separate from the header, it needs a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed.
+`getShards : PrivateFile -> Array<Namefilter>`
 
-External content namefilters are defined thus:
+[External content](#3211-externalized-content) namefilters are defined thus:
 
 ```typescript
 const segmentNames = (file) => {
@@ -218,27 +311,30 @@ const segmentNames = (file) => {
 }
 ```
 
+## 4.5 Merge
 
-### Merge
+`merge : Array<PrivateForest> -> PrivateForest`
 
-`: Array<PrivateForest> -> PrivateForest`
 
-The private forest forms a join-semilattice with the `merge` ($\land$) function as the semilattice operation:
-The merge operation is
-- associative: $(a \land b) \land c = a \land (b \land c)$
-- commutative: $a \land b = b \land a$
-- idempotent: $a \land a = a$
+The private forest forms a join-semilattice via the `merge` ($\land$) operation. `merge` is thus:
+- [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
+- [Commutative](https://en.wikipedia.org/wiki/Commutative_property): $a \land b = b \land a$
+- [Idempotent](https://en.wikipedia.org/wiki/Idempotence): $a \land a = a$
 
-The merge operation has an identity element which is the empty HAMT.
+The identity element is the empty HAMT.
 
-It is sufficient to describe a two-way merge function, as it can be extended to an $n$-ary algorithm by reducing the array of forests using the two-way merge. However, an implementation may decide to implement a more efficient $n$-ary merge.
+These properties are very helpful in the case of an n-ary merge: the merge may be performed in any order, and either in a simple pipeline or with a more sophisticated merge mechanism.
 
-When the two `PrivateForest`s to merge have the same CID, they're equal and thus nothing has to be done. This gives the merge algorithm the idempotence property.
+Merklization is also helpful for performance. When the two `PrivateForest`s being merged have the same CID, they're equal and thus nothing has to be done (thanks to idempotence). This also applies recursively: if a HAMT branch or leaf have the same CID, treat both as one node (idempotence).
 
 Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. At each level:
 - Find the difference between the `Node` bitmasks. The resulting bitmask is simply the binary-or of the input bitmasks.
-- Figure out which children one `Node` adds over the other. Keep the superset of both sets of children.
+- Figure out which children one `Node` adds over the other. Keep the superset of both sets of children (this is an additive merge)
 - Recursively apply this algorithm on matching pairs of children nodes, unless they have the same CID.
-- When merging buckets of values, merge them by matching keys in the bucket entries. Merge the values of matching keys by merging the CID lists using set semantics and keep the CID list sorted. Key-value pairs that only appear in one of the inputs are kept as-is. If the bucket gets bigger than the normal bucket size, split the bucket into its own node, as per its normal splitting semantics.
+- When merging buckets of values, match the keys in the bucket entries. Merge the values of matching keys by merging the CID lists using set semantics and keep the CID list sorted. Key-value pairs that only appear in one of the inputs are kept as-is. If the bucket gets bigger than the normal bucket size, split the bucket into its own node, as per its normal splitting semantics described earlier in the document.
 
-The private forest merge algorithm thus works completely on the encrypted layer and can be done by a third party that doesn't have read access to the private file system at all. However, there is some complexity involved when reading files. It's possible multiple "conflicting" file writes exist at a single revision. In these cases, we need to do some simple tie-breaking and may just choose the smallest CID.
+### 4.5.1 Blind Merge
+
+The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
+
+ [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.

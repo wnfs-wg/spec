@@ -1,0 +1,38 @@
+digraph G {
+    node [
+        shape = box
+        fontname = "Helvetica"
+    ]
+
+    table [
+        shape = none
+        margin = 0
+        label = <
+            <table
+                border = "0"
+                cellborder = "1"
+                cellspacing = "0"
+                cellpadding = "10"
+            >
+                <th>
+                    <td color="invis">Visibilty</td>
+                    <td color="invis">Noun</td>
+                </th>
+
+                <tr>
+                    <td rowspan="2">Decrypted</td>
+                    <td>Files</td>
+                </tr>
+
+                <tr>
+                    <td rowspan = "2">Data</td>
+                    <td rowspan = "1" color = "invis"></td>
+                </tr>
+
+                <tr>
+                    <td colspan = "1">Encrypted</td>
+                </tr>
+            </table>
+        >
+    ]
+ }

@@ -1,0 +1,305 @@
+digraph G {
+    #########
+    # SETUP #
+    #########
+
+    compound = true
+    fontname = "Helvetica"
+    rankdir = "LR"
+
+    edge [
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+    ];
+
+    node [
+        shape = plaintext
+        style = filled
+        colorscheme = "piyg11"
+        fontname = "Helvetica"
+
+        color = 2
+        fontcolor = 2
+        fillcolor = 5
+    ];
+
+    graph [
+        colorscheme = "piyg11"
+        color = 10
+        style = "rounded,filled"
+        fontcolor = 7
+    ];
+
+    #########
+    # NODES #
+    #########
+
+    subgraph cluster_legend {
+        label = "Legend"
+        colorscheme = purples9
+
+        color = 7
+        fillcolor = 2
+        fontcolor = 7
+
+        node [
+            colorscheme = purples9
+            style = none
+            fillcolor = invis
+            fontcolor = 7
+        ]
+
+        edge [
+            colorscheme = purples9
+            color = 7
+        ]
+
+        sha [label = "Derive via SHA"]
+        key [label = "Contains key"]
+        inc [label = "Increment Ratchet"]
+
+        sha_end [style = invis]
+        key_end [style = invis]
+        inc_end [style = invis]
+
+        sha -> sha_end [style = dashed]
+        key -> key_end
+        inc -> inc_end [penwidth = 2]
+    }
+
+    start_time [style = invis]
+    end_time [style = invis]
+    start_time -> end_time [label = "Time" style = dashed weight = 100]
+    start_time -> root_skip_4 [style=invis]
+
+    start_space [style = invis]
+    end_space [style = invis]
+    start_space -> end_space [label = "File Hierarchy" style = dashed]
+    start_space -> root_skip_4 [weight = 100 style = invis]
+    end_space -> notes_content_0 [weight = 100 style = invis]
+    {rank=same start_space end_space}
+
+    root_skip_4 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;4</td></tr>
+            </table>
+        >
+    ]
+
+    root_skip_5 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;5</td></tr>
+            </table>
+        >
+    ]
+
+    root_skip_6 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    docs_skip_2 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
+            </table>
+        >
+    ]
+
+    notes_skip_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    notes_skip_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Skip Ratchet ⚙️</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    node [
+        color = 10
+        fontcolor = 10
+        fillcolor = 7
+    ]
+
+    root_content_4 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;4</td></tr>
+            </table>
+        >
+    ]
+
+    root_content_5 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;5</td></tr>
+            </table>
+        >
+    ]
+
+    root_content_6 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;6</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    docs_content_2 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;2</td></tr>
+            </table>
+        >
+    ]
+
+    notes_content_0 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;0</td></tr>
+            </table>
+        >
+
+        color = 10
+        fillcolor = 7
+        fontcolor = 10
+    ]
+
+    notes_content_1 [
+        label=<
+            <table border="0" cellborder="1" cellspacing="0">
+                <tr><td align="left"><b>Content Key 🔑</b></td></tr>
+                <tr><td align="left"><b>Path:</b>&nbsp;/Documents/Notes.md</td></tr>
+                <tr><td align="left"><b>Revision:</b>&nbsp;1</td></tr>
+            </table>
+        >
+    ]
+
+    {rank=same root_skip_4 docs_skip_0 start_time}
+
+    {rank=same root_skip_5 docs_skip_1 notes_skip_0}
+    {rank=same root_skip_6 docs_skip_2 notes_skip_1}
+
+    {rank=same root_content_4 docs_content_0}
+    {rank=same root_content_5 docs_content_1 notes_content_0}
+    {rank=same root_content_6 docs_content_2 notes_content_1 end_time}
+
+    #########
+    # EDGES #
+    #########
+
+    root_skip_4 -> root_skip_5 [color = 2 minlen = 2 penwidth = 2 weight = 100]
+    root_skip_5 -> root_skip_6 [color = 2 minlen = 2 penwidth = 2 weight = 100]
+
+    root_skip_4:s -> root_content_4:w [color = 10 style = dashed]
+    root_skip_5:s -> root_content_5:w [color = 10 style = dashed]
+    root_skip_6:s -> root_content_6:w [color = 10 style = dashed]
+
+    ## Docs ##
+
+    docs_skip_0 -> docs_skip_1 [color = 2 penwidth = 2weight = 100]
+    docs_skip_1 -> docs_skip_2 [color = 2 penwidth = 2weight = 100]
+
+    docs_skip_0:s -> docs_content_0:w [color = 10 style = dashed]
+    docs_skip_1:s -> docs_content_1:w [color = 10 style = dashed]
+    docs_skip_2:s -> docs_content_2:w [color = 10 style = dashed]
+
+    ## Root -> Docs ##
+
+    root_skip_4:s -> docs_skip_0:n [color = 2 minlen = 12]
+    root_skip_5:s -> docs_skip_1:n [color = 2]
+    root_skip_6:s -> docs_skip_2:n [color = 2]
+
+    root_content_4:s -> docs_content_0:n [color = 10 minlen = 12]
+    root_content_5:s -> docs_content_1:n [color = 10 minlen = 12]
+    root_content_6:s -> docs_content_2:n [color = 10 minlen = 12]
+
+    ## Notes ##
+
+    notes_skip_0 -> notes_skip_1 [color = 2 penwidth = 2 weight = 100]
+
+    notes_skip_0:s -> notes_content_0:w [color = 10 style = dashed]
+    notes_skip_1:s -> notes_content_1:w [color = 10 style = dashed weight = 100]
+
+    ## Docs -> Notes ##
+
+    docs_skip_1 -> notes_skip_0 [color = 2 minlen = 12]
+    docs_skip_2 -> notes_skip_1 [color = 2]
+
+    docs_content_1 -> notes_content_0 [color = 10]
+    docs_content_2 -> notes_content_1 [color = 10]
+}
