@@ -35,7 +35,7 @@ digraph G {
     ##############
 
     invis_parent [style = invis]
-    node_key [label = "Node Key\n🔑" color = 2  fontcolor = 2]
+    revision_key [label = "Revision Key\n🔑" color = 2  fontcolor = 2]
     content_key [label = "Content Key\n🗝" color=10 fontcolor = 10 fillcolor=7]
 
     ############
@@ -57,8 +57,8 @@ digraph G {
         label = "Temporal Header"
         color = 3
 
-        apps_header_key [label = "Apps Node Key\n🔑"]
-        docs_header_key [label = "Documents Node Key\n🔑"]
+        apps_header_key [label = "Apps Revision Key\n🔑"]
+        docs_header_key [label = "Documents Revision Key\n🔑"]
         invis_header [style = invis]
 
         invis_header -> apps_header_key -> docs_header_key  [style=invis]
@@ -85,7 +85,7 @@ digraph G {
     # EDGES #
     #########
 
-    node_key:e -> content_key:n [
+    revision_key:e -> content_key:n [
         label = "SHA3"
         style = dashed
         color = 3
@@ -93,7 +93,7 @@ digraph G {
         weight = 0.5
     ]
 
-    node_key:w -> skip_ratchet:w [
+    revision_key:w -> skip_ratchet:w [
         dir = back
         style = dashed
         label = "Derive"
@@ -101,15 +101,15 @@ digraph G {
         fontcolor = blueviolet
     ]
 
-    invis_parent -> node_key [color = lightgray weight = 10]
+    invis_parent -> revision_key [color = lightgray weight = 10]
     content_key:s -> metadata [
         lhead = cluster_private_content
         color = 10
         weight = 18
     ]
 
-    node_key -> skip_ratchet [lhead = cluster_private_header color = 3 weight=10]
-    node_key -> invis_header [lhead = cluster_temporal_header color = 3]
+    revision_key -> skip_ratchet [lhead = cluster_private_header color = 3 weight=10]
+    revision_key -> invis_header [lhead = cluster_temporal_header color = 3]
 
     apps_header_key -> apps_content_key [
         penwidth = 3
