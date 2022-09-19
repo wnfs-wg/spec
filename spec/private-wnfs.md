@@ -72,7 +72,7 @@ A space optimization delaying the creation of additional layers until 3 collisio
 
 #### 2.1.1.3 `Entry`
 
-A multivalued leaf node, containing a file data and write conflicts.
+A multi-valued leaf node, containing a file data and write conflicts.
 
 ## 2.2 Ciphertext Files
 
@@ -276,7 +276,7 @@ For each path segment, look up the most recent version that can be found (as des
 
 #### 4.3.2.1 Attach
 
-A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly nessesary, as this always starts from the parent's link which moves forward monotonically.
+A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
 In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
 
