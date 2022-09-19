@@ -39,7 +39,7 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-formatted binary blobs.
 
-All values in the Merkle HAMT MUST be sorted in lexicographic ascending order by CID.
+All values in the Merkle HAMT MUST be sorted in binary ascending order by CID.
 
 ```typescript
 type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
