@@ -171,13 +171,13 @@ Keys are always attached to pointers to some data.
 
 ![](./diagrams/decryption_pointer.svg)
 
-#### 3.2.3.1 Node Key
+#### 3.2.3.1 Revision Key
 
-Node keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
 
 #### 3.2.3.2 Content Key
 
-Content keys MUST be derived from the [Node Key](#3231-node-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+Content keys MUST be derived from the [Revision Key](#3231-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
 
 ### 3.2.4 Read Hierarchy
 
@@ -204,9 +204,9 @@ In the above diagram, newer revisions of nodes progress left-to-right. The file 
 
 Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a content key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the content key.
 
-### 3.2.4.2 Node Key Structure
+### 3.2.4.2 Revision Key Structure
 
-A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "node key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the content key for the current node
