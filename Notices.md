@@ -30,6 +30,14 @@ Specification version: 0.2.0-alpha or later
 
 ---------------------------------------------------------------------------------
 
+Licensee’s name: Daniel Holmgren
+
+Authorized individual and system identifier: dholms
+
+Specification version: 0.2.0-alpha or later
+
+---------------------------------------------------------------------------------
+
 ## Withdrawals
 
 Name of party withdrawing:
