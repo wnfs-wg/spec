@@ -110,6 +110,8 @@ type PrivateDirectory = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
+  // encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous: Encrypted<CBOR<Array<CID>>>
 
   // USERLAND
   metadata: Metadata
@@ -146,6 +148,11 @@ Node headers MUST be encrypted with the key derived from the node's skip ratchet
 ### 3.2.2 Node Metadata
 
 Node metadata is the userland equivalent of the node's header.
+
+### 3.2.3 Node Previous
+
+Node previous is the encrypted binary ascending order sorted CBOR list of CIDs this node was based on when constructed. This value MUST be encrypted with the ratchet key derived from the previous skip ratchet relative to the current node.
+Note that the array of previous CIDs can refer to private nodes that are 'older' than one revision.
 
 ### 3.2.1 Private File
 
