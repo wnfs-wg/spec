@@ -1,16 +1,18 @@
 digraph G {
+
     #########
     # SETUP #
     #########
 
     compound = true
     fontname = "Helvetica"
+    newrank = true
 
     edge [
         colorscheme = "piyg11"
         color = black
         fontname = "Helvetica"
-    ];
+    ]
 
     node [
         shape = box
@@ -21,116 +23,122 @@ digraph G {
         fontname = "Helvetica"
         color=2
         fontcolor=2
-    ];
+    ]
 
     graph [
-        colorscheme="piyg11"
-        color=10
+        colorscheme = "piyg11"
         style = "rounded,filled"
-        fontcolor=white
-    ];
+    ]
 
-    ##############
-    # FREE NODES #
-    ##############
+    #################
+    # NODES & EDGES #
+    #################
 
     invis_parent [style = invis]
     revision_key [label = "Revision Key\n🔑" color = 2  fontcolor = 2]
     content_key [label = "Content Key\n🗝" color=10 fontcolor = 10 fillcolor=7]
 
-    ############
-    # CLUSTERS #
-    ############
-
-    subgraph cluster_private_header {
-        label = "Private Header"
-        color=3
-
-        skip_ratchet [label = "Skip Ratchet\n⚙️" color = blueviolet fontcolor = blueviolet fillcolor=lavender]
-        bare_nf [label = "Bare Namefilter" shape = note]
-        i_number [label = "i-number" shape = note]
-
-        skip_ratchet -> bare_nf -> i_number [style=invis]
-    }
-
-    subgraph cluster_temporal_header {
-        label = "Temporal Header"
-        color = 3
-
-        apps_header_key [label = "Apps Revision Key\n🔑"]
-        docs_header_key [label = "Documents Revision Key\n🔑"]
-        invis_header [style = invis]
-
-        invis_header -> apps_header_key -> docs_header_key  [style=invis]
-    }
-
-    subgraph cluster_private_content {
-        label = "Private Content"
+    subgraph cluster_node {
+        label = "Private Node"
+        color = 8
+        fontcolor = 10
 
         node [
             color=10
             fontcolor=10
             fillcolor=7
         ]
+        
+        subgraph cluster_node_header {
+            label = "Private Node Header"
+            color = 3
+            fontcolor = white
+
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            skip_ratchet [
+                label = "Skip Ratchet\n⚙️"
+                color = blueviolet
+                fontcolor = blueviolet
+                fillcolor = lavender
+            ]
+
+            bare_namefilter [label = "Bare Namefilter" shape = note]
+            i_number [label = "i-number" shape = note]
+
+            skip_ratchet -> bare_namefilter -> i_number [style=invis]
+        }
+
+        subgraph cluster_apps {
+            label = "Revision-encrypted"
+            color = 3
+            fontcolor = white
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            apps_revision_key [label = "Apps Revision Key\n🔑"]
+        }
+
+        subgraph cluster_docs {
+            label = "Revision-encrypted"
+            color = 3
+            fontcolor = white
+            node [
+                color = 2
+                fontcolor = 2
+                fillcolor = 5
+            ]
+
+            docs_revision_key [label = "Documents Revision Key\n🔑"]
+        }
 
         metadata [shape = note]
 
-        apps_content_key [label="Apps Content Key\n🗝"]
-        docs_content_key [label="Documents Content Key\n🗝"]
+        apps_content_key [label = "Apps Content Key\n🗝"]
+        docs_content_key [label = "Documents Content Key\n🗝"]
 
-        metadata -> apps_content_key -> docs_content_key [style=invis];
+        apps_revision_key -> apps_content_key [label = "Hash" color = 2 fontcolor = 2 style = dashed]
+        docs_revision_key -> docs_content_key [label = "Hash" color = 2 fontcolor = 2 style = dashed]
+
+        {rank=same apps_revision_key apps_content_key}
+        {rank=same docs_revision_key docs_content_key}
+
+        metadata -> apps_content_key -> docs_content_key [style = invis]
+        metadata -> apps_revision_key -> docs_revision_key [style = invis]
     }
 
-    #########
-    # EDGES #
-    #########
-
-    revision_key:e -> content_key:n [
-        label = "SHA3"
-        style = dashed
-        color = 3
-        fontcolor = 3
-        weight = 0.5
+    invis_parent -> revision_key [
+        color = lightgray
+        weight = 10
     ]
 
-    revision_key:w -> skip_ratchet:w [
-        dir = back
+    revision_key -> content_key [
+        label = "Hash"
         style = dashed
-        label = "Derive"
+        color = 2
+        fontcolor = 2
+    ]
+
+    {rank=same revision_key content_key}
+
+    content_key -> metadata [ lhead = cluster_node color = 10 ]
+
+    revision_key -> skip_ratchet:e [
+        label = "derive key"
+        style = dashed
+        dir = back
         color = blueviolet
         fontcolor = blueviolet
     ]
 
-    invis_parent -> revision_key [color = lightgray weight = 10]
-    content_key:s -> metadata [
-        lhead = cluster_private_content
-        color = 10
-        weight = 18
-    ]
-
-    revision_key -> skip_ratchet [lhead = cluster_private_header color = 3 weight=10]
-    revision_key -> invis_header [lhead = cluster_temporal_header color = 3]
-
-    apps_header_key -> apps_content_key [
-        penwidth = 3
-        arrowtail = none
-        dir = back
-        style = dashed
-    ]
-
-    docs_content_key -> docs_header_key [
-        penwidth = 3
-        arrowhead = none
-        style = dashed
-    ]
-
-    ################
-    # LAYOUT HACKS #
-    ################
-
-    content_key:s -> invis_header:n [lhead=cluster_temporal_header style=invis]
-    content_key:s -> skip_ratchet:n [lhead=cluster_temporal_header style=invis]
-    skip_ratchet -> apps_header_key [lhead=cluster_private_header style=invis]
-    apps_header_key -> skip_ratchet [style=invis]
+    revision_key -> skip_ratchet [lhead = cluster_node_header color = 2]
+    revision_key -> apps_revision_key [lhead = cluster_apps color = 2]
+    revision_key -> docs_revision_key [lhead = cluster_docs color = 2]
 }
-
