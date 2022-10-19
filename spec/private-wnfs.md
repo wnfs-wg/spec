@@ -6,7 +6,7 @@ The private file system provides granular control over read access along two dim
 
 # 1 Terminology
 
-Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
+Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer.
 
 ![](./diagrams/layer_dimensions.svg)
 
@@ -15,7 +15,7 @@ Broadly speaking, there is a "decrypted" layer and an "encrypted" layer.
 - The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
 - The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-These all form graphs, where the nodes and links have different meanings per layer. The 
+These all form graphs, where the nodes and links have different meanings per layer.
 
 | Visibility | Layer | Node        | Link             |
 |------------|-------|-------------|------------------|
@@ -43,7 +43,7 @@ All values in the Merkle HAMT MUST be sorted in binary ascending order by CID.
 
 ```typescript
 type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
-  
+
 type HAMT<K, V> = {
   structure: "hamt"
   version: "0.1.0"
@@ -86,7 +86,7 @@ The decrypted (or "cleartext") layer is where the actual structure of the file s
 
 The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext file layer.
 
-## 3.1 Cleartext Data 
+## 3.1 Cleartext Data
 
 The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
@@ -134,8 +134,8 @@ type PrivateFile = {
 }
 
 type ExternalContent = {
-  ratchet: SkipRatchet 
-  count: Uint64
+  key: Key
+  blockCount: Uint64
 }
 ```
 
@@ -155,9 +155,11 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.2.1.1 Externalized Content
 
-Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
 
-The skip ratchet counter for externalized content MUST reference the block index, not the version. The skip ratchet for the externalized blocks is generated fresh per revision, where the header maintains the temporal access. For structural sharing between revisions, decryption pointers ("flattened" derived keys) MUST be used in order to not leak non-shared chunks on that same skip ratchet.
+The block count for externalized content MUST reference the number of blocks the externalized content was split into. The key for the externalized blocks is generated fresh per revision, where the header maintains the temporal access.
+
+Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller.
 
 ### 3.2.1 Private Directory
 
@@ -284,7 +286,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 ##### 4.3.2.1.1 Example
 
-To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents. 
+To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents.
 
 ![](./diagrams/attach.svg)
 
@@ -292,24 +294,11 @@ To illustrate this mode, consider the following diagram. An agent may only have 
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-[External content](#3211-externalized-content) namefilters are defined thus:
-
-```typescript
-const segmentNames = (file) => {
-  const { bareNamefilter, content: { ratchet, count } } = file.header
-  const key = ratchet.toBytes()
-  
-  let names = []
-  for (i = 0; i < count; i++) {  
-    names[i] = bareNamefilter
-                 .addBare(sha3(key))
-                 .addBare(sha3(`${key}${i}`))
-                 .saturate()
-  }
-
-  return contentNames
-}
-```
+The blocks for [external content](#3211-externalized-content) with `key` and `count` MUST have namefilters of the form $\text{saturate}(\text{add}(\text{sha3}(\textsf{key} || \textsf{encode}(i), \textsf{bareName})))$, where 
+- the block index $i$ MUST range from $0$ to $\textsf{blockCount} - 1$ inclusive.
+- $||$ denotes byte array concatenation
+- $\textsf{bareName}$ is the bare namefilter from the private file's header.
+- $\textsf{encode}(\cdot)$ is a function that maps a block index to a low-endian encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge
 
