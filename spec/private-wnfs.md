@@ -161,6 +161,8 @@ The block count for externalized content MUST reference the number of blocks the
 
 Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller.
 
+The externalized content's `key` MUST be re-generated randomly every time the file content changes. It MAY stay the same across private file header revisions if only file metadata changes.
+
 ### 3.2.1 Private Directory
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
