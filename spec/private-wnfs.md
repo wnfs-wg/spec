@@ -296,7 +296,7 @@ To illustrate this mode, consider the following diagram. An agent may only have 
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-The blocks for [external content](#3211-externalized-content) with `key` and `count` MUST have namefilters of the form $\text{saturate}(\text{add}(\text{sha3}(\textsf{key} || \textsf{encode}(i), \textsf{bareName})))$, where 
+The blocks for [external content](#3211-externalized-content) with `key` and `count` MUST have namefilters of the form $\text{saturate}(\text{add}(\textsf{key}, \text{add}(\text{sha3}(\textsf{key} || \textsf{encode}(i), \textsf{bareName}))))$, where 
 - the block index $i$ MUST range from $0$ to $\textsf{blockCount} - 1$ inclusive.
 - $||$ denotes byte array concatenation
 - $\textsf{bareName}$ is the bare namefilter from the private file's header.
