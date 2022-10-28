@@ -157,11 +157,13 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
 
-The block count for externalized content MUST reference the number of blocks the externalized content was split into. The key for the externalized blocks is generated fresh per revision, where the header maintains the temporal access.
-
-Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller.
+The block count for externalized content MUST reference the number of blocks the externalized content was split into.
 
 The externalized content's `key` MUST be re-generated randomly every time the file content changes. It MAY stay the same across private file header revisions if only file metadata changes.
+
+The namefilters to be used as labels for the ciphertexts in the HAMT are computed as defined in [Algorithm 4.4: Sharded File Content Access](#44-sharded-file-content-access).
+
+Each multivalue in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
 
 ### 3.2.1 Private Directory
 
@@ -276,7 +278,7 @@ Resolve the current snapshot: only resolve the current snapshot of a version. Th
 
 ### 4.3.2 Seek
 
-For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
+For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's revision key.
 
 #### 4.3.2.1 Attach
 
@@ -296,11 +298,22 @@ To illustrate this mode, consider the following diagram. An agent may only have 
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-The blocks for [external content](#3211-externalized-content) with `key` and `count` MUST have namefilters of the form $\text{saturate}(\text{add}(\textsf{key}, \text{add}(\text{sha3}(\textsf{key} || \textsf{encode}(i), \textsf{bareName}))))$, where 
-- the block index $i$ MUST range from $0$ to $\textsf{blockCount} - 1$ inclusive.
-- $||$ denotes byte array concatenation
-- $\textsf{bareName}$ is the bare namefilter from the private file's header.
-- $\textsf{encode}(\cdot)$ is a function that maps a block index to a low-endian encoding of a 64-bit unsigned integer.
+To calculate the array of HAMT labels for [external content](#3211-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
+
+```ts
+function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
+  for (let i = 0; i < count; i++) {
+    yield bareName
+      .add(key)
+      .add(sha3(concat(key, encode(i))))
+      .saturate()
+  }
+}
+```
+
+- `concat` denotes byte array concatenation,
+- `bareName` is the bare namefilter from the private file's header,
+- `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge
 
