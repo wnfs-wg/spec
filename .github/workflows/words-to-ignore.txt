@@ -75,6 +75,7 @@ superset like set
 userland
 low-endian
 big-endian
+codec
 
 # rationale
 Combinatoric
