@@ -37,30 +37,32 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-formatted binary blobs.
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of raw-codec CIDs.
 
-All values in the Merkle HAMT MUST be sorted in binary ascending order by CID.
+All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
 ```typescript
 type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
 
-type HAMT<K, V> = {
+type HAMT<L, V> = {
   structure: "hamt"
   version: "0.1.0"
-  root: SparseNode<K, V>
+  root: SparseNode<L, V>
 }
 
-type SparseNode<K, V> = [
+type SparseNode<L, V> = [
   ByteArray<2>, // Sparse Index
-  Array<Entry<K, V>> // Entries
+  Array<Entry<L, V>> // Entries
 ]
 
-type Entry<K, V>
-  = CID<CBOR<SparseNode<K, V>>> // Child node
-  | Array<[K, V]> // Leaf values
+type Entry<L, V>
+  = CID<CBOR<SparseNode<L, V>>> // Child node
+  | Bucket<L,V>
+
+type Bucket<L, V> = Array<[L, V]> // Leaf values
 ```
 
-Note that `Node<K, V>` and `Entry<K, V>` are mutually recursive.
+Note that `Node<L, V>` and `Entry<L, V>` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -72,7 +74,7 @@ A space optimization delaying the creation of additional layers until 3 collisio
 
 #### 2.1.1.3 `Entry`
 
-A multi-valued leaf node, containing a file data and write conflicts.
+A leaf node, containing the expanded label as well as a value. As the private forest for WNFS, this MUST contain a namefilter as label and a set of CIDs of ciphertexts of conflicting writes as the value. This set of CIDs is also called the multi-value.
 
 ## 2.2 Ciphertext Files
 
@@ -163,7 +165,7 @@ The externalized content's `key` MUST be re-generated randomly every time the fi
 
 The namefilters to be used as labels for the ciphertexts in the HAMT are computed as defined in [Algorithm 4.4: Sharded File Content Access](#44-sharded-file-content-access).
 
-Each multivalue in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
+Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
 
 ### 3.2.1 Private Directory
 
