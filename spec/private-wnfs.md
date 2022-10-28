@@ -37,7 +37,7 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of raw-codec CIDs.
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of `raw` codec CIDs.
 
 All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
