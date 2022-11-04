@@ -143,7 +143,7 @@ type ExternalContent = {
 
 ### 3.2.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [§3.2.3 Pointers & Keys](#323-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to the section [Pointers & Keys](#323-pointers--keys) for more detail.
 
 ### 3.2.2 Node Metadata
 
@@ -157,13 +157,13 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.2.1.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
 
 The block count for externalized content MUST reference the number of blocks the externalized content was split into.
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
 
-NB: label namefilters MUST be computed per [Algorithm 4.4](#44-sharded-file-content-access)
+NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
 Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
 
@@ -171,7 +171,7 @@ Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a cip
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See [§3.2.4 Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
+See the section for [Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
 
 ### 3.2.3 Pointers & Keys
 
