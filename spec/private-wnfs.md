@@ -163,7 +163,7 @@ The block count for externalized content MUST reference the number of blocks the
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
 
-The namefilters to be used as labels for the ciphertexts in the HAMT are computed as defined in [Algorithm 4.4: Sharded File Content Access](#44-sharded-file-content-access).
+NB: label namefilters MUST be computed per [Algorithm 4.4](#44-sharded-file-content-access)
 
 Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
 
