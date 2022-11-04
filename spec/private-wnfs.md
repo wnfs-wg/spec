@@ -155,7 +155,9 @@ The `previous` link provides an encrypted back-pointer to any direct causal depe
 
 The `previous` link MUST be an encrypted CBOR list of CIDs sorted in binary ascending order. This value MUST be encrypted with the same skip ratchet key as referred to in the particular link.
 
-Each CID in the decrypted `previous` links MUST refer to a value from the private forest. At least once CID MUST refer to a CID from the previous revision. If the `previous` links contain more than one element, then some CIDs MAY refer to CIDs of even older revisions. `previous` link CIDs MUST NOT refer to values in the private forest from newer revisions.
+Each CID in the decrypted `previous` links MUST refer to a value from the private forest. Either the list of CIDs is empty or at least one CID MUST refer to a CID from the previous revision.
+
+If the `previous` links contain more than one element, then some CIDs MAY refer to CIDs of even older revisions. `previous` link CIDs MUST NOT refer to values in the private forest from newer revisions.
 
 ### 3.1.4 Private File
 
