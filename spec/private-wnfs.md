@@ -139,6 +139,7 @@ type PrivateFile = {
 
 type ExternalContent = {
   key: Key
+  blockSize: Uint64 // in bytes, at max 262132
   blockCount: Uint64
 }
 ```
@@ -171,13 +172,17 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
 
-The block count for externalized content MUST reference the number of blocks the externalized content was split into.
+The block size MUST be at least 1 and at maximum $2^{18} - 12 = 262,322$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes need to be prepended to each ciphertext. It is RECOMMENDED to use the maximum block size.
+
+The block count MUST reference the number of blocks the externalized content was split into.
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `12 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes refer to the initialization vector and the rest are the ciphertext.
+
+If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
 ### 3.1.5 Private Directory
 
