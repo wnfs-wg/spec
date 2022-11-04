@@ -151,7 +151,9 @@ Node metadata is the userland equivalent of the node's header.
 
 ### 3.1.3 Node `previous` Backlinks
 
-The node "previous" links is an encrypted binary ascending order sorted CBOR list of CIDs this node was based on when constructed. This value MUST be encrypted with the ratchet key derived from the previous skip ratchet relative to the current node.
+The `previous` link provides an encrypted back-pointer to any direct causal dependencies (the previous version of this node). The encryption protects from metadata leakage from agents that do not have access to the relevant node.
+
+The `previous` link MUST be a encrypted CBOR list sorted by CID in binary ascending order. This value MUST be encrypted with the same skip ratchet key as referred to in the particular link.
 Note that the array of previous CIDs can refer to private nodes that are 'older' than one revision.
 
 ### 3.1.4 Private File
