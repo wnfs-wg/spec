@@ -112,6 +112,8 @@ type PrivateDirectory = {
   version: "0.2.0"
   // encrypted using deriveKey(ratchet)
   header: Encrypted<CBOR<PrivateNodeHeader>>
+  // encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous: Encrypted<CBOR<Array<CID>>>
 
   // USERLAND
   metadata: Metadata
@@ -141,21 +143,31 @@ type ExternalContent = {
 }
 ```
 
-### 3.2.1 Node Headers
+### 3.1.1 Node Headers
 
 Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to the section [Pointers & Keys](#323-pointers--keys) for more detail.
 
-### 3.2.2 Node Metadata
+### 3.1.2 Node Metadata
 
 Node metadata is the userland equivalent of the node's header.
 
-### 3.2.1 Private File
+### 3.1.3 Node `previous` Backlinks
+
+The `previous` link provides an encrypted back-pointer to any direct causal dependencies (the previous version of this node). The encryption protects from metadata leakage from agents that do not have access to the relevant node.
+
+The `previous` link MUST be an encrypted CBOR list of CIDs sorted in binary ascending order. This value MUST be encrypted with the same skip ratchet key as referred to in the particular link.
+
+Each CID in the decrypted `previous` links MUST refer to a value from the private forest. Either the list of CIDs is empty or at least one CID MUST refer to a CID from the previous revision.
+
+If the `previous` links contain more than one element, then some CIDs MAY refer to CIDs of even older revisions. `previous` link CIDs MUST NOT refer to values in the private forest from newer revisions.
+
+### 3.1.4 Private File
 
 A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
 
 Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
 
-#### 3.2.1.1 Externalized Content
+#### 3.1.4.1 Externalized Content
 
 Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
 
@@ -167,27 +179,27 @@ NB: Label namefilters MUST be computed as described in the algorithm for [sharde
 
 Each multi-value in the HAMT MUST have exactly one CID. That CID refers to a ciphertext block. Each block MUST be a $2^{18} = 262144$ byte ciphertext, where the first 12 bytes are the initialization vector for encryption, so each block MUST encode exactly 262,132 plaintext bytes, except for the last block with index equal to `blockCount - 1`, which MAY be smaller, but MUST NOT encode an empty plaintext.
 
-### 3.2.1 Private Directory
+### 3.1.5 Private Directory
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
 See the section for [Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
 
-### 3.2.3 Pointers & Keys
+### 3.1.6 Pointers & Keys
 
 Keys are always attached to pointers to some data.
 
 ![](./diagrams/decryption_pointer.svg)
 
-#### 3.2.3.1 Revision Key
+#### 3.1.6.1 Revision Key
 
 revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
 
-#### 3.2.3.2 Content Key
+#### 3.1.6.2 Content Key
 
 Content keys MUST be derived from the [Revision Key](#3231-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
 
-### 3.2.4 Read Hierarchy
+### 3.1.7 Read Hierarchy
 
 Access in WNFS is fundamentally hierarchical. Access granted to a single node in a DAG implies access to all of its child nodes (and no others). Decryption pointers provide a way to "discover" the structure of the portion of the file system accessible to the viewer. This process is always started from a pointer held by the viewer outside of the file system.
 
@@ -199,7 +211,7 @@ Each link in the above picture is looked up in the [encrypted HAMT](#211-data-ty
 
 Note that holding the decryption pointer to this particular directory MUST NOT grant access to sibling or parent nodes, nor to other structures rooted in the private forest.
 
-### 3.2.4.1 Temporal Hierarchy
+### 3.1.7.1 Temporal Hierarchy
 
 Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
@@ -212,7 +224,7 @@ In the above diagram, newer revisions of nodes progress left-to-right. The file 
 
 Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a content key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the content key.
 
-### 3.2.4.2 Revision Key Structure
+### 3.1.7.2 Revision Key Structure
 
 A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
