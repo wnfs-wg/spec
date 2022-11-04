@@ -161,7 +161,7 @@ Since external content blocks are separate from the header, they MUST have a uni
 
 The block count for externalized content MUST reference the number of blocks the externalized content was split into.
 
-The externalized content's `key` MUST be re-generated randomly every time the file content changes. It MAY stay the same across private file header revisions if only file metadata changes.
+The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
 
 The namefilters to be used as labels for the ciphertexts in the HAMT are computed as defined in [Algorithm 4.4: Sharded File Content Access](#44-sharded-file-content-access).
 
