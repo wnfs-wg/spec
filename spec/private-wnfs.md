@@ -292,7 +292,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 ##### 4.3.2.1.1 Example
 
-To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents.
+Consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents.
 
 ![](./diagrams/attach.svg)
 
