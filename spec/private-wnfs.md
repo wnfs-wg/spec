@@ -234,9 +234,9 @@ All algorithms MUST have access to a `PrivateForest` in their context.
 
 ## 4.1 Namefilter Hash Resolution
 
-`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Encrypted<PrivateNodeHeader>, Array<Encrypted<PrivateNode>>)`
+`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Encrypted<PrivateNode>>)`
 
-The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter, the private node header, and a list of at least one private node.
+The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one private node.
 
 Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
