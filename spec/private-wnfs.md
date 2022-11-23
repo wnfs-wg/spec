@@ -74,7 +74,7 @@ A space optimization delaying the creation of additional layers until 3 collisio
 
 #### 2.1.1.3 `Entry`
 
-A leaf node, containing the expanded label as well as a value. As the private forest for WNFS, this MUST contain a namefilter as label and a set of CIDs of ciphertexts of conflicting writes as the value. This set of CIDs is also called the multi-value.
+A leaf node, containing the expanded label as well as a value. As the private forest for WNFS, this MUST contain a namefilter as label and a set of CIDs of ciphertexts of conflicting writes as the value.
 
 ## 2.2 Ciphertext Files
 
