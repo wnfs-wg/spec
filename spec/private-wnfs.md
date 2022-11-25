@@ -146,7 +146,7 @@ type ExternalContent = {
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to the section [Pointers & Keys](#323-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#323-pointers--keys) for more detail.
 
 ### 3.1.2 Node Metadata
 
