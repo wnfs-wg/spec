@@ -74,7 +74,11 @@ A space optimization delaying the creation of additional layers until 3 collisio
 
 #### 2.1.1.3 `Entry`
 
-A leaf node, containing the expanded label as well as a value. As the private forest for WNFS, this MUST contain a namefilter as label and a set of CIDs of ciphertexts of conflicting writes as the value.
+An `Entry` node MUST consist of:
+* The expanded label (HAMT hash preimage)
+* The value for this label
+
+If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOULD be ciphertexts representing conflicting file system writes to that same path and revision.
 
 ## 2.2 Ciphertext Files
 
