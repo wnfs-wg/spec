@@ -78,6 +78,7 @@ big-endian
 codec
 backlink like link
 prepend like append
+preimage like image
 
 # rationale
 Combinatoric
