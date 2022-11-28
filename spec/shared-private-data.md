@@ -9,9 +9,9 @@ These encrypted payloads contain secrets giving read access and/or [UCANs](https
 
 # 1 Exchange Keys
 
-To share information with a user that's offline we make use of asymmetric encryption. All WNFS users widely distribute a list of public 2048-bit RSA public keys - their non-exportable "exchange keys" - as `did:key:` DIDs at a well-known location: A list under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information on this.
+To share information with a user that's offline we make use of asymmetric encryption. All WNFS users widely distribute a list of public 2048-bit RSA public keys - their non-exportable "exchange keys" - as `did:key:` DIDs at a well-known location: A list under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information.
 
-These RSA keys are used to encrypt a symmetric key for a recipient; the "share key". This symmetric key is then used to decrypt a pointer a private node.
+These RSA keys are used to encrypt a share payload for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
 
 Allowing multiple exchange keys per WNFS enables multiple recipient devices to receive a share without having to transfer exchange keys between devices.
 
@@ -83,10 +83,14 @@ Thus it is possible to scan other user's file systems for files that were shared
 
 # 4 Concurrent Share Creation
 
-If multiple shares are created concurrently on separate devices, then these can simply be merged according to the [private forest merge algorithm](/spec/private-wnfs.md#45-merge).
+If multiple shares are created concurrently on separate devices, then these are merged according to the [private forest merge algorithm](/spec/private-wnfs.md#45-merge).
 
 Multiple share payloads are allowed per share label.
 
-# 5 Share Creation Permission
+# 5 Externally Shared Data
 
-## 5.1 Share as Inbox
+The shared private data extension also allows dropping off secrets on a file system with the owner as recipient instead of as a sender.
+
+A sender with write access to the root owner's private forest would thus drop off share payloads in the private forest at the labels corresponding to all combinations of the sender's root DID and the file system owner's listed exchange keys.
+
+The file system owner can later receive share payloads by looking through their own file system with combinations of the known sender's root DID and of their own exchange keys.
