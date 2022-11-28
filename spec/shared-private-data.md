@@ -96,3 +96,9 @@ The shared private data extension also allows dropping off secrets on a file sys
 A sender with write access to the root owner's private forest would thus drop off share payloads in the private forest at the labels corresponding to all combinations of the sender's root DID and the file system owner's listed exchange keys.
 
 The file system owner can later receive share payloads by looking through their own file system with combinations of the known sender's root DID and of their own exchange keys.
+
+# 6 Sharing Multiple Private Nodes
+
+If a sender wants to share multiple private nodes at the same time, it is RECOMMENDED to create a private directory containing all nodes to share and create a single share payload pointing to that directory.
+
+This directory MAY be constructed on-the-fly. Its bare namefilter then consists of only its own `inumber` and its entries don't have their bare namefilters adjusted, as this directory is not meant to have additional revisions.
