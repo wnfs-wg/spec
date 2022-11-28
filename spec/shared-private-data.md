@@ -3,13 +3,13 @@
 # 0 Abstract
 
 There are several cases where we need to exchange private data asynchronously when the other party may be offline.
-The shared private data extension allows a file system's owner to deposit messages encrypted with a recipient's public key on their private forest.
+The shared private data extension allows a file system's owner to deposit asymmetrically encrypted messages so they can be picked up by the recipient when they come online.
 A recipient will then periodically - or after being prompted - scan the sender's private forest for payloads they can decrypt.
 These encrypted payloads contain secrets giving read access and/or [UCANs](https://ucan.xyz) giving write access to parts of the owner's public or private file system.
 
 # 1 Exchange Keys
 
-To share information with a user that's offline we make use of asymmetric encryption. All WNFS users widely distribute a list of public 2048-bit RSA public keys - their non-exportable "exchange keys" - as `did:key:` DIDs at a well-known location: A list under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information.
+To share information with a user that's offline we make use of asymmetric encryption. All WNFS users widely distribute a list of 2048-bit RSA public keys - their non-exportable "exchange keys" - as `did:key:` DIDs at a well-known location: A list under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information.
 
 These RSA keys are used to encrypt a share payload for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
 
@@ -35,14 +35,16 @@ function computeShareLabel(senderRootDID: string, recipientExchangeDID: string, 
   return new Namefilter()
     .add(senderRootDID)
     .add(recipientExchangeDID)
-    .add(counter.toString())
+    .add(encode(counter))
     .saturate()
 }
 ```
 
+Here `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
+
 ## 2.2. Share Payload
 
-The share payload MUST be a non-empty list of CIDs to [RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1) encrypted ciphertexts.
+The share payload MUST be a non-empty list of CIDs to [RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)-encrypted ciphertexts.
 
 When decrypted, this reveals a payload of the form:
 
@@ -77,7 +79,7 @@ This content key only gives access to a single revision, in case a user wanted t
 
 # 3 Share Lookup and Discovery
 
-It's not assumed that recipients are notified over some channel about whether they received any new shares.
+It's not assumed that recipients are notified over some secondary channel when they receive new shares.
 
 Thus it is possible to scan other user's file systems for files that were shared with a given exchange key. To do this, generate share labels as described in [section Share Label](#21-share-label) starting from 0 or the last counter used for lookup until the first missing label in the private forest is hit.
 
