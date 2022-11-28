@@ -77,7 +77,7 @@ This content key only gives access to a single revision, in case a user wanted t
 
 # 3 Share Lookup and Discovery
 
-It's not assumed that recipients are notified over some channel about whether they recieved any new shares.
+It's not assumed that recipients are notified over some channel about whether they received any new shares.
 
 Thus it is possible to scan other user's file systems for files that were shared with a given exchange key. To do this, generate share labels as described in [section Share Label](#21-share-label) starting from 0 or the last counter used for lookup until the first missing label in the private forest is hit.
 
@@ -90,15 +90,3 @@ Multiple share payloads are allowed per share label.
 # 5 Share Creation Permission
 
 ## 5.1 Share as Inbox
-
-
-
-
-
-
-# TODO & thoughts
-* think through write permissions. What would UCANs look like if this were done with RSA accumulators?
-* may not need a shared counter
-* put shared in the forest? Put stuff in the rsa accumulator
-* extract .well-known/exchange/* into top level?
-* make symlinks not contain the key! Only forest label (+ inumber?)

@@ -73,6 +73,12 @@ subdirectory like directory
 superset like set
 userland
 backlink like link
+UCAN like noun
+WebCrypto
+DID like ID
+RSAES-OAEP
+varint like integer
+
 
 # rationale
 Combinatoric
