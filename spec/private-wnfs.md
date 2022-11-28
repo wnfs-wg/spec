@@ -6,7 +6,7 @@ The private file system provides granular control over read access along two dim
 
 # 1 Terminology
 
-Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer. 
+Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer.
 
 ![](./diagrams/layer_dimensions.svg)
 
@@ -15,7 +15,7 @@ Broadly speaking, there is a "decrypted" layer and an "encrypted" layer.
 - The "decrypted" layer defines the type of data you can decrypt given the correct keys. Links between blocks in this layer are references in the HAMT data structure at the "encrypted" layer.
 - The "encrypted" layer defines how all of the encrypted data blocks are organized as IPLD data. Links in this layer are CID-links.
 
-These all form graphs, where the nodes and links have different meanings per layer. The 
+These all form graphs, where the nodes and links have different meanings per layer.
 
 | Visibility | Layer | Node        | Link             |
 |------------|-------|-------------|------------------|
@@ -37,30 +37,32 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of IPLD-formatted binary blobs.
+The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
 
-All values in the Merkle HAMT MUST be sorted in binary ascending order by CID.
+All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
 ```typescript
 type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
-  
-type HAMT<K, V> = {
+
+type HAMT<L, V> = {
   structure: "hamt"
   version: "0.1.0"
-  root: SparseNode<K, V>
+  root: SparseNode<L, V>
 }
 
-type SparseNode<K, V> = [
+type SparseNode<L, V> = [
   ByteArray<2>, // Sparse Index
-  Array<Entry<K, V>> // Entries
+  Array<Entry<L, V>> // Entries
 ]
 
-type Entry<K, V>
-  = CID<CBOR<SparseNode<K, V>>> // Child node
-  | Array<[K, V]> // Leaf values
+type Entry<L, V>
+  = CID<CBOR<SparseNode<L, V>>> // Child node
+  | Bucket<L,V>
+
+type Bucket<L, V> = Array<[L, V]> // Leaf values
 ```
 
-Note that `Node<K, V>` and `Entry<K, V>` are mutually recursive.
+Note that `Node<L, V>` and `Entry<L, V>` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -72,7 +74,11 @@ A space optimization delaying the creation of additional layers until 3 collisio
 
 #### 2.1.1.3 `Entry`
 
-A multi-valued leaf node, containing a file data and write conflicts.
+An `Entry` node MUST consist of:
+* The expanded label (HAMT hash preimage)
+* The value for this label
+
+If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOULD be ciphertexts representing conflicting file system writes to that same path and revision.
 
 ## 2.2 Ciphertext Files
 
@@ -86,7 +92,7 @@ The decrypted (or "cleartext") layer is where the actual structure of the file s
 
 The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext file layer.
 
-## 3.1 Cleartext Data 
+## 3.1 Cleartext Data
 
 The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
 
@@ -136,14 +142,15 @@ type PrivateFile = {
 }
 
 type ExternalContent = {
-  ratchet: SkipRatchet 
-  count: Uint64
+  key: Key
+  blockSize: Uint64 // in bytes, at max 262132
+  blockCount: Uint64
 }
 ```
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [§3.2.3 Pointers & Keys](#323-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#323-pointers--keys) for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -167,15 +174,25 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content is separate from the header, it MUST have a unique namefilter derived from a ratchet (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [the relevant algorithm](#44-shared-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
 
-The skip ratchet counter for externalized content MUST reference the block index, not the version. The skip ratchet for the externalized blocks is generated fresh per revision, where the header maintains the temporal access. For structural sharing between revisions, decryption pointers ("flattened" derived keys) MUST be used in order to not leak non-shared chunks on that same skip ratchet.
+The block size MUST be at least 1 and at maximum $2^{18} - 12 = 262,322$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes need to be prepended to each ciphertext. It is RECOMMENDED to use the maximum block size.
+
+The block count MUST reference the number of blocks the externalized content was split into.
+
+The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
+
+NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
+
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `12 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext.
+
+If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
 ### 3.1.5 Private Directory
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See [§3.2.4 Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
+See the section for [Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
 
 ### 3.1.6 Pointers & Keys
 
@@ -284,7 +301,7 @@ Resolve the current snapshot: only resolve the current snapshot of a version. Th
 
 ### 4.3.2 Seek
 
-For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#Private-Versioning)). This requires access to the directory's revision key.
+For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's revision key.
 
 #### 4.3.2.1 Attach
 
@@ -296,7 +313,7 @@ If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs 
 
 ##### 4.3.2.1.1 Example
 
-To illustrate this mode, consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents. 
+Consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents.
 
 ![](./diagrams/attach.svg)
 
@@ -304,24 +321,22 @@ To illustrate this mode, consider the following diagram. An agent may only have 
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-[External content](#3211-externalized-content) namefilters are defined thus:
+To calculate the array of HAMT labels for [external content](#3211-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
 
-```typescript
-const segmentNames = (file) => {
-  const { bareNamefilter, content: { ratchet, count } } = file.header
-  const key = ratchet.toBytes()
-  
-  let names = []
-  for (i = 0; i < count; i++) {  
-    names[i] = bareNamefilter
-                 .addBare(sha3(key))
-                 .addBare(sha3(`${key}${i}`))
-                 .saturate()
+```ts
+function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
+  for (let i = 0; i < count; i++) {
+    yield bareName
+      .add(key)
+      .add(sha3(concat(key, encode(i))))
+      .saturate()
   }
-
-  return contentNames
 }
 ```
+
+- `concat` denotes byte array concatenation,
+- `bareName` is the bare namefilter from the private file's header,
+- `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge
 
