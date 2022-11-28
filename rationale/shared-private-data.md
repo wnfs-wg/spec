@@ -22,7 +22,7 @@ We need a way to deposit secrets for a known user non-interactively.
 
 ## Choice
 
-We've decided to use asymmetric RSA encryption ([RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)) mainly because it is possible to use non-extrcatable RSA keys in the WebCrypto API, thus keeping these keys away from potentially malicious extensions or app updates.
+We've decided to use asymmetric RSA encryption ([RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)) mainly because it is possible to use non-extractable RSA keys in the WebCrypto API, thus keeping these keys away from potentially malicious extensions or app updates.
 
 ## Alternatives Considered
 
