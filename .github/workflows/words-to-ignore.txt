@@ -79,6 +79,7 @@ DID like ID
 RSAES-OAEP
 varint like integer
 ECDH
+extractable
 
 
 # rationale
