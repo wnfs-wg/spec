@@ -11,6 +11,7 @@ Bluesky
 
 # Spec
 cleartext
+plaintext
 Cleartext
 sharding
 multimap
@@ -72,6 +73,9 @@ idempotence like omnipotence
 subdirectory like directory
 superset like set
 userland
+low-endian
+big-endian
+codec
 backlink like link
 UCAN like noun
 WebCrypto
@@ -80,7 +84,8 @@ RSAES-OAEP
 varint like integer
 ECDH
 extractable
-
+prepend like append
+preimage like image
 
 # rationale
 Combinatoric
