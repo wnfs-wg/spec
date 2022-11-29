@@ -9,8 +9,6 @@ Nodes need to be encoded as dag-cbor.
 A directory node contains a map of entry names to either symlinks or CIDs that resolve to another directory or to a file.
 
 ```typescript
-type PublicRoot = CBOR<PublicDirectory>
-
 type PublicNode
   = PublicDirectory
   | PublicFile
@@ -21,11 +19,7 @@ type PublicDirectory = {
   previous: Array<CID<CBOR<PublicDirectory>>>
   // userland:
   metadata: Metadata
-  entries: Record<string, CID<CBOR<PublicNode>> | PublicSymlink>
-}
-
-type PublicSymlink = {
-  ipns: string // e.g. alice.files.fission.name/public/<public-key>
+  entries: Record<string, CID<CBOR<PublicNode>> | Symlink>
 }
 
 type PublicFile = {
@@ -37,6 +31,8 @@ type PublicFile = {
   content: CID<IPFSUnixFSFile>
 }
 ```
+
+Symbolic links (`Symlink`s) are described in the [Symlink Specification](/spec/symlinks.md).
 
 ## Metadata
 
