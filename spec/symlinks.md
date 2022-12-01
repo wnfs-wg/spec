@@ -38,7 +38,7 @@ type PublicSymlink = {
 }
 ```
 
-Public data is symlinked via a list of utf8 path segment strings.
+Public data is symlinked via a list of [UTF-8](https://www.rfc-editor.org/rfc/rfc3629) path segment strings.
 
 If the symlink is not linking relative to the same file system, it can provide a `root` parameter: An [`ipns://` URI](https://github.com/ipfs/in-web-browsers/blob/master/ADDRESSING.md) to the public root that the path is relative to.
 

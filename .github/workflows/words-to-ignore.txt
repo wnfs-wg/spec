@@ -79,6 +79,8 @@ codec
 backlink like link
 prepend like append
 preimage like image
+UTF
+URI
 
 # rationale
 Combinatoric
