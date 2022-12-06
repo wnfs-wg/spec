@@ -11,7 +11,7 @@ These encrypted payloads contain secrets giving read access and/or [UCANs](https
 
 To share information with a user that's offline we make use of asymmetric encryption. All WNFS users widely distribute a list of 2048-bit RSA public keys - their non-exportable "exchange keys" - as `did:key:` DIDs at a well-known location: A list under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information.
 
-These RSA keys are used to encrypt a share payload for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
+These RSA keys are used to encrypt a [share payload](/spec/shared-private-data.md#22-share-payload) for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
 
 Allowing multiple exchange keys per WNFS enables multiple recipient devices to receive a share without having to transfer exchange keys between devices.
 
@@ -21,7 +21,7 @@ Shared private data payloads are stored in the [Private Forest](/spec/private-wn
 
 ## 2.1 Share Label
 
-Shares are labeled in the private forest by a namefilter consisting of:
+Shares are labeled in the private forest by a [namefilter](/spec/namefilter.md) consisting of:
 - The sender's root DID. In most cases this will be the file system owner's root DID.
 - The recipient's exchange DID
 - A counter, which is incremented each time the sender creates a share.
