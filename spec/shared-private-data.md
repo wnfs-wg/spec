@@ -32,8 +32,8 @@ The exchange key partition is a link to a [public directory](/spec/public-wnfs.m
 
 Exchange keys are grouped by device, such that a sender only needs to choose *one* of the available keys for each device. For example, senders that support protocol version 1 and 2 look through all recipient's devices and select either a single version 2 exchange key or, if no such key is present, a version 1 key from each device.
 
-These keys are grouped as a directory with a unique name per device. It is RECOMMENDED to use a [base64url](https://www.rfc-editor.org/rfc/rfc4648#section-5)-encoded 32-byte nonce, as that does not leak any information about the device and is sufficiently collision-resistant.
-In the future, implementations MAY choose to use a meaningful identifier instead, so implementations MUST NOT assume the directory name is a base64url-encoded 32-byte nonce.
+These keys are grouped as a directory with a unique name per device. It is RECOMMENDED to use a [base64URL](https://www.rfc-editor.org/rfc/rfc4648#section-5)-encoded 32-byte nonce, as that does not leak any information about the device and is sufficiently collision-resistant.
+In the future, implementations MAY choose to use a meaningful identifier instead, so implementations SHOULD be lenient with directory names.
 
 See the [example exchange partition layout](#exchange-partition-layout) for examples.
 
@@ -41,7 +41,7 @@ See the [example exchange partition layout](#exchange-partition-layout) for exam
 
 Individual device exchange keys are versioned. The protocol version is derived from the file name. Protocol version 1 exchange keys are named `v1.exchangekey`.
 
-The file's content is 256 bytes of the exchange key's RSA public modulus encoded as lower-endian unsigned integer.
+The file's content is 256 bytes of the exchange key's RSA public modulus encoded as low-endian unsigned integer.
 
 See the [test vectors](#exchange-key-test-vectors) for examples.
 

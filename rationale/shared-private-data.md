@@ -40,4 +40,4 @@ It also complicates looking up deposited messages for receivers, since they need
 
 In contrast to RSAES-OAEP, this is a padding-less encryption scheme, which makes implementations easier and is supposedly faster.
 
-However, as browsers are one of our target environments and only RSA-OAEP is currently widely supported in WebCrypto, we can't use RSA KEM-DEM.
+However, as browsers are one of our target environments and only RSAES-OAEP is currently widely supported in WebCrypto, we can't use RSA KEM-DEM.

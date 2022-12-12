@@ -81,6 +81,7 @@ UCAN like noun
 WebCrypto
 DID like ID
 RSAES-OAEP
+KEM-DEM
 varint like integer
 ECDH
 extractable
