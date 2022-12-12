@@ -26,10 +26,18 @@ We've decided to use asymmetric RSA encryption ([RSAES-OAEP](https://datatracker
 
 ## Alternatives Considered
 
-ECDH. The advantages ought to be:
+### ECDH
+
+The advantages ought to be:
 - Authentication of the sender
 - Smaller key sizes
 
 We don't need authentication for shared private files, as that's already covered by file system modification authorization systems outside WNFS (e.g. through UCANs).
 
 It also complicates looking up deposited messages for receivers, since they need to go through all combinations of sender & receiver public keys.
+
+### [RSA KEM-DEM](https://www.rfc-editor.org/rfc/rfc5990.html#appendix-A)
+
+In contrast to RSAES-OAEP, this is a padding-less encryption scheme, which makes implementations easier and is supposedly faster.
+
+However, as browsers are one of our target environments and only RSA-OAEP is currently widely supported in WebCrypto, we can't use RSA KEM-DEM.
