@@ -2,9 +2,9 @@
 
 # 0 Abstract
 
-There are several cases where we need to exchange private data asynchronously when the other party may be offline.
-The shared private data extension allows a file system's owner to deposit asymmetrically encrypted messages so they can be picked up by the recipient when they come online.
-A recipient will then periodically - or after being prompted - scan the sender's private forest for payloads they can decrypt.
+There are several cases where users want to exchange private data asynchronously when the other party may be offline. In such cases we can make use of [store-and-forward networks](https://en.wikipedia.org/wiki/Store_and_forward) to deposit data for later retrieval.
+The shared private data extension allows a file system's owner to deposit asymmetrically encrypted messages so they can be picked up by recipients when they come online.
+Recipients can periodically - or after being prompted - scan the sender's private forest for payloads they can decrypt, for example by looking for updates in file systems from a contact list, or by being sent a message pointing to the share payload over an out-of-bounds secure channel.
 These encrypted payloads contain secrets giving read access and/or [UCANs](https://ucan.xyz) giving write access to parts of the owner's public or private file system.
 
 # 1 Protocol Versions
