@@ -41,3 +41,5 @@ It also complicates looking up deposited messages for receivers, since they need
 In contrast to RSAES-OAEP, this is a padding-less encryption scheme, which makes implementations easier and is supposedly faster.
 
 However, as browsers are one of our target environments and only RSAES-OAEP is currently widely supported in WebCrypto, we can't use RSA KEM-DEM.
+
+Should browsers widely support e.g. X25519-based ECDH, we're happy to start working on a new protocol version based on such keys.
