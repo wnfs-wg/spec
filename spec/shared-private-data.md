@@ -22,7 +22,7 @@ The method for encryption MUST be RSAES-OAEP.
 
 To share information with a user who is offline we make use of asymmetric encryption. All WNFS users widely distribute a list of public keys - their non-exportable "exchange public keys" at a well-known location: A map under `exchange` at the root of WNFS next to `public` and `private`. See [the rationale](/rationale/shared-private-data.md#exchange-key-location) for more information.
 
-These keys are used to encrypt a [share payload](/spec/shared-private-data.md#22-share-payload) for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
+These keys are used to encrypt a [share payload](#32-share-payload) for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
 
 Allowing multiple exchange keys per WNFS enables multiple recipient devices to receive a share without having to transfer exchange keys between devices.
 
@@ -121,7 +121,7 @@ This content key only gives access to a single revision, in case a user wanted t
 
 It's not assumed that recipients are notified over some secondary channel when they receive new shares.
 
-Thus it is possible to scan other user's file systems for files that were shared with a given exchange key. To do this, generate share labels as described in [section Share Label](#21-share-label) starting from 0 or the last counter used for lookup until the first missing label in the private forest is hit.
+Thus it is possible to scan other user's file systems for files that were shared with a given exchange key. To do this, generate share labels as described in [section Share Label](#31-share-label) starting from 0 or the last counter used for lookup until the first missing label in the private forest is hit.
 
 # 5 Concurrent Share Creation
 
