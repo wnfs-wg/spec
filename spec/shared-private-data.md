@@ -82,11 +82,9 @@ The `recipientExchangeKey` are the recipient device's exchange key bytes, includ
 
 The share payload MUST be a non-empty list of CIDs to [RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)-encrypted ciphertexts.
 
-When decrypted, this reveals a payload of the form:
+The decrypted payload MUST be represented as a [multicodec](https://github.com/multiformats/multicodec/) in the form:
 
 `<unsigned varint prefix><32 byte private forest label><32 byte AES key>`
-
-This is a [multicodec](https://github.com/multiformats/multicodec/).
 
 As exchange keys are 2048 bit and can thus encrypt only up to 190 bits of data, the [unsigned varint](https://github.com/multiformats/unsigned-varint) prefix MUST be smaller than $190 - 32 \cdot 2 = 126$ bytes.
 
