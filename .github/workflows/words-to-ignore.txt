@@ -60,6 +60,7 @@ inline like outline
 IPFS like ABC
 symlink like link
 AES
+GCM
 CBOR like ABC
 distinguishability
 bitarray like array
