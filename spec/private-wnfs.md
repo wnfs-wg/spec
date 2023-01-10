@@ -25,7 +25,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -62,7 +62,7 @@ type Entry<L, V>
 type Bucket<L, V> = Array<[L, V]> // Leaf values
 ```
 
-Note that `Node<L, V>` and `Entry<L, V>` are mutually recursive.
+Note that `SparseNode<L, V>` and `Entry<L, V>` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -82,7 +82,7 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
 
 ![](./diagrams/hamt_leaves.svg)
 
@@ -176,7 +176,7 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
 
-The block size MUST be at least 1 and at maximum $2^{18} - 12 = 262,322$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes need to be prepended to each ciphertext. It is RECOMMENDED to use the maximum block size.
+The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size.
 
 The block count MUST reference the number of blocks the externalized content was split into.
 
@@ -184,7 +184,7 @@ The externalized content's `key` MUST be regenerated randomly whenever the file 
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `12 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
@@ -235,7 +235,7 @@ Special attention should be paid to the relationship of the skip ratchet to cont
 
 ### 3.1.7.2 Revision Key Structure
 
-A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the content key for the current node
