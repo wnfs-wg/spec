@@ -94,7 +94,7 @@ The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext 
 
 ## 3.1 Cleartext Data
 
-The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
+The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip-ratchet.md).
 
 ```typescript
 type Namefilter = ByteArray<256>
@@ -150,7 +150,7 @@ type ExternalContent = {
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#323-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#316-pointers--keys) for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -174,7 +174,7 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
 
 The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size.
 
@@ -192,7 +192,7 @@ If any externalized content blocks exceed the specified `blockSize` or are missi
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See the section for [Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
+See the section for [Read Hierarchy](#317-read-hierarchy) for more information about the link structure.
 
 ### 3.1.6 Pointers & Keys
 
@@ -206,7 +206,7 @@ revision keys MUST be derived from the skip ratchet for that node, incremented t
 
 #### 3.1.6.2 Content Key
 
-Content keys MUST be derived from the [Revision Key](#3231-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+Content keys MUST be derived from the [Revision Key](#3161-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
 
 ### 3.1.7 Read Hierarchy
 
@@ -222,7 +222,7 @@ Note that holding the decryption pointer to this particular directory MUST NOT g
 
 ### 3.1.7.1 Temporal Hierarchy
 
-Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#317-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
@@ -321,7 +321,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-To calculate the array of HAMT labels for [external content](#3211-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
