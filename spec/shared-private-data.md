@@ -24,7 +24,7 @@ To share information with a user who is offline we make use of asymmetric encryp
 
 These keys are used to encrypt a [share payload](#32-share-payload) for a recipient. This share payload contains a pointer to a private node and the symmetric key to decrypt it.
 
-Allowing multiple exchange keys per WNFS enables multiple recipient devices to receive a share without having to transfer exchange keys between devices.
+Allowing multiple exchange keys per WNFS enables multiple recipient devices to receive a share without having to transfer exchange keys between devices. This enables exchange keys to be stored as non-extractable keys in device enclaves for safety.
 
 ## 2.1 Layout
 
