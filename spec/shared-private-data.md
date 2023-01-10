@@ -28,7 +28,7 @@ Allowing multiple exchange keys per WNFS enables multiple recipient devices to r
 
 ## 2.1 Layout
 
-The exchange key partition is a link to a [public directory](/spec/public-wnfs.md). This directory contains a set of further directories with exchange keys within.
+The exchange key partition is structured as a [public directory](/spec/public-wnfs.md) under its own top-level link. This directory contains further directories containing exchange keys.
 
 Exchange keys are grouped by device, such that a sender only needs to choose *one* of the available keys for each device. For example, senders that support protocol version 1 and 2 look through all recipient's devices and select either a single version 2 exchange key or, if no such key is present, a version 1 key from each device.
 
