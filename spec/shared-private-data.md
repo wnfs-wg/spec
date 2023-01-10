@@ -62,7 +62,7 @@ Shares are labeled in the private forest by a [namefilter](/spec/namefilter.md) 
 
 The counter MUST be a 0-based natural number.
 
-The namefilter for a share is computed like this:
+The namefilter for a share MUST be computed as follows:
 
 ```ts
 function computeShareLabel(senderRootDID: string, recipientExchangeKey: ByteString, counter: number) {
