@@ -33,7 +33,7 @@ The encrypted layer is intended to hide as much information as possible, while s
 
 At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16[^1], and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
@@ -358,7 +358,7 @@ function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<N
 `merge : Array<PrivateForest> -> PrivateForest`
 
 
-The private forest forms a join-semilattice via the `merge` ($\land$) operation. `merge` is thus:
+The private forest forms a join-semilattice via the `merge` ( $\land$ ) operation. `merge` is thus:
 - [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
 - [Commutative](https://en.wikipedia.org/wiki/Commutative_property): $a \land b = b \land a$
 - [Idempotent](https://en.wikipedia.org/wiki/Idempotence): $a \land a = a$
@@ -379,4 +379,3 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 
 The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
- [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.
