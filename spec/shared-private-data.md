@@ -82,36 +82,37 @@ The `recipientExchangeKey` are the recipient device's exchange key bytes, includ
 
 The share payload MUST be a non-empty list of CIDs to [RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)-encrypted ciphertexts.
 
-The decrypted payload MUST be represented as a [multicodec](https://github.com/multiformats/multicodec/) in the form:
+The decrypted payload MUST be a CBOR-encoded object of following shape:
 
-`<unsigned varint prefix><32 byte private forest label><32 byte AES key>`
+```typescript
+type SharePayload = TemporalSharePointer | SnapshotSharePointer
 
-As exchange keys are 2048 bit and can thus encrypt only up to 190 bits of data, the [unsigned varint](https://github.com/multiformats/unsigned-varint) prefix MUST be smaller than $190 - 32 \cdot 2 = 126$ bytes.
+type TemporalSharePointer = {
+  type: "wnfs/share/temporal"
+  label: Hash<Namefilter> // 32 bytes SHA3 hash
+  revisionKey: Key // 32 bytes AES key
+}
 
-In the current specification, valid prefixes always encode into 8 bytes. This means *decrypted* share payloads will always be 72 bytes long.
+type SnapshotSharePointer = {
+  type: "wnfs/share/snapshot"
+  label: Hash<Namefilter> // 32 bytes SHA3 hash
+  contentKey: Key // 32 bytes AES key
+}
+```
 
-Share payload *ciphertexts* will always be 256 bytes long, due to the way RSAES-OAEP works.
+Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Payloads of the above format end up taking up 112 and 111 bytes respectively, so fit well within RSAES-OAEP limits.
 
-### 3.2.1 Unsigned Varint Prefix
-
-WNFS (currently) uses the [multicodec private use range](https://github.com/multiformats/multicodec/#private-use-area) for prefixing and identifying share pointers.
-
-| Prefix | Meaning | Decoded Unsigned Varint | Prefix Computation |
-|-------:|---------|-------------------------|:-------------------|
-| `0xceaec101` | Temporal Share Pointer | `0x30574e` | `varint_enc(0x300000 \| ascii_enc("WN"))` |
-| `0xcfaec101` | Snapshot Share Pointer | `0x30574d` | `varint_enc(0x300000 \| ascii_enc("WN") + 1)` |
-
-The `varint_enc` function encodes an [unsigned varint](https://github.com/multiformats/unsigned-varint).
+NB: Share payload *ciphertexts* will always be 256 bytes long, due to the way RSAES-OAEP works.
 
 ### 3.2.2. Temporal Share Pointer
 
-After the unsigned varint prefix `0xceaec101`, the temporal share pointer consists of
+The temporal share pointer consists of
 - a 32 byte private forest label used to look up the private node to decrypt in the private forest
 - a 32 byte [revision key](/spec/private-wnfs.md#3161-revision-key) to decrypt the private node and its temporal header.
 
 ### 3.2.3 Snapshot Share Pointer
 
-The snapshot share pointer works exactly like the temporal share pointer, except it is prefixed with `0xcfaec101` and instead of encoding a revision key, it encodes a [content key](/spec/private-wnfs.md#3162-content-key).
+The snapshot share pointer works exactly like the temporal share pointer, except instead of encoding a revision key, it encodes a [content key](/spec/private-wnfs.md#3162-content-key).
 
 This content key only gives access to a single revision, in case a user wanted to only share a single revision with someone else.
 
