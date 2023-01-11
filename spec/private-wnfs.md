@@ -176,7 +176,22 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
 
-The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size.
+The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
+
+```
+ 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Initialization Vector |         |
++-+-+-+-+-+-+-+-+-+-+-+-+         |
+|                                 :
+:         Encrypted Block         :
+:        (blockSize bytes)        |
+|                                 |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Authentication Tag       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
 The block count MUST reference the number of blocks the externalized content was split into.
 
