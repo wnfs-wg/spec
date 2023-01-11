@@ -9,7 +9,7 @@ Nodes need to be encoded as dag-cbor.
 A directory node contains a map of entry names to either symlinks or CIDs that resolve to another directory or to a file.
 
 ```typescript
-type PublicRoot = CBOR<PublicDirectory>
+type PublicRoot = Cbor<PublicDirectory>
 
 type PublicNode
   = PublicDirectory
@@ -18,10 +18,10 @@ type PublicNode
 type PublicDirectory = {
   type: "wnfs/pub/dir"
   version: "0.2.0"
-  previous: Array<CID<CBOR<PublicDirectory>>>
+  previous: Array<Cid<Cbor<PublicDirectory>>>
   // userland:
   metadata: Metadata
-  entries: Record<string, CID<CBOR<PublicNode>> | PublicSymlink>
+  entries: Record<string, Cid<Cbor<PublicNode>> | PublicSymlink>
 }
 
 type PublicSymlink = {
@@ -31,10 +31,10 @@ type PublicSymlink = {
 type PublicFile = {
   type: "wnfs/pub/file"
   version: "0.2.0"
-  previous: Array<CID<CBOR<PublicFile>>>
+  previous: Array<Cid<Cbor<PublicFile>>>
   // userland:
   metadata: Metadata
-  content: CID<IPFSUnixFSFile>
+  content: Cid<IPFSUnixFSFile>
 }
 ```
 
@@ -43,7 +43,7 @@ type PublicFile = {
 The metadata field MUST be a CBOR map. It is in userland, and contains arbitrary keys and values.
 
 ```ts
-type Metadata = CBOR<Record<string, DagCbor>>
+type Metadata = Cbor<Record<string, DagCbor>>
 ```
 
 ## Algorithms

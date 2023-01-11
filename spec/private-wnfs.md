@@ -42,9 +42,9 @@ The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The va
 All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
 ```typescript
-type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
+type PrivateForest = Cbor<Hamt<Namefilter, Array<Cid<ByteArray>>>>
 
-type HAMT<L, V> = {
+type Hamt<L, V> = {
   structure: "hamt"
   version: "0.1.0"
   root: SparseNode<L, V>
@@ -56,7 +56,7 @@ type SparseNode<L, V> = [
 ]
 
 type Entry<L, V>
-  = CID<CBOR<SparseNode<L, V>>> // Child node
+  = Cid<Cbor<SparseNode<L, V>>> // Child node
   | Bucket<L,V>
 
 type Bucket<L, V> = Array<[L, V]> // Leaf values
@@ -101,40 +101,43 @@ type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
 type Inumber = ByteArray<32>
 
-type PrivateNode
-  = PrivateDirectory
-  | PrivateFile
-
+// aes-gcm encrypted using deriveKey(ratchet)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   bareName: Namefilter
   inumber: Inumber // Invariant: The `inumber` is included in `bareName`
 }
 
+// aes-gcm encrypted using hash(deriveKey(parentRatchet))
+type PrivateNode
+  = PrivateDirectory
+  | PrivateFile
+
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
-  // encrypted using deriveKey(ratchet)
-  header: Encrypted<CBOR<PrivateNodeHeader>>
-  // encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous: Encrypted<CBOR<Array<CID>>>
+  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous: AesGcm<Cbor<Array<Cid>>>
 
   // USERLAND
   metadata: Metadata
   entries: Record<string, {
-    contentKey: Key // hash(deriveKey(entryRatchet))
-    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-    name: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
+    label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
     // and can be used as the key in the private partition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
+    contentKey: Key // hash(deriveKey(entryRatchet))
+    contentCid: Cid
+
+    revisionKey: AesKw<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+    revisionCid: Cid
   }>
 }
 
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
-  // encrypted using deriveKey(ratchet)
-  header: Encrypted<CBOR<PrivateNodeHeader>>
+  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous: AesGcm<Cbor<ArrayCid>>
 
   // USERLAND
   metadata: Metadata
@@ -146,6 +149,16 @@ type ExternalContent = {
   blockSize: Uint64 // in bytes, at max 262132
   blockCount: Uint64
 }
+```
+
+A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
+
+```typescript
+type PrivateForest =
+  Cbor<Hamt<
+    Namefilter,
+    Array<Cid<AesGcm<PrivateNodeHeader | PrivateNode>>>
+  >>
 ```
 
 ### 3.1.1 Node Headers
@@ -167,8 +180,6 @@ Each CID in the decrypted `previous` links MUST refer to a value from the privat
 If the `previous` links contain more than one element, then some CIDs MAY refer to CIDs of even older revisions. `previous` link CIDs MUST NOT refer to values in the private forest from newer revisions.
 
 ### 3.1.4 Private File
-
-A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
 
 Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
 
@@ -270,7 +281,7 @@ All algorithms MUST have access to a `PrivateForest` in their context.
 
 ## 4.1 Namefilter Hash Resolution
 
-`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Encrypted<PrivateNode>>)`
+`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<AesGcm<PrivateNode>>)`
 
 The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one private node.
 
@@ -336,7 +347,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so:
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {

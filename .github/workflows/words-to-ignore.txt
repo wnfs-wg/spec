@@ -61,6 +61,8 @@ IPFS like ABC
 symlink like link
 AES
 AES-GCM
+AES-KW
+AES-GCM-SIV
 CBOR like ABC
 distinguishability
 bitarray like array
