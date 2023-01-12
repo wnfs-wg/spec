@@ -34,7 +34,7 @@ AES-KW is essentially a keyed permutation function where observing the permutati
 
 TODO
 - We're using the deterministic encryption version
-- No IND-CAA2, but useful for high-entropy stuff
+- No IND-CCA2, but useful for high-entropy stuff
 
 ## `ByteArray<length>`
 
