@@ -117,7 +117,10 @@ type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
   // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous: AesGcm<Cbor<Array<Cid>>>
+  previous?: AesGcm<Cbor<{
+    header: Cid
+    contents: Array<Cid>
+  }>>
 
   // USERLAND
   metadata: Metadata
