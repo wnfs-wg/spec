@@ -82,6 +82,7 @@ codec
 backlink like link
 prepend like append
 preimage like image
+IND-CCA
 
 # rationale
 Combinatoric

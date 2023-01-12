@@ -140,7 +140,10 @@ type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
   // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous: AesGcm<Cbor<ArrayCid>>
+  previous?: AesGcm<Cbor<{
+    header: Cid
+    contents: Array<Cid>
+  }>>
 
   // USERLAND
   metadata: Metadata
