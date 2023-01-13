@@ -60,8 +60,8 @@ inline like outline
 IPFS like ABC
 symlink like link
 AES
-AES-GCM
 AES-KW
+AES-GCM
 AES-GCM-SIV
 CBOR like ABC
 distinguishability
@@ -80,6 +80,14 @@ low-endian
 big-endian
 codec
 backlink like link
+UCAN like noun
+WebCrypto
+DID like ID
+RSAES-OAEP
+KEM-DEM
+varint like integer
+ECDH
+extractable
 prepend like append
 preimage like image
 IND-CCA

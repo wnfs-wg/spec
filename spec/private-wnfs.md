@@ -234,7 +234,7 @@ Keys are always attached to pointers to some data.
 
 #### 3.1.6.1 Revision Key
 
-revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+Revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
 
 #### 3.1.6.2 Content Key
 
