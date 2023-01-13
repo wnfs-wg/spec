@@ -100,6 +100,14 @@ The cleartext data layer makes use of the pointer machine from the encrypted lay
 type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
 type Inumber = ByteArray<32>
+type PrivateBacklink = [
+  UInt, // number of revisions back
+  // encrypted(deriveKey(oldRatchet), cid) where ratchet = inc(oldRatchet, number of revisions back)
+  // i.e. the CID is encrypted with the ratchet from the revision that is linked to
+  // Also: What is encrypted should be the actual byte representation of a CID (usually 40 bytes),
+  // as opposed to the dag-cbor-encoded representation of a CID.
+  AesKw<Cid> // disambiguation CID for revision
+]
 
 // aes-gcm encrypted using deriveKey(ratchet)
 type PrivateNodeHeader = {
@@ -117,10 +125,10 @@ type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
   // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: AesGcm<Cbor<{
-    header: Cid
-    contents: Array<Cid>
-  }>>
+  previous?: {
+    header: PrivateBacklink
+    contents: Array<PrivateBacklink>
+  }
 
   // USERLAND
   metadata: Metadata
@@ -140,10 +148,10 @@ type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
   // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: AesGcm<Cbor<{
-    header: Cid
-    contents: Array<Cid>
-  }>>
+  previous?: {
+    header: PrivateBacklink
+    contents: Array<PrivateBacklink>
+  }
 
   // USERLAND
   metadata: Metadata
