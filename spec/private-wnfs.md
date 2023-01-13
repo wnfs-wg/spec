@@ -25,7 +25,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a fie system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -33,7 +33,7 @@ The encrypted layer is intended to hide as much information as possible, while s
 
 At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16[^1], and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
@@ -62,7 +62,7 @@ type Entry<L, V>
 type Bucket<L, V> = Array<[L, V]> // Leaf values
 ```
 
-Note that `Node<L, V>` and `Entry<L, V>` are mutually recursive.
+Note that `SparseNode<L, V>` and `Entry<L, V>` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -82,7 +82,7 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
 
 ![](./diagrams/hamt_leaves.svg)
 
@@ -94,7 +94,7 @@ The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext 
 
 ## 3.1 Cleartext Data
 
-The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip.ratchet.md).
+The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip-ratchet.md).
 
 ```typescript
 type Namefilter = ByteArray<256>
@@ -150,7 +150,7 @@ type ExternalContent = {
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#323-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#316-pointers--keys) for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -174,9 +174,24 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-shared-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
 
-The block size MUST be at least 1 and at maximum $2^{18} - 12 = 262,322$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes need to be prepended to each ciphertext. It is RECOMMENDED to use the maximum block size.
+The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
+
+```
+ 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6  (bytes)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Initialization Vector |         |
++-+-+-+-+-+-+-+-+-+-+-+-+         |
+|                                 :
+:         Encrypted Block         :
+:        (blockSize bytes)        |
+|                                 |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Authentication Tag       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
 The block count MUST reference the number of blocks the externalized content was split into.
 
@@ -184,7 +199,7 @@ The externalized content's `key` MUST be regenerated randomly whenever the file 
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `12 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
@@ -192,7 +207,7 @@ If any externalized content blocks exceed the specified `blockSize` or are missi
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See the section for [Read Hierarchy](#324-read-hierarchy) for more information about the link structure.
+See the section for [Read Hierarchy](#317-read-hierarchy) for more information about the link structure.
 
 ### 3.1.6 Pointers & Keys
 
@@ -206,7 +221,7 @@ Revision keys MUST be derived from the skip ratchet for that node, incremented t
 
 #### 3.1.6.2 Content Key
 
-Content keys MUST be derived from the [Revision Key](#3231-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+Content keys MUST be derived from the [Revision Key](#3161-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
 
 ### 3.1.7 Read Hierarchy
 
@@ -222,7 +237,7 @@ Note that holding the decryption pointer to this particular directory MUST NOT g
 
 ### 3.1.7.1 Temporal Hierarchy
 
-Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#324-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#317-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
 Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
@@ -235,7 +250,7 @@ Special attention should be paid to the relationship of the skip ratchet to cont
 
 ### 3.1.7.2 Revision Key Structure
 
-A viewing agent may be able to view more than a single revisions of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the content key for the current node
@@ -321,7 +336,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-To calculate the array of HAMT labels for [external content](#3211-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
@@ -343,7 +358,7 @@ function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<N
 `merge : Array<PrivateForest> -> PrivateForest`
 
 
-The private forest forms a join-semilattice via the `merge` ($\land$) operation. `merge` is thus:
+The private forest forms a join-semilattice via the `merge` ( $\land$ ) operation. `merge` is thus:
 - [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
 - [Commutative](https://en.wikipedia.org/wiki/Commutative_property): $a \land b = b \land a$
 - [Idempotent](https://en.wikipedia.org/wiki/Idempotence): $a \land a = a$
@@ -364,4 +379,3 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 
 The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
- [^1]: See [`rationale/hamt.md`](/rationale/hamt.md) for more information.
