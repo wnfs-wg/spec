@@ -30,11 +30,15 @@ This represents a ciphertext that decrypts to given data type `Data`.
 The encryption/decryption algorithm used is [AES-KW](https://csrc.nist.gov/publications/detail/sp/800-38f/final) with 256-bit keys.
 AES-KW is essentially a keyed permutation function where observing the permutation doesn't reveal information about the key used. It doesn't provide [IND-CCA2](https://en.wikipedia.org/wiki/Ciphertext_indistinguishability), so shouldn't be used for encrypting user-provided data. Instead,we use it for encrypting uniformly random data: cryptographic keys.
 
-## `AesGcmSiv<Data>`
+## `AesGcmDet<Data>`
 
-TODO
-- We're using the deterministic encryption version
-- No IND-CCA2, but useful for high-entropy stuff
+Short for "AES-GCM deterministic".
+
+This represents a ciphertext that decrypts to given data type `Data`.
+The encryption/decryption algorithm used is [AES-GCM-SIV](https://datatracker.ietf.org/doc/html/rfc8452) with 256-bit keys.
+However, to achieve deterministic encryption, we intentionally re-use the nonce `wnfs det enc` (12 ascii bytes). This nonce MUST NOT prepended to the ciphertexts, but is assumed from context.
+
+These ciphertexts are not secure under attacks like IND-CCA, so in this specification we're careful to make sure that it is never used to encrypt data that can be arbitrarily chosen.
 
 ## `ByteArray<length>`
 

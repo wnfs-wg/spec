@@ -109,7 +109,7 @@ type PrivateBacklink = [
   AesKw<Cid> // disambiguation CID for revision
 ]
 
-// aes-gcm encrypted using deriveKey(ratchet)
+// deterministically encrypted using deriveKey(ratchet) (see AesGcmDet in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   bareName: Namefilter
@@ -171,7 +171,7 @@ A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode`
 type PrivateForest =
   Cbor<Hamt<
     Namefilter,
-    Array<Cid<AesGcm<PrivateNodeHeader | PrivateNode>>>
+    Array<Cid<AesGcmDet<PrivateNodeHeader> | AesGcm<PrivateNode>>>
   >>
 ```
 
