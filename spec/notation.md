@@ -32,7 +32,7 @@ AES-KW and AES-KWP are can be thought of as keyed permutation functions where ob
 
 In contrast to AES-KW, AES-KWP allows encrypting messages that are not multiples of 8 bytes by adding padding.
 
-In this specification we use AES-KW for encrypting random AES keys and AES-KWP for encrypting private node headers containing the inumber, namefilter and skip ratchet.
+In this specification we use AES-KW for encrypting random AES keys and AES-KWP for encrypting private node headers containing the `inumber`, namefilter and skip ratchet.
 
 ## `ByteArray<length>`
 
