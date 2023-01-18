@@ -171,7 +171,7 @@ A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode`
 type PrivateForest =
   Cbor<Hamt<
     Namefilter,
-    Array<Cid<AesGcmDet<PrivateNodeHeader> | AesGcm<PrivateNode>>>
+    Array<Cid<AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>>>
   >>
 ```
 

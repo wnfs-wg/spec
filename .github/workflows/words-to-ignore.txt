@@ -61,6 +61,7 @@ IPFS like ABC
 symlink like link
 AES
 AES-KW
+AES-KWP
 AES-GCM
 AES-GCM-SIV
 CBOR like ABC
