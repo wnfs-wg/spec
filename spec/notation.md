@@ -24,15 +24,12 @@ The *actual* representation of `Cid` is meant to be a byte representation for CI
 This represents a ciphertext that's marked with the data type `Data` that it needs to decrypt to. For example `AesGcm<Ratchet>` represents a byte string that would decrypt to a value of type `Ratchet` using [AES-GCM](https://csrc.nist.gov/publications/detail/sp/800-38d/final) with 256-bit keys.
 The ciphertexts produced by `AesGcm<>` have a 12 byte initialization vector prepended and the 16 byte authentication tag appended.
 
-## `AesKw<Data>` and `AesKwp<Data>`
+## `AesKwp<Data>`
 
 This represents a ciphertext that decrypts to given data type `Data`.
-The encryption/decryption algorithm used is [AES-KW](https://csrc.nist.gov/publications/detail/sp/800-38f/final) with 256-bit keys.
-AES-KW and AES-KWP are can be thought of as keyed permutation functions where observing the permutation doesn't reveal information about the key used. It doesn't provide [IND-CCA2](https://en.wikipedia.org/wiki/Ciphertext_indistinguishability), so must only be only be used in cases where detecting two same-key and same-message ciphertexts is not a security concern.
-
-In contrast to AES-KW, AES-KWP allows encrypting messages that are not multiples of 8 bytes by adding padding.
-
-In this specification we use AES-KW for encrypting random AES keys and AES-KWP for encrypting private node headers containing the `inumber`, namefilter and skip ratchet.
+The encryption/decryption algorithm used is [AES-KWP](https://www.rfc-editor.org/rfc/rfc5649) with 256-bit keys.
+AES-KWP can be thought of as keyed permutation function where observing the permutation doesn't reveal information about the key used, together with an 8-byte authentication tag. It doesn't provide [IND-CCA2](https://en.wikipedia.org/wiki/Ciphertext_indistinguishability), so must only be only be used in cases where detecting two same-key and same-message ciphertexts is not a security concern.
+In this specification we use AES-KWP for encrypting random AES keys and private node headers containing the `inumber`, namefilter and skip ratchet.
 
 ## `ByteArray<length>`
 

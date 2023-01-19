@@ -106,7 +106,7 @@ type PrivateBacklink = [
   // i.e. the CID is encrypted with the ratchet from the revision that is linked to
   // Also: What is encrypted should be the actual byte representation of a CID (usually 40 bytes),
   // as opposed to the dag-cbor-encoded representation of a CID.
-  AesKw<Cid> // disambiguation CID for revision
+  AesKwp<Cid> // disambiguation CID for revision
 ]
 
 // deterministically encrypted using deriveKey(ratchet) (see AesGcmDet in notation.md)
@@ -139,7 +139,7 @@ type PrivateDirectory = {
     contentKey: Key // hash(deriveKey(entryRatchet))
     contentCid: Cid
 
-    revisionKey: AesKw<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+    revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
     revisionCid: Cid
   }>
 }
