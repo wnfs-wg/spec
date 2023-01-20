@@ -33,7 +33,9 @@ The encrypted layer is intended to hide as much information as possible, while s
 
 At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
+
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
