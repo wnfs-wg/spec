@@ -86,7 +86,7 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
 
-![](./diagrams/hamt_leaves.svg)
+![](./diagrams/hamt_leaves.png)
 
 # 3 Decrypted
 
