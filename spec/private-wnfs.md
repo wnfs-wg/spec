@@ -240,7 +240,7 @@ See the section for [Read Hierarchy](#317-read-hierarchy) for more information a
 
 Keys are always attached to pointers to some data.
 
-![](./diagrams/decryption_pointer.png)
+<img src="./diagrams/decryption_pointer.png" width="400">
 
 #### 3.1.6.1 Revision Key
 
