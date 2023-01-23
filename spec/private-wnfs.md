@@ -207,17 +207,17 @@ The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, 
 
 ```
  0                   1
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6  (bytes)
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Initialization Vector |         |
-+-+-+-+-+-+-+-+-+-+-+-+-+         |
-|                                 :
-:         Encrypted Block         :
-:        (blockSize bytes)        |
-|                                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|        Authentication Tag       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5  (bytes)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Initialization Vector |       |
++-+-+-+-+-+-+-+-+-+-+-+-+       |
+|                               :
+:         Encrypted Block       :
+:        (blockSize bytes)      |
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Authentication Tag     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 The block count MUST reference the number of blocks the externalized content was split into.
