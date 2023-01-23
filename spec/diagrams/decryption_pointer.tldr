@@ -1,0 +1,250 @@
+{
+  "document": {
+    "id": "doc",
+    "name": "New Document",
+    "version": 15.5,
+    "pages": {
+      "page": {
+        "id": "page",
+        "name": "decryption_pointer",
+        "childIndex": 1,
+        "shapes": {
+          "4aa65d02-8095-4b31-2fed-02d7780b976e": {
+            "id": "4aa65d02-8095-4b31-2fed-02d7780b976e",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 1,
+            "point": [
+              352,
+              312
+            ],
+            "size": [
+              432,
+              456
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "559c26a7-730f-46e0-0db1-0211fbcb079e": {
+            "id": "559c26a7-730f-46e0-0db1-0211fbcb079e",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 2,
+            "point": [
+              392,
+              352
+            ],
+            "rotation": 0,
+            "text": "Hashed Namefilter",
+            "style": {
+              "color": "green",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "85fc0fe5-e90c-4b43-3585-d887965aff40": {
+            "id": "85fc0fe5-e90c-4b43-3585-d887965aff40",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 3,
+            "point": [
+              392,
+              504
+            ],
+            "rotation": 0,
+            "text": "Content Key",
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "900f2d0d-2486-4970-0ea6-22e32f9cdd40": {
+            "id": "900f2d0d-2486-4970-0ea6-22e32f9cdd40",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 4,
+            "point": [
+              392,
+              664
+            ],
+            "rotation": 0,
+            "text": "Revision Key",
+            "style": {
+              "color": "indigo",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "ad0866ba-0a76-4462-1018-4a9c598594c4": {
+            "id": "ad0866ba-0a76-4462-1018-4a9c598594c4",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 5,
+            "point": [
+              392,
+              448
+            ],
+            "rotation": 0,
+            "text": "Content CID",
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "eb5ac555-5532-4a92-19ff-e793db0ba952": {
+            "id": "eb5ac555-5532-4a92-19ff-e793db0ba952",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 6,
+            "point": [
+              392,
+              600
+            ],
+            "rotation": 0,
+            "text": "Revision CID",
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "96a30326-98d2-4cbb-047e-b1d9b56fff4f": {
+            "id": "96a30326-98d2-4cbb-047e-b1d9b56fff4f",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 7,
+            "point": [
+              384,
+              656
+            ],
+            "size": [
+              264,
+              72
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "indigo",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "77b9412f-8b0c-4b96-22e8-439058d5605f": {
+            "id": "77b9412f-8b0c-4b96-22e8-439058d5605f",
+            "type": "ellipse",
+            "name": "Ellipse",
+            "parentId": "page",
+            "childIndex": 8,
+            "point": [
+              864,
+              320
+            ],
+            "radius": [
+              32,
+              32
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "indigo",
+              "size": "medium",
+              "isFilled": true,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "b06719ac-bebf-41d3-3032-3dd74f779d69": {
+            "id": "b06719ac-bebf-41d3-3032-3dd74f779d69",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 9,
+            "point": [
+              960,
+              320
+            ],
+            "rotation": 0,
+            "text": "AES-KWP encrypted",
+            "style": {
+              "color": "indigo",
+              "size": "medium",
+              "isFilled": true,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          }
+        },
+        "bindings": {}
+      }
+    },
+    "pageStates": {
+      "page": {
+        "id": "page",
+        "selectedIds": [],
+        "camera": {
+          "point": [
+            0,
+            0
+          ],
+          "zoom": 1
+        }
+      }
+    },
+    "assets": {}
+  },
+  "assets": {}
+}
