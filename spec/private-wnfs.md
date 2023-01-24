@@ -239,12 +239,15 @@ See the section for [Read Hierarchy](#317-read-hierarchy) for more information a
 ### 3.1.6 Pointers & Keys
 
 Keys are always attached to pointers to some data.
+The pointer to that that data consists of the hashed namefilter, which is used as the label for a multivalue in the private forest and an accompanying CID to disambiguate which value in the multivalue is actually referred to.
 
 <img src="./diagrams/decryption_pointer.png" width="400">
 
 #### 3.1.6.1 Revision Key
 
 Revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+
+When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's revision key. This prevents readers with only a content key from gaining revision read access.
 
 #### 3.1.6.2 Content Key
 
@@ -285,7 +288,7 @@ The skip ratchet is the single source of truth for generating the decryption key
 * Access to decryption pointers to all child nodes
 * Access to the skip ratchets for all child nodes
 
-![](./diagrams/node_key_layout.svg)
+<img src="./diagrams/node_key_layout.png" width="600">
 
 ## 3.2 Cleartext Files
 
@@ -297,9 +300,9 @@ All algorithms MUST have access to a `PrivateForest` in their context.
 
 ## 4.1 Namefilter Hash Resolution
 
-`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<AesGcm<PrivateNode>>)`
+`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Cid>)`
 
-The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one private node.
+The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one CID that points to encrypted private node headers or private nodes.
 
 Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
@@ -383,7 +386,6 @@ function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<N
 ## 4.5 Merge
 
 `merge : Array<PrivateForest> -> PrivateForest`
-
 
 The private forest forms a join-semilattice via the `merge` ( $\land$ ) operation. `merge` is thus:
 - [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $

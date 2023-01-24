@@ -16,11 +16,11 @@
             "parentId": "page",
             "childIndex": 1,
             "point": [
-              352,
-              312
+              1355.93,
+              704
             ],
             "size": [
-              432,
+              452.07,
               456
             ],
             "rotation": 0,
@@ -44,8 +44,8 @@
             "parentId": "page",
             "childIndex": 2,
             "point": [
-              392,
-              352
+              1408,
+              736
             ],
             "rotation": 0,
             "text": "Hashed Namefilter",
@@ -66,8 +66,8 @@
             "parentId": "page",
             "childIndex": 3,
             "point": [
-              392,
-              504
+              1408,
+              896
             ],
             "rotation": 0,
             "text": "Content Key",
@@ -88,13 +88,13 @@
             "parentId": "page",
             "childIndex": 4,
             "point": [
-              392,
-              664
+              1408,
+              1056
             ],
             "rotation": 0,
             "text": "Revision Key",
             "style": {
-              "color": "indigo",
+              "color": "orange",
               "size": "medium",
               "isFilled": false,
               "dash": "solid",
@@ -110,8 +110,8 @@
             "parentId": "page",
             "childIndex": 5,
             "point": [
-              392,
-              448
+              1408,
+              832
             ],
             "rotation": 0,
             "text": "Content CID",
@@ -132,8 +132,8 @@
             "parentId": "page",
             "childIndex": 6,
             "point": [
-              392,
-              600
+              1408,
+              992
             ],
             "rotation": 0,
             "text": "Revision CID",
@@ -154,8 +154,8 @@
             "parentId": "page",
             "childIndex": 7,
             "point": [
-              384,
-              656
+              1403.51,
+              1051.23
             ],
             "size": [
               264,
@@ -163,7 +163,7 @@
             ],
             "rotation": 0,
             "style": {
-              "color": "indigo",
+              "color": "orange",
               "size": "medium",
               "isFilled": false,
               "dash": "solid",
@@ -180,11 +180,11 @@
             "id": "77b9412f-8b0c-4b96-22e8-439058d5605f",
             "type": "ellipse",
             "name": "Ellipse",
-            "parentId": "page",
-            "childIndex": 8,
+            "parentId": "8344cc8a-8a66-4f35-2313-a8c340cef347",
+            "childIndex": 1,
             "point": [
-              864,
-              320
+              975.11,
+              1322.42
             ],
             "radius": [
               32,
@@ -192,7 +192,7 @@
             ],
             "rotation": 0,
             "style": {
-              "color": "indigo",
+              "color": "orange",
               "size": "medium",
               "isFilled": true,
               "dash": "solid",
@@ -209,16 +209,800 @@
             "id": "b06719ac-bebf-41d3-3032-3dd74f779d69",
             "type": "text",
             "name": "Text",
-            "parentId": "page",
-            "childIndex": 9,
+            "parentId": "8344cc8a-8a66-4f35-2313-a8c340cef347",
+            "childIndex": 2,
             "point": [
-              960,
-              320
+              1071.11,
+              1322.42
             ],
             "rotation": 0,
             "text": "AES-KWP encrypted",
             "style": {
-              "color": "indigo",
+              "color": "orange",
+              "size": "medium",
+              "isFilled": true,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "8344cc8a-8a66-4f35-2313-a8c340cef347": {
+            "id": "8344cc8a-8a66-4f35-2313-a8c340cef347",
+            "type": "group",
+            "name": "Group",
+            "parentId": "page",
+            "childIndex": 8,
+            "point": [
+              975.11,
+              1322.42
+            ],
+            "size": [
+              479.9999999999999,
+              64
+            ],
+            "rotation": 0,
+            "children": [
+              "77b9412f-8b0c-4b96-22e8-439058d5605f",
+              "b06719ac-bebf-41d3-3032-3dd74f779d69"
+            ],
+            "style": {
+              "color": "orange",
+              "size": "small",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1
+            }
+          },
+          "db78264e-e6ee-40da-13c9-5aac81aa8034": {
+            "id": "db78264e-e6ee-40da-13c9-5aac81aa8034",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 9,
+            "point": [
+              1312,
+              -448
+            ],
+            "rotation": 0,
+            "text": "PrivateForest",
+            "style": {
+              "color": "black",
+              "size": "large",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            }
+          },
+          "f154fddb-104a-49ea-28d5-c2a1869ce697": {
+            "id": "f154fddb-104a-49ea-28d5-c2a1869ce697",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 10,
+            "point": [
+              1016.38,
+              384
+            ],
+            "size": [
+              448,
+              160
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "orange",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "Private Node Header\nCiphertext",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "4019ed71-dfb0-454c-252d-c608c07efd7c": {
+            "id": "4019ed71-dfb0-454c-252d-c608c07efd7c",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 11,
+            "point": [
+              1664,
+              384
+            ],
+            "size": [
+              320,
+              160
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "violet",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "PrivateNode\nCiphertext",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "46e22418-9222-435f-3509-366655739032": {
+            "id": "46e22418-9222-435f-3509-366655739032",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 13,
+            "point": [
+              1312,
+              -320
+            ],
+            "size": [
+              544,
+              544
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "55dbb53a-c1fb-43dc-15ff-7a8402b61ab3": {
+            "id": "55dbb53a-c1fb-43dc-15ff-7a8402b61ab3",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 14,
+            "point": [
+              1376,
+              -96
+            ],
+            "size": [
+              352,
+              256
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1
+            },
+            "label": " ",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "0b8437c6-81c0-4199-2836-5ae5c9701514": {
+            "id": "0b8437c6-81c0-4199-2836-5ae5c9701514",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 15,
+            "point": [
+              1440,
+              -64
+            ],
+            "rotation": 0,
+            "text": "Multi-valued\nEntry",
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "302db415-45c7-4093-29d4-1666ae2101e0": {
+            "id": "302db415-45c7-4093-29d4-1666ae2101e0",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 16,
+            "point": [
+              1440,
+              64
+            ],
+            "rotation": 0,
+            "text": "Namefilter",
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "18df1c19-e847-45cf-2262-44ead790d98f": {
+            "id": "18df1c19-e847-45cf-2262-44ead790d98f",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 17,
+            "point": [
+              1504,
+              -288
+            ],
+            "rotation": 0,
+            "text": "Label",
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "8581bffb-7c35-4f07-2736-f46bb3ff0400": {
+            "id": "8581bffb-7c35-4f07-2736-f46bb3ff0400",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 18,
+            "point": [
+              1376,
+              -224
+            ],
+            "rotation": 0,
+            "text": "Hashed Namefilter",
+            "style": {
+              "color": "green",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "db55597c-4d38-43e2-2d1c-731b29c1e945": {
+            "id": "db55597c-4d38-43e2-2d1c-731b29c1e945",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 19,
+            "point": [
+              1300.27,
+              160
+            ],
+            "rotation": 0,
+            "bend": 0,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  155.83,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "7a8a1211-d056-42a1-37a2-017ea1dd0da7"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  0,
+                  208
+                ],
+                "canBind": true,
+                "bindingId": "9ee7efdc-fb70-4e29-2336-135e284cd2cf"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  77.92,
+                  104
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "cfb8ea88-866d-4024-01f4-86df9f26b50e": {
+            "id": "cfb8ea88-866d-4024-01f4-86df9f26b50e",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 20,
+            "point": [
+              1632.44,
+              160
+            ],
+            "rotation": 0,
+            "bend": 0,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  0,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "0925771b-cf91-4a24-20b0-5537d62e6988"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  130.73,
+                  208
+                ],
+                "canBind": true,
+                "bindingId": "43eabc42-7480-4cd5-22f3-76b60fb5a3f1"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  65.36,
+                  104
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "76c80b15-533d-4c4f-1581-13a873bd047b": {
+            "id": "76c80b15-533d-4c4f-1581-13a873bd047b",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 22,
+            "point": [
+              1549.18,
+              -166
+            ],
+            "rotation": 0,
+            "bend": 0,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  4.44,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "50ffae18-ef29-4117-3f93-68c53aaad430"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  0,
+                  54
+                ],
+                "canBind": true,
+                "bindingId": "33a69e85-0fa5-4de4-296c-bbd4924b5368"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  2.22,
+                  27
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "2885fb13-29d0-4c7c-0998-45fc51887664": {
+            "id": "2885fb13-29d0-4c7c-0998-45fc51887664",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 23,
+            "point": [
+              1760,
+              0
+            ],
+            "rotation": 0,
+            "text": "...",
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "d5c3964e-a829-4448-3c02-a0f0ab134dfe": {
+            "id": "d5c3964e-a829-4448-3c02-a0f0ab134dfe",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 24,
+            "point": [
+              1741.95,
+              -158
+            ],
+            "rotation": 0,
+            "bend": -0.99,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  31.14,
+                  928
+                ],
+                "canBind": true,
+                "bindingId": "4f1c0515-10e0-4ef7-189c-04021c1ab08d"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  0,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "df1e3eba-c67d-471d-16fb-5f01fae963b3"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  474.93,
+                  448.59
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "black",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "fb3d9d39-9a0e-4453-323b-ca842f87827a": {
+            "id": "fb3d9d39-9a0e-4453-323b-ca842f87827a",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 25,
+            "point": [
+              1685.52,
+              563.42
+            ],
+            "rotation": 0,
+            "bend": -0.7705177282117973,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  0,
+                  330.79
+                ],
+                "canBind": true,
+                "bindingId": "b549f08c-0d8f-452f-2b1b-49c8bfbc98f2"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  306.02,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "2021b301-4261-4596-0421-ca017fe68806"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  280.45,
+                  283.29
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "disambiguates\n& decrypts",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "6d3d0fe4-5304-4cf3-15e9-444bf70fbb01": {
+            "id": "6d3d0fe4-5304-4cf3-15e9-444bf70fbb01",
+            "type": "arrow",
+            "name": "Arrow",
+            "parentId": "page",
+            "childIndex": 26,
+            "point": [
+              1095.1,
+              560
+            ],
+            "rotation": 0,
+            "bend": 0.33903303918129557,
+            "handles": {
+              "start": {
+                "id": "start",
+                "index": 0,
+                "point": [
+                  302.12,
+                  507.58
+                ],
+                "canBind": true,
+                "bindingId": "deb486d9-c05b-4647-3442-dc996cf38430"
+              },
+              "end": {
+                "id": "end",
+                "index": 1,
+                "point": [
+                  3.54,
+                  0
+                ],
+                "canBind": true,
+                "bindingId": "70bb1671-0aed-42ae-1c47-2a292aedba44"
+              },
+              "bend": {
+                "id": "bend",
+                "index": 2,
+                "point": [
+                  66.79,
+                  304.4
+                ]
+              }
+            },
+            "decorations": {
+              "end": "arrow"
+            },
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "disambiguates\n& decrypts",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "e92d9454-633d-495b-0ce7-3e4d4bb0252f": {
+            "id": "e92d9454-633d-495b-0ce7-3e4d4bb0252f",
+            "type": "text",
+            "name": "Text",
+            "parentId": "page",
+            "childIndex": 27,
+            "point": [
+              1312,
+              640
+            ],
+            "rotation": 0,
+            "text": "Subdirectory Pointers & Keys",
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans",
+              "textAlign": "middle"
+            }
+          },
+          "829056d0-285f-46fb-367b-42665f2624bf": {
+            "id": "829056d0-285f-46fb-367b-42665f2624bf",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 28,
+            "point": [
+              1397.22,
+              824.39
+            ],
+            "size": [
+              288.3,
+              140.16
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "59356643-48c6-4255-014f-b7a7e0d47727": {
+            "id": "59356643-48c6-4255-014f-b7a7e0d47727",
+            "type": "rectangle",
+            "name": "Rectangle",
+            "parentId": "page",
+            "childIndex": 29,
+            "point": [
+              1397.22,
+              988.52
+            ],
+            "size": [
+              289.14,
+              140.85
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "white",
+              "size": "medium",
+              "isFilled": false,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "a789c6bc-1309-483f-3bb6-6a96a8aab84d": {
+            "id": "a789c6bc-1309-483f-3bb6-6a96a8aab84d",
+            "type": "group",
+            "name": "Group",
+            "parentId": "page",
+            "childIndex": 9,
+            "point": [
+              975.11,
+              1231.66
+            ],
+            "size": [
+              479.9999999999999,
+              64
+            ],
+            "rotation": 0,
+            "children": [
+              "46a6909e-24a8-46b0-3c3e-72b75805a2d1",
+              "d2c5b549-e650-44c0-24ab-da9a215091b9"
+            ],
+            "style": {
+              "color": "violet",
+              "size": "small",
+              "isFilled": false,
+              "dash": "draw",
+              "scale": 1
+            }
+          },
+          "46a6909e-24a8-46b0-3c3e-72b75805a2d1": {
+            "id": "46a6909e-24a8-46b0-3c3e-72b75805a2d1",
+            "type": "ellipse",
+            "name": "Ellipse",
+            "parentId": "a789c6bc-1309-483f-3bb6-6a96a8aab84d",
+            "childIndex": 2,
+            "point": [
+              975.11,
+              1231.66
+            ],
+            "radius": [
+              32,
+              32
+            ],
+            "rotation": 0,
+            "style": {
+              "color": "violet",
+              "size": "medium",
+              "isFilled": true,
+              "dash": "solid",
+              "scale": 1,
+              "font": "sans"
+            },
+            "label": "",
+            "labelPoint": [
+              0.5,
+              0.5
+            ]
+          },
+          "d2c5b549-e650-44c0-24ab-da9a215091b9": {
+            "id": "d2c5b549-e650-44c0-24ab-da9a215091b9",
+            "type": "text",
+            "name": "Text",
+            "parentId": "a789c6bc-1309-483f-3bb6-6a96a8aab84d",
+            "childIndex": 3,
+            "point": [
+              1071.11,
+              1231.66
+            ],
+            "rotation": 0,
+            "text": "AES-GCM encrypted",
+            "style": {
+              "color": "violet",
               "size": "medium",
               "isFilled": true,
               "dash": "solid",
@@ -228,7 +1012,152 @@
             }
           }
         },
-        "bindings": {}
+        "bindings": {
+          "7a8a1211-d056-42a1-37a2-017ea1dd0da7": {
+            "id": "7a8a1211-d056-42a1-37a2-017ea1dd0da7",
+            "type": "arrow",
+            "fromId": "db55597c-4d38-43e2-2d1c-731b29c1e945",
+            "toId": "55dbb53a-c1fb-43dc-15ff-7a8402b61ab3",
+            "handleId": "start",
+            "point": [
+              0.5,
+              0.5
+            ],
+            "distance": 16
+          },
+          "0925771b-cf91-4a24-20b0-5537d62e6988": {
+            "id": "0925771b-cf91-4a24-20b0-5537d62e6988",
+            "type": "arrow",
+            "fromId": "cfb8ea88-866d-4024-01f4-86df9f26b50e",
+            "toId": "55dbb53a-c1fb-43dc-15ff-7a8402b61ab3",
+            "handleId": "start",
+            "point": [
+              0.5,
+              0.5
+            ],
+            "distance": 16
+          },
+          "33a69e85-0fa5-4de4-296c-bbd4924b5368": {
+            "id": "33a69e85-0fa5-4de4-296c-bbd4924b5368",
+            "type": "arrow",
+            "fromId": "76c80b15-533d-4c4f-1581-13a873bd047b",
+            "toId": "55dbb53a-c1fb-43dc-15ff-7a8402b61ab3",
+            "handleId": "end",
+            "point": [
+              0.46,
+              0.53
+            ],
+            "distance": 16
+          },
+          "50ffae18-ef29-4117-3f93-68c53aaad430": {
+            "id": "50ffae18-ef29-4117-3f93-68c53aaad430",
+            "type": "arrow",
+            "fromId": "76c80b15-533d-4c4f-1581-13a873bd047b",
+            "toId": "8581bffb-7c35-4f07-2736-f46bb3ff0400",
+            "handleId": "start",
+            "point": [
+              0.5,
+              0.5
+            ],
+            "distance": 8
+          },
+          "9ee7efdc-fb70-4e29-2336-135e284cd2cf": {
+            "id": "9ee7efdc-fb70-4e29-2336-135e284cd2cf",
+            "type": "arrow",
+            "fromId": "db55597c-4d38-43e2-2d1c-731b29c1e945",
+            "toId": "f154fddb-104a-49ea-28d5-c2a1869ce697",
+            "handleId": "end",
+            "point": [
+              0.4,
+              0.75
+            ],
+            "distance": 16
+          },
+          "43eabc42-7480-4cd5-22f3-76b60fb5a3f1": {
+            "id": "43eabc42-7480-4cd5-22f3-76b60fb5a3f1",
+            "type": "arrow",
+            "fromId": "cfb8ea88-866d-4024-01f4-86df9f26b50e",
+            "toId": "4019ed71-dfb0-454c-252d-c608c07efd7c",
+            "handleId": "end",
+            "point": [
+              0.55,
+              0.65
+            ],
+            "distance": 16
+          },
+          "4f1c0515-10e0-4ef7-189c-04021c1ab08d": {
+            "id": "4f1c0515-10e0-4ef7-189c-04021c1ab08d",
+            "type": "arrow",
+            "fromId": "d5c3964e-a829-4448-3c02-a0f0ab134dfe",
+            "toId": "559c26a7-730f-46e0-0db1-0211fbcb079e",
+            "handleId": "start",
+            "point": [
+              0.99,
+              0.78
+            ],
+            "distance": 8
+          },
+          "df1e3eba-c67d-471d-16fb-5f01fae963b3": {
+            "id": "df1e3eba-c67d-471d-16fb-5f01fae963b3",
+            "type": "arrow",
+            "fromId": "d5c3964e-a829-4448-3c02-a0f0ab134dfe",
+            "toId": "8581bffb-7c35-4f07-2736-f46bb3ff0400",
+            "handleId": "end",
+            "point": [
+              0.99,
+              0.28
+            ],
+            "distance": 8
+          },
+          "70bb1671-0aed-42ae-1c47-2a292aedba44": {
+            "id": "70bb1671-0aed-42ae-1c47-2a292aedba44",
+            "type": "arrow",
+            "fromId": "6d3d0fe4-5304-4cf3-15e9-444bf70fbb01",
+            "toId": "f154fddb-104a-49ea-28d5-c2a1869ce697",
+            "handleId": "end",
+            "point": [
+              0.08,
+              0.47
+            ],
+            "distance": 16
+          },
+          "deb486d9-c05b-4647-3442-dc996cf38430": {
+            "id": "deb486d9-c05b-4647-3442-dc996cf38430",
+            "type": "arrow",
+            "fromId": "6d3d0fe4-5304-4cf3-15e9-444bf70fbb01",
+            "toId": "59356643-48c6-4255-014f-b7a7e0d47727",
+            "handleId": "start",
+            "point": [
+              0.11,
+              0.74
+            ],
+            "distance": 16
+          },
+          "2021b301-4261-4596-0421-ca017fe68806": {
+            "id": "2021b301-4261-4596-0421-ca017fe68806",
+            "type": "arrow",
+            "fromId": "fb3d9d39-9a0e-4453-323b-ca842f87827a",
+            "toId": "4019ed71-dfb0-454c-252d-c608c07efd7c",
+            "handleId": "end",
+            "point": [
+              0.99,
+              0.99
+            ],
+            "distance": 19.4164878389476
+          },
+          "b549f08c-0d8f-452f-2b1b-49c8bfbc98f2": {
+            "id": "b549f08c-0d8f-452f-2b1b-49c8bfbc98f2",
+            "type": "arrow",
+            "fromId": "fb3d9d39-9a0e-4453-323b-ca842f87827a",
+            "toId": "829056d0-285f-46fb-367b-42665f2624bf",
+            "handleId": "start",
+            "point": [
+              0.82,
+              0.76
+            ],
+            "distance": 16
+          }
+        }
       }
     },
     "pageStates": {
