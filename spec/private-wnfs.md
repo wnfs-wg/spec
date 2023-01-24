@@ -84,7 +84,7 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multivalued entry.
 
 <img src="./diagrams/hamt_leaves.png" width="600">
 
@@ -226,7 +226,7 @@ The externalized content's `key` MUST be regenerated randomly whenever the file 
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 

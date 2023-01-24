@@ -42,7 +42,7 @@ We chose [AES-KWP] with 256-bit keys.
 
 ### [AES-SIV]
 
-AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the content key derived from it is used with aes-gcm or the private node header is decrypted and the namefilter it implies is checked against the hamt label.
+AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the content key derived from it is used with AES-GCM or the private node header is decrypted and the namefilter it implies is checked against the HAMT label.
 
 ### [AES-KW]
 
@@ -53,7 +53,7 @@ This mode works just like AES-KWP, except it's slightly simpler due to not inclu
 
 ## Need
 
-Deterministic encryption for [`PrivateNodeHeader`](/spec/private-wnfs.md#31-cleartext-data)s. The advantage of determinstic encryption over probabilistic encryption for these headers is that replicas that write into the same revision concurrently also derive the same encrypted node headers and can thus skip exchanging them over the network, improving sync performance.
+Deterministic encryption for [`PrivateNodeHeader`](/spec/private-wnfs.md#31-cleartext-data)s. The advantage of deterministic encryption over probabilistic encryption for these headers is that replicas that write into the same revision concurrently also derive the same encrypted node headers and can thus skip exchanging them over the network, improving sync performance.
 
 ## Choice
 
@@ -63,7 +63,7 @@ We chose [AES-KWP] as it's the most widely supported authenticated deterministic
 
 ### [AES-SIV]
 
-This mode's advantage is support for associated data. However, keys need to be twice the size and we don't need associated data, since we can just check that the hamt label that is derived from the node header's contents matches its context.
+This mode's advantage is support for associated data. However, keys need to be twice the size and we don't need associated data, since we can just check that the HAMT label that is derived from the node header's contents matches its context.
 
 
 [AES-SIV]: https://www.rfc-editor.org/rfc/rfc5297

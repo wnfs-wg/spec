@@ -64,6 +64,10 @@ AES-KW
 AES-KWP
 AES-GCM
 AES-GCM-SIV
+AES-SIV
+AES-OCB
+SIV
+ChaCha
 CBOR like ABC
 distinguishability
 bitarray like array
@@ -92,6 +96,7 @@ extractable
 prepend like append
 preimage like image
 IND-CCA
+multivalue like value
 
 # rationale
 Combinatoric
