@@ -243,6 +243,8 @@ The pointer to that that data consists of the hashed namefilter, which is used a
 
 <img src="./diagrams/decryption_pointer.png" width="400">
 
+NB: This diagram shows an abstract model of how data relates to each other. Some arrows are meant to be interpreted more abstractly and don't have a concrete encoding as data. The box labeled "Subdirectory Pointers & Keys" doesn't exist on its own and is part of the [`PrivateDirectory` schema](#31-cleartext-data). For a different angle and a more concrete diagram see [Section Revision Key Structure](#3172-revision-key-structure).
+
 #### 3.1.6.1 Revision Key
 
 Revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
