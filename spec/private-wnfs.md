@@ -366,7 +366,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so:
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(concat(key, encode(i)))` for each block index `i` of external content to the `bareName` like so:
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {

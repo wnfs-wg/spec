@@ -1,10 +1,13 @@
+In this document we list what we think would be sensible alternatives to picked encryption algorithms for use-cases in WNFS. For a good resource on encryption algorithms in general, we recommend [this post](https://soatok.blog/2020/07/12/comparison-of-symmetric-encryption-methods/) and its further links.
+
+
 # File Encryption
 
 ## Need
 
 A way to encrypt [`PrivateFile` and `PrivateDirectory` blocks](/spec/private-wnfs.md#31-cleartext-data) as well as externalized file content blocks.
 
-Even though authentication is not strictly necessary, because write access should be managed via namefilter certificates instead of knowledge-of-read-key, it is beneficial to have another layer of principals writing data with write access but without read access.
+Note that authentication is not strictly necessary since write access is managed via PKI-signed certificates instead of knowledge of a secret (like a read key). However, it is useful to have another layer of authentication for principals with write (but not read) access.
 
 ## Choice
 
