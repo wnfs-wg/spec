@@ -25,7 +25,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted-layer).
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -39,32 +39,32 @@ Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multi
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
+The multimap container is based on the [IPLD HAMT specification](https://ipld.io/specs/advanced-data-layouts/hamt/spec/).
+
+It MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
 
 All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
 ```typescript
-type PrivateForest = Cbor<Hamt<Namefilter, Array<Cid<ByteArray>>>>
-
-type Hamt<L, V> = {
+type PrivateForest = Cbor<{
   structure: "hamt"
   version: "0.1.0"
-  root: SparseNode<L, V>
-}
+  root: SparseNode
+}>
 
-type SparseNode<L, V> = [
+type SparseNode = [
   ByteArray<2>, // Sparse Index
-  Array<Entry<L, V>> // Entries
+  Array<Entry> // Entries
 ]
 
-type Entry<L, V>
-  = Cid<Cbor<SparseNode<L, V>>> // Child node
-  | Bucket<L,V>
+type Entry
+  = Cid<Cbor<SparseNode>> // Child node
+  | Bucket
 
-type Bucket<L, V> = Array<[L, V]> // Leaf values
+type Bucket = Array<[Namefilter, Array<Cid>]> // Leaf values
 ```
 
-Note that `SparseNode<L, V>` and `Entry<L, V>` are mutually recursive.
+Note that `SparseNode` and `Entry` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -88,7 +88,7 @@ The encrypted file layer is a very thin enrichment of the data layer. In particu
 
 <img src="./diagrams/hamt_leaves.png" width="600">
 
-# 3 Decrypted
+# 3 Decrypted Layer
 
 The decrypted (or "cleartext") layer is where the actual structure of the file system is rediscovered out of the encrypted layer.
 
@@ -170,11 +170,9 @@ type ExternalContent = {
 A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
 
 ```typescript
-type PrivateForest =
-  Cbor<Hamt<
-    Namefilter,
-    Array<Cid<AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>>>
-  >>
+type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
+
+// PrivateForest values should be Cid<CiphertextBlock>
 ```
 
 ### 3.1.1 Node Headers
