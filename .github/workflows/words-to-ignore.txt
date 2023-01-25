@@ -98,6 +98,7 @@ prepend like append
 preimage like image
 IND-CCA
 multivalue like value
+PKI
 
 # rationale
 Combinatoric

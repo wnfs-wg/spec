@@ -7,7 +7,7 @@ In this document we list what we think would be sensible alternatives to picked 
 
 A way to encrypt [`PrivateFile` and `PrivateDirectory` blocks](/spec/private-wnfs.md#31-cleartext-data) as well as externalized file content blocks.
 
-Note that authentication is not strictly necessary since write access is managed via PKI-signed certificates instead of knowledge of a secret (like a read key). However, it is useful to have another layer of authentication for principals with write (but not read) access.
+Note that authentication is not strictly necessary since write access is managed via [PKI](https://en.wikipedia.org/wiki/Public_key_infrastructure)-signed certificates instead of knowledge of a secret (like a read key). However, it is useful to have another layer of authentication for principals with write (but not read) access.
 
 ## Choice
 
