@@ -35,7 +35,7 @@ At the encrypted data layer, the private forest is a collection of ciphertext bl
 
 We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated [namefilter](/spec/namefilter.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
