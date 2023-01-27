@@ -60,7 +60,15 @@ inline like outline
 IPFS like ABC
 symlink like link
 AES
+AES-KW
+AES-KWP
 AES-GCM
+AES-GCM-SIV
+AES-SIV
+AES-OCB
+AEAD
+SIV
+ChaCha
 CBOR like ABC
 distinguishability
 bitarray like array
@@ -88,6 +96,9 @@ ECDH
 extractable
 prepend like append
 preimage like image
+IND-CCA
+multivalue like value
+PKI
 
 # rationale
 Combinatoric

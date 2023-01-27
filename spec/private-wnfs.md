@@ -25,7 +25,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted-layer).
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -33,36 +33,38 @@ The encrypted layer is intended to hide as much information as possible, while s
 
 At the encrypted data layer, the private forest is a collection of ciphertext blocks. These blocks SHOULD be smaller than 256 kilobytes in order to comply with the default IPFS block size. Keeping block size small is also useful for reducing metadata leakage - it's less obvious what the file size distribution in the private file system is like if these files are split into blocks.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated  saturated [namefilter](/spec/namefilter.md)s as keys. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
+
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated [namefilter](/spec/namefilter.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
-The multimap container MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
+The multimap container is based on the [IPLD HAMT specification](https://ipld.io/specs/advanced-data-layouts/hamt/spec/).
+
+It MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
 
 All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
 ```typescript
-type PrivateForest = CBOR<HAMT<Namefilter, Array<CID<ByteArray>>>>
-
-type HAMT<L, V> = {
+type PrivateForest = Cbor<{
   structure: "hamt"
   version: "0.1.0"
-  root: SparseNode<L, V>
-}
+  root: SparseNode
+}>
 
-type SparseNode<L, V> = [
+type SparseNode = [
   ByteArray<2>, // Sparse Index
-  Array<Entry<L, V>> // Entries
+  Array<Entry> // Entries
 ]
 
-type Entry<L, V>
-  = CID<CBOR<SparseNode<L, V>>> // Child node
-  | Bucket<L,V>
+type Entry
+  = Cid<Cbor<SparseNode>> // Child node
+  | Bucket
 
-type Bucket<L, V> = Array<[L, V]> // Leaf values
+type Bucket = Array<[Namefilter, Array<Cid>]> // Leaf values
 ```
 
-Note that `SparseNode<L, V>` and `Entry<L, V>` are mutually recursive.
+Note that `SparseNode` and `Entry` are mutually recursive.
 
 #### 2.1.1.1 `SparseNode`
 
@@ -82,11 +84,11 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multi-valued entry.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multivalued entry.
 
-![](./diagrams/hamt_leaves.svg)
+<img src="./diagrams/hamt_leaves.png" width="600">
 
-# 3 Decrypted
+# 3 Decrypted Layer
 
 The decrypted (or "cleartext") layer is where the actual structure of the file system is rediscovered out of the encrypted layer.
 
@@ -100,41 +102,58 @@ The cleartext data layer makes use of the pointer machine from the encrypted lay
 type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
 type Inumber = ByteArray<32>
+type PrivateBacklink = [
+  UInt, // number of revisions back
+  // encrypted(deriveKey(oldRatchet), cid) where ratchet = inc(oldRatchet, number of revisions back)
+  // i.e. the CID is encrypted with the ratchet from the revision that is linked to
+  // Also: What is encrypted should be the actual byte representation of a CID (usually 40 bytes),
+  // as opposed to the dag-cbor-encoded representation of a CID.
+  AesKwp<Cid> // disambiguation CID for revision
+]
 
-type PrivateNode
-  = PrivateDirectory
-  | PrivateFile
-
+// deterministically encrypted using deriveKey(ratchet) (see AesGcmDet in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   bareName: Namefilter
   inumber: Inumber // Invariant: The `inumber` is included in `bareName`
 }
 
+// aes-gcm encrypted using hash(deriveKey(parentRatchet))
+type PrivateNode
+  = PrivateDirectory
+  | PrivateFile
+
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
-  // encrypted using deriveKey(ratchet)
-  header: Encrypted<CBOR<PrivateNodeHeader>>
-  // encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous: Encrypted<CBOR<Array<CID>>>
+  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous?: {
+    header: PrivateBacklink
+    contents: Array<PrivateBacklink>
+  }
 
   // USERLAND
   metadata: Metadata
   entries: Record<string, {
-    contentKey: Key // hash(deriveKey(entryRatchet))
-    revisionKey: Encrypted<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-    name: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
+    label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
     // and can be used as the key in the private partition HAMT to lookup
     // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
+    contentKey: Key // hash(deriveKey(entryRatchet))
+    contentCid: Cid
+
+    revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+    revisionCid: Cid
   }>
 }
 
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
-  // encrypted using deriveKey(ratchet)
-  header: Encrypted<CBOR<PrivateNodeHeader>>
+  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
+  previous?: {
+    header: PrivateBacklink
+    contents: Array<PrivateBacklink>
+  }
 
   // USERLAND
   metadata: Metadata
@@ -146,6 +165,14 @@ type ExternalContent = {
   blockSize: Uint64 // in bytes, at max 262132
   blockCount: Uint64
 }
+```
+
+A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
+
+```typescript
+type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
+
+// PrivateForest values should be Cid<CiphertextBlock>
 ```
 
 ### 3.1.1 Node Headers
@@ -168,8 +195,6 @@ If the `previous` links contain more than one element, then some CIDs MAY refer 
 
 ### 3.1.4 Private File
 
-A private file MUST contain the actual bytes that represent the file. Files MAY also contain userland metadata.
-
 Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
 
 #### 3.1.4.1 Externalized Content
@@ -180,26 +205,26 @@ The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, 
 
 ```
  0                   1
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6  (bytes)
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Initialization Vector |         |
-+-+-+-+-+-+-+-+-+-+-+-+-+         |
-|                                 :
-:         Encrypted Block         :
-:        (blockSize bytes)        |
-|                                 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|        Authentication Tag       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5  (bytes)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Initialization Vector |       |
++-+-+-+-+-+-+-+-+-+-+-+-+       |
+|                               :
+:         Encrypted Block       :
+:        (blockSize bytes)      |
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|        Authentication Tag     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-The block count MUST reference the number of blocks the externalized content was split into.
+The block count MUST reference the number of blocks the externalized content was split into. The value of `blockCount` MUST be between $1$ and $2^{32}$, for sensible security margins regarding accidental nonce reuse.
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multi-value. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
@@ -212,12 +237,17 @@ See the section for [Read Hierarchy](#317-read-hierarchy) for more information a
 ### 3.1.6 Pointers & Keys
 
 Keys are always attached to pointers to some data.
+The pointer to that that data consists of the hashed namefilter, which is used as the label for a multivalue in the private forest and an accompanying CID to disambiguate which value in the multivalue is actually referred to.
 
-![](./diagrams/decryption_pointer.svg)
+<img src="./diagrams/decryption_pointer.png" width="400">
+
+NB: This diagram shows an abstract model of how data relates to each other. Some arrows are meant to be interpreted more abstractly and don't have a concrete encoding as data. The box labeled "Subdirectory Pointers & Keys" doesn't exist on its own and is part of the [`PrivateDirectory` schema](#31-cleartext-data). For a different angle and a more concrete diagram see [Section Revision Key Structure](#3172-revision-key-structure).
 
 #### 3.1.6.1 Revision Key
 
 Revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+
+When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's revision key. This prevents readers with only a content key from gaining revision read access.
 
 #### 3.1.6.2 Content Key
 
@@ -258,7 +288,7 @@ The skip ratchet is the single source of truth for generating the decryption key
 * Access to decryption pointers to all child nodes
 * Access to the skip ratchets for all child nodes
 
-![](./diagrams/node_key_layout.svg)
+<img src="./diagrams/node_key_layout.png" width="600">
 
 ## 3.2 Cleartext Files
 
@@ -270,9 +300,9 @@ All algorithms MUST have access to a `PrivateForest` in their context.
 
 ## 4.1 Namefilter Hash Resolution
 
-`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Encrypted<PrivateNode>>)`
+`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Cid>)`
 
-The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one private node.
+The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one CID that points to encrypted private node headers or private nodes.
 
 Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
@@ -336,7 +366,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<Namefilter>`
 
-To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(key || encode(i))` for each block index `i` of external content to the `bareName` like so: 
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(concat(key, encode(i)))` for each block index `i` of external content to the `bareName` like so:
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
@@ -356,7 +386,6 @@ function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<N
 ## 4.5 Merge
 
 `merge : Array<PrivateForest> -> PrivateForest`
-
 
 The private forest forms a join-semilattice via the `merge` ( $\land$ ) operation. `merge` is thus:
 - [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
