@@ -126,11 +126,7 @@ type PrivateNode
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
-  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: {
-    header: PrivateBacklink
-    contents: Array<PrivateBacklink>
-  }
+  previous: Array<PrivateBacklink>
 
   // USERLAND
   metadata: Metadata
@@ -149,11 +145,7 @@ type PrivateDirectory = {
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
-  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: {
-    header: PrivateBacklink
-    contents: Array<PrivateBacklink>
-  }
+  previous: Array<PrivateBacklink>
 
   // USERLAND
   metadata: Metadata
