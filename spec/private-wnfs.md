@@ -135,10 +135,10 @@ type PrivateDirectory = {
 }
 
 type PrivateRef = {
-  label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
+  label: Hash<Namefilter> // hash(saturated(add(deriveKey(entryRatchet), entryBareName)))
   contentCid: Cid // used for disambiguating which value in the multivalue was referred to
   contentKey: Key // hash(deriveKey(entryRatchet))
-  revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
+  revisionKey: AesKwp<Key> // encrypt(deriveKey(directoryRatchet), deriveKey(entryRatchet))
 }
 
 type PrivateFile = {
