@@ -90,17 +90,19 @@ type SharePayload = TemporalSharePointer | SnapshotSharePointer
 type TemporalSharePointer = {
   type: "wnfs/share/temporal"
   label: Hash<Namefilter> // 32 bytes SHA3 hash
+  cid: Cid // content block CID
   revisionKey: Key // 32 bytes AES key
 }
 
 type SnapshotSharePointer = {
   type: "wnfs/share/snapshot"
   label: Hash<Namefilter> // 32 bytes SHA3 hash
+  cid: Cid // content block CID
   contentKey: Key // 32 bytes AES key
 }
 ```
 
-Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Payloads of the above format end up taking up 112 and 111 bytes respectively, so fit well within RSAES-OAEP limits.
+Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Payloads of the above format encode to 157 and 156 bytes respectively, so fit within RSAES-OAEP limits.
 
 NB: Share payload *ciphertexts* will always be 256 bytes long, due to the way RSAES-OAEP works.
 
