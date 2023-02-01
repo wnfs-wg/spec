@@ -126,25 +126,23 @@ type PrivateNode
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
+  headerCid: Cid
   previous: Array<PrivateBacklink>
 
   // USERLAND
   metadata: Metadata
   entries: Record<string, {
     label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
-    // and can be used as the key in the private partition HAMT to lookup
-    // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
+    contentCid: Cid // used for disambiguating which value in the multivalue was referred to
     contentKey: Key // hash(deriveKey(entryRatchet))
-    contentCid: Cid
-
     revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-    revisionCid: Cid
   }>
 }
 
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
+  headerCid: Cid
   previous: Array<PrivateBacklink>
 
   // USERLAND
