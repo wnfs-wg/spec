@@ -131,12 +131,14 @@ type PrivateDirectory = {
 
   // USERLAND
   metadata: Metadata
-  entries: Record<string, {
-    label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
-    contentCid: Cid // used for disambiguating which value in the multivalue was referred to
-    contentKey: Key // hash(deriveKey(entryRatchet))
-    revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-  }>
+  entries: Record<string, PrivateRef>
+}
+
+type PrivateRef = {
+  label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
+  contentCid: Cid // used for disambiguating which value in the multivalue was referred to
+  contentKey: Key // hash(deriveKey(entryRatchet))
+  revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
 }
 
 type PrivateFile = {
