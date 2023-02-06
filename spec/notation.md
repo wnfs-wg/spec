@@ -43,4 +43,4 @@ This means at this point in the data structure there's a 32-byte array represent
 
 ## Algorithm Type Signatures
 
-For algorithms, we often specify their type signature, e.g. `: (Namefilter, RevisionKey) -> Namefilter`. This is read as "has the type signature 'function of namefilter and revision key to namefilter'".
+For algorithms, we often specify their type signature, e.g. `: (Namefilter, TemporalKey) -> Namefilter`. This is read as "has the type signature 'function of namefilter and temporal key to namefilter'".
