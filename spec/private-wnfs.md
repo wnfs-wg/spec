@@ -235,6 +235,9 @@ The pointer to that that data consists of the hashed namefilter, which is used a
 
 NB: This diagram shows an abstract model of how data relates to each other. Some arrows are meant to be interpreted more abstractly and don't have a concrete encoding as data. The box labeled "Subdirectory Pointers & Keys" doesn't exist on its own and is part of the [`PrivateDirectory` schema](#31-cleartext-data). For a different angle and a more concrete diagram see [Section Temporal Key Structure](#3172-temporal-key-structure).
 
+Separating the `PrivateNodeHeader` and `PrivateNodeContent` ciphertext blocks allows a reader that traverses a path to skip reading `PrivateNodeHeader`s on the path, but still read temporally once they reached the end of the path.
+However, developers should be aware that such operations wouldn't check the invariant that the `TemporalKey` stored in directories is correctly derived from the respective `PrivateNodeHeader`, so it should only be used in situations that assume there are no malicious or buggy writes, e.g. when doing an operation on locally-computed or already verified data.
+
 #### 3.1.6.1 Temporal Key
 
 Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
