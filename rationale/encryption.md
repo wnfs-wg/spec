@@ -35,7 +35,7 @@ In the future, it's likely we'll reconsider these ciphers.
 
 ## Need
 
-A way to wrap [`RevisionKey`s](/spec/private-wnfs.md#3161-revision-key) of subdirectories within [`PrivateDirectory`](/spec/private-wnfs.md#31-cleartext-data) blocks.
+A way to wrap [`TemporalKey`s](/spec/private-wnfs.md#3161-temporal-key) of subdirectories within [`PrivateDirectory`](/spec/private-wnfs.md#31-cleartext-data) blocks.
 
 ## Choice
 
@@ -45,7 +45,7 @@ We chose [AES-KWP] with 256-bit keys.
 
 ### [AES-SIV]
 
-AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the content key derived from it is used with AES-GCM or the private node header is decrypted and the namefilter it implies is checked against the HAMT label.
+AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the snapshot key derived from it is used with AES-GCM or the private node header is decrypted and the namefilter it implies is checked against the HAMT label.
 
 ### [AES-KW]
 

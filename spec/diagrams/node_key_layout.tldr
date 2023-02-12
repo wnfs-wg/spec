@@ -220,11 +220,11 @@
             "parentId": "page",
             "childIndex": 35,
             "point": [
-              96,
+              85.5,
               416
             ],
             "rotation": 0,
-            "text": "Revision Key",
+            "text": "Temporal Key",
             "style": {
               "color": "black",
               "size": "medium",
@@ -242,11 +242,11 @@
             "parentId": "page",
             "childIndex": 36,
             "point": [
-              576,
+              562,
               416
             ],
             "rotation": 0,
-            "text": "Content Key",
+            "text": "Snapshot Key",
             "style": {
               "color": "black",
               "size": "medium",
@@ -264,7 +264,7 @@
             "parentId": "page",
             "childIndex": 37,
             "point": [
-              342,
+              352.5,
               445
             ],
             "rotation": 0,
@@ -284,7 +284,7 @@
                 "id": "end",
                 "index": 1,
                 "point": [
-                  226,
+                  201.5,
                   0
                 ],
                 "canBind": true,
@@ -294,7 +294,7 @@
                 "id": "bend",
                 "index": 2,
                 "point": [
-                  113,
+                  100.75,
                   0
                 ]
               }
@@ -508,7 +508,7 @@
               896
             ],
             "rotation": 0,
-            "text": "Content Key",
+            "text": "Snapshot Key",
             "style": {
               "color": "black",
               "size": "medium",
@@ -530,7 +530,7 @@
               960
             ],
             "rotation": 0,
-            "text": "Revision Key",
+            "text": "Temporal Key",
             "style": {
               "color": "orange",
               "size": "medium",
@@ -552,7 +552,7 @@
               1184
             ],
             "rotation": 0,
-            "text": "Content Key",
+            "text": "Snapshot Key",
             "style": {
               "color": "black",
               "size": "medium",
@@ -574,7 +574,7 @@
               1248
             ],
             "rotation": 0,
-            "text": "Revision Key",
+            "text": "Temporal Key",
             "style": {
               "color": "orange",
               "size": "medium",
@@ -596,7 +596,7 @@
               1243.38
             ],
             "size": [
-              261.66,
+              276.74,
               68.74
             ],
             "rotation": 0,
@@ -626,7 +626,7 @@
               955.39
             ],
             "size": [
-              261.66,
+              275.66,
               68.74
             ],
             "rotation": 0,
@@ -656,7 +656,7 @@
               955.39
             ],
             "size": [
-              261.6600000000001,
+              275.6600000000001,
               68.7399999999999
             ],
             "rotation": 0,
@@ -683,7 +683,7 @@
               1243.38
             ],
             "size": [
-              261.6600000000001,
+              276.74,
               68.74000000000001
             ],
             "rotation": 0,
@@ -750,7 +750,7 @@
             "parentId": "page",
             "childIndex": 48,
             "point": [
-              327.9,
+              334.27,
               474
             ],
             "rotation": 0,
@@ -770,8 +770,8 @@
                 "id": "end",
                 "index": 1,
                 "point": [
-                  226.13,
-                  478.77
+                  219.76,
+                  477.18
                 ],
                 "canBind": true,
                 "bindingId": "df2ad27e-b9d2-48bd-11c4-b87fb9f4d4ba"
@@ -780,8 +780,8 @@
                 "id": "bend",
                 "index": 2,
                 "point": [
-                  90.83,
-                  249.89
+                  87.72,
+                  248.8
                 ]
               }
             },
@@ -810,7 +810,7 @@
             "parentId": "page",
             "childIndex": 49,
             "point": [
-              300.56,
+              305.51,
               474
             ],
             "rotation": 0,
@@ -830,8 +830,8 @@
                 "id": "end",
                 "index": 1,
                 "point": [
-                  253.47,
-                  773.28
+                  248.52,
+                  772.12
                 ],
                 "canBind": true,
                 "bindingId": "651a206f-6fa6-43ff-107c-0973f9406e2d"
@@ -840,8 +840,8 @@
                 "id": "bend",
                 "index": 2,
                 "point": [
-                  63.84,
-                  407.26
+                  61.46,
+                  406.27
                 ]
               }
             },
@@ -936,8 +936,8 @@
             "parentId": "page",
             "childIndex": 53,
             "point": [
-              -230.54,
-              420.9
+              -231.62,
+              424.7
             ],
             "rotation": 0,
             "bend": 0.7365823137113765,
@@ -946,8 +946,8 @@
                 "id": "start",
                 "index": 0,
                 "point": [
-                  34.77,
-                  349.18
+                  35.85,
+                  345.38
                 ],
                 "canBind": true,
                 "bindingId": "d1188787-f2aa-492a-1652-18d0f1245983"
@@ -956,8 +956,8 @@
                 "id": "end",
                 "index": 1,
                 "point": [
-                  318.54,
-                  18.76
+                  309.12,
+                  17.05
                 ],
                 "canBind": true,
                 "bindingId": "325bd9e8-4876-4431-2308-8cf6c3fe1405"
@@ -966,8 +966,8 @@
                 "id": "bend",
                 "index": 2,
                 "point": [
-                  54.96,
-                  79.46
+                  51.56,
+                  80.57
                 ]
               }
             },

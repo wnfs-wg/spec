@@ -126,34 +126,26 @@ type PrivateNode
 type PrivateDirectory = {
   type: "wnfs/priv/dir"
   version: "0.2.0"
-  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: {
-    header: PrivateBacklink
-    contents: Array<PrivateBacklink>
-  }
+  headerCid: Cid
+  previous: Array<PrivateBacklink>
 
   // USERLAND
   metadata: Metadata
-  entries: Record<string, {
-    label: Hash<Namefilter> // hash(saturated(add(deriveKey(ratchet), entryBareName)))
-    // and can be used as the key in the private partition HAMT to lookup
-    // a (set of) PrivateNode(s) with an entryBareName and entryRatchet from above
-    contentKey: Key // hash(deriveKey(entryRatchet))
-    contentCid: Cid
+  entries: Record<string, PrivateRef>
+}
 
-    revisionKey: AesKwp<Key> // encrypt(deriveKey(ratchet), deriveKey(entryRatchet))
-    revisionCid: Cid
-  }>
+type PrivateRef = {
+  label: Hash<Namefilter> // hash(saturated(add(deriveKey(entryRatchet), entryBareName)))
+  contentCid: Cid // used for disambiguating which value in the multivalue was referred to
+  snapshotKey: Key // hash(deriveKey(entryRatchet))
+  temporalKey: AesKwp<Key> // encrypt(deriveKey(directoryRatchet), deriveKey(entryRatchet))
 }
 
 type PrivateFile = {
   type: "wnfs/priv/file"
   version: "0.2.0"
-  // aes-gcm encrypted using deriveKey(previousRatchet) where inc(previousRatchet) = ratchet
-  previous?: {
-    header: PrivateBacklink
-    contents: Array<PrivateBacklink>
-  }
+  headerCid: Cid
+  previous: Array<PrivateBacklink>
 
   // USERLAND
   metadata: Metadata
@@ -177,7 +169,7 @@ type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "content key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#316-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "snapshot key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#316-pointers--keys) for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -220,7 +212,7 @@ The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, 
 
 The block count MUST reference the number of blocks the externalized content was split into. The value of `blockCount` MUST be between $1$ and $2^{32}$, for sensible security margins regarding accidental nonce reuse.
 
-The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the content key MAY remain the same across those revisions
+The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the snapshot key MAY remain the same across those revisions
 
 NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
@@ -241,17 +233,20 @@ The pointer to that that data consists of the hashed namefilter, which is used a
 
 <img src="./diagrams/decryption_pointer.png" width="400">
 
-NB: This diagram shows an abstract model of how data relates to each other. Some arrows are meant to be interpreted more abstractly and don't have a concrete encoding as data. The box labeled "Subdirectory Pointers & Keys" doesn't exist on its own and is part of the [`PrivateDirectory` schema](#31-cleartext-data). For a different angle and a more concrete diagram see [Section Revision Key Structure](#3172-revision-key-structure).
+NB: This diagram shows an abstract model of how data relates to each other. Some arrows are meant to be interpreted more abstractly and don't have a concrete encoding as data. The box labeled "Subdirectory Pointers & Keys" doesn't exist on its own and is part of the [`PrivateDirectory` schema](#31-cleartext-data). For a different angle and a more concrete diagram see [Section Temporal Key Structure](#3172-temporal-key-structure).
 
-#### 3.1.6.1 Revision Key
+Separating the `PrivateNodeHeader` and `PrivateNodeContent` ciphertext blocks allows a reader that traverses a path to skip reading `PrivateNodeHeader`s on the path, but still read temporally once they reached the end of the path.
+However, developers should be aware that such operations wouldn't check the invariant that the `TemporalKey` stored in directories is correctly derived from the respective `PrivateNodeHeader`, so it should only be used in situations that assume there are no malicious or buggy writes, e.g. when doing an operation on locally-computed or already verified data.
 
-Revision keys MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
+#### 3.1.6.1 Temporal Key
 
-When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's revision key. This prevents readers with only a content key from gaining revision read access.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that.
 
-#### 3.1.6.2 Content Key
+When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 
-Content keys MUST be derived from the [Revision Key](#3161-revision-key) by hashing it with SHA3. The content key grants access to a single revision snapshot of that node and its children, but no other revisions forward or backward.
+#### 3.1.6.2 Snapshot Key
+
+Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key](#3161-temporal-key) by hashing it with SHA3.
 
 ### 3.1.7 Read Hierarchy
 
@@ -269,21 +264,21 @@ Note that holding the decryption pointer to this particular directory MUST NOT g
 
 Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#317-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
-Given the root content key, you can decrypt the root directory that contains the content keys of all subdirectories, which allow you to decrypt the subdirectories.
-It's possible to share the content key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
+Given the root snapshot key, you can decrypt the root directory that contains the snapshot keys of all subdirectories, which allow you to decrypt the subdirectories.
+It's possible to share the snapshot key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
 
 ![](./diagrams/temporal_hierarchy.svg)
 
 In the above diagram, newer revisions of nodes progress left-to-right. The file hierarchy still runs top-to-bottom: subdirectories are below the directory that contains them. Given any of these boxes, follow the lines to see what data you can decrypt or derive.
 
-Special attention should be paid to the relationship of the skip ratchet to content keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a content key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the content key.
+Special attention should be paid to the relationship of the skip ratchet to snapshot keys. There is a parallel structure between the skip ratchets and the content hierarchy. The primary difference is that access to _only_ a snapshot key does not grant access to other revisions, where having access to a skip ratchet includes the next revisions and the ability to derive the snapshot key.
 
-### 3.1.7.2 Revision Key Structure
+### 3.1.7.2 Temporal Key Structure
 
-A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a "revision key". Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a [Temporal Key](#3161-temporal-key). Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
-* Generate the content key for the current node
+* Generate the snapshot key for the current node
 * Generate decryption pointers for future versions of this node
 * Access to decryption pointers to all child nodes
 * Access to the skip ratchets for all child nodes
@@ -318,9 +313,9 @@ If the child is a HAMT bucket of values, iterate that bucket to find one that ha
 
 ## 4.2 Private Versioning
 
-`toVersioned : (Namefilter, RevisionKey) -> Namefilter`
+`toVersioned : (Namefilter, TemporalKey) -> Namefilter`
 
-Every private file or directory implicitly links to the name (namefilter) of its next version. These implicit links can only be resolved when you have the revision key that allows you to decrypt the `PrivateNodeHeader`. Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead. Then, the new namefilter is:
+Every private file or directory implicitly links to the name (namefilter) of its next version. These implicit links can only be resolved when you have the temporal key that allows you to decrypt the `PrivateNodeHeader`. Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead. Then, the new namefilter is:
 
 $$saturate(add(deriveKey(inc^n(ratchet)), bareName))$$
 
@@ -342,19 +337,19 @@ Path resolution can happen in three modes: "current", "seek", and "attach".
 
 ### 4.3.1 Current Snapshot
 
-Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a content key for decryption.
+Resolve the current snapshot: only resolve the current snapshot of a version. This only requires a snapshot key for decryption.
 
 ### 4.3.2 Seek
 
-For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's revision key.
+For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's temporal key.
 
 #### 4.3.2.1 Attach
 
 A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
-In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].contentKey`.
+In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
 
-If this mode is seeking, the `directory.entries[segmentName].revisionKey` needs to be decrypted using the revision key for the current directory.
+If this mode is seeking, the `directory.entries[segmentName].temporalKey` needs to be decrypted using the temporal key for the current directory.
 
 ##### 4.3.2.1.1 Example
 

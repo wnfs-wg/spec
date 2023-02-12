@@ -90,17 +90,19 @@ type SharePayload = TemporalSharePointer | SnapshotSharePointer
 type TemporalSharePointer = {
   type: "wnfs/share/temporal"
   label: Hash<Namefilter> // 32 bytes SHA3 hash
-  revisionKey: Key // 32 bytes AES key
+  cid: Cid // content block CID
+  temporalKey: Key // 32 bytes AES key
 }
 
 type SnapshotSharePointer = {
   type: "wnfs/share/snapshot"
   label: Hash<Namefilter> // 32 bytes SHA3 hash
-  contentKey: Key // 32 bytes AES key
+  cid: Cid // content block CID
+  snapshotKey: Key // 32 bytes AES key
 }
 ```
 
-Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Payloads of the above format end up taking up 112 and 111 bytes respectively, so fit well within RSAES-OAEP limits.
+Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Both payloads of the above format encode to 157, so fit within RSAES-OAEP limits.
 
 NB: Share payload *ciphertexts* will always be 256 bytes long, due to the way RSAES-OAEP works.
 
@@ -108,13 +110,13 @@ NB: Share payload *ciphertexts* will always be 256 bytes long, due to the way RS
 
 The temporal share pointer consists of
 - a 32 byte private forest label used to look up the private node to decrypt in the private forest
-- a 32 byte [revision key](/spec/private-wnfs.md#3161-revision-key) to decrypt the private node and its temporal header.
+- a 32 byte [temporal key](/spec/private-wnfs.md#3161-temporal-key) to decrypt the private node and its temporal header.
 
 ### 3.2.3 Snapshot Share Pointer
 
-The snapshot share pointer works exactly like the temporal share pointer, except instead of encoding a revision key, it encodes a [content key](/spec/private-wnfs.md#3162-content-key).
+The snapshot share pointer works exactly like the temporal share pointer, except instead of encoding a temporal key, it encodes a [snapshot key](/spec/private-wnfs.md#3162-snapshot-key).
 
-This content key only gives access to a single revision, in case a user wanted to only share a single revision with someone else.
+This snapshot key only gives access to a single revision, in case a user wanted to only share a single revision with someone else.
 
 # 4 Share Lookup and Discovery
 
