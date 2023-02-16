@@ -74,7 +74,7 @@ function computeShareLabel(senderRootDID: string, recipientExchangeKey: ByteStri
 }
 ```
 
-Here `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
+Here `encode` is a function that maps a share counter to a low-endian byte array encoding of a 64-bit unsigned integer.
 
 The `recipientExchangeKey` are the recipient device's exchange key bytes, including the protocol versioning prefix.
 
