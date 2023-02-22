@@ -16,12 +16,13 @@ type PublicNode
   | PublicFile
 
 type PublicDirectory = {
-  type: "wnfs/pub/dir"
-  version: "0.2.0"
-  previous: Array<Cid<Cbor<PublicDirectory>>>
-  // userland:
-  metadata: Metadata
-  entries: Record<string, Cid<Cbor<PublicNode>> | PublicSymlink>
+  "wnfs/pub/dir": {
+    version: "0.2.0"
+    previous: Array<Cid<Cbor<PublicDirectory>>>
+    // userland:
+    metadata: Metadata
+    entries: Record<string, Cid<Cbor<PublicNode>> | PublicSymlink>
+  }
 }
 
 type PublicSymlink = {
@@ -29,12 +30,13 @@ type PublicSymlink = {
 }
 
 type PublicFile = {
-  type: "wnfs/pub/file"
-  version: "0.2.0"
-  previous: Array<Cid<Cbor<PublicFile>>>
-  // userland:
-  metadata: Metadata
-  content: Cid<IPFSUnixFSFile>
+  "wnfs/pub/file": {
+    version: "0.2.0"
+    previous: Array<Cid<Cbor<PublicFile>>>
+    // userland:
+    metadata: Metadata
+    content: Cid<IPFSUnixFSFile>
+  }
 }
 ```
 
