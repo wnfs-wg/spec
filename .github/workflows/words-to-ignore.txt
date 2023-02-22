@@ -103,6 +103,9 @@ PKI
 # rationale
 Combinatoric
 POS like ABC
+deserialize like serialize
+enum like structure
+javascript
 
 # other
 md
