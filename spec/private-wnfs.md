@@ -167,6 +167,8 @@ type ExternalContent = {
 }
 ```
 
+See the [validation specification](/spec/validation.md) on requirements for validating this data during deserialization.
+
 A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
 
 ```typescript
