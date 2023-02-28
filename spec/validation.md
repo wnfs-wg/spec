@@ -4,7 +4,7 @@ This document contains specifications on how implementations should validate inc
 
 The goals with these extra validation steps are:
 - Ensure consistency between different specification-adhering implementations. If two implementations parse the same data and are both spec-adherent, they should either show the same data to the user or at least one of them errors out.
-- Keep enough extensibility in the specification format for it to eventuall evolve independently from the spec.
+- Keep enough extensibility in the specification format for it to eventually evolve independently from the spec.
 
 
 ## Enum Variant Validation
