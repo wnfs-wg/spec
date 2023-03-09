@@ -78,7 +78,7 @@ Here `encode` is a function that maps a share counter to a low-endian byte array
 
 The `recipientExchangeKey` are the recipient device's exchange key bytes, including the protocol versioning prefix.
 
-## 3.2. Share Payload
+## 3.2 Share Payload
 
 The share payload MUST be a non-empty list of CIDs to [RSAES-OAEP](https://datatracker.ietf.org/doc/html/rfc3447#section-7.1)-encrypted ciphertexts.
 
@@ -88,25 +88,29 @@ The decrypted payload MUST be a CBOR-encoded object of following shape:
 type SharePayload = TemporalSharePointer | SnapshotSharePointer
 
 type TemporalSharePointer = {
-  type: "wnfs/share/temporal"
-  label: Hash<Namefilter> // 32 bytes SHA3 hash
-  cid: Cid // content block CID
-  temporalKey: Key // 32 bytes AES key
+  "wnfs/share/temporal": {
+    label: Hash<Namefilter> // 32 bytes SHA3 hash
+    cid: Cid // content block CID
+    temporalKey: Key // 32 bytes AES key
+  }
 }
 
 type SnapshotSharePointer = {
-  type: "wnfs/share/snapshot"
-  label: Hash<Namefilter> // 32 bytes SHA3 hash
-  cid: Cid // content block CID
-  snapshotKey: Key // 32 bytes AES key
+  "wnfs/share/snapshot": {
+    label: Hash<Namefilter> // 32 bytes SHA3 hash
+    cid: Cid // content block CID
+    snapshotKey: Key // 32 bytes AES key
+  }
 }
 ```
+
+See the [validation specification](/spec/validation.md) on requirements for validating this data during deserialization.
 
 Because v1 exchange keys are 2048 bit RSAES-OAEP keys, they can only encrypt up to 190 bits of data. Both payloads of the above format encode to 157, so fit within RSAES-OAEP limits.
 
 NB: Share payload *ciphertexts* will always be 256 bytes long, due to the way RSAES-OAEP works.
 
-### 3.2.2. Temporal Share Pointer
+### 3.2.2 Temporal Share Pointer
 
 The temporal share pointer consists of
 - a 32 byte private forest label used to look up the private node to decrypt in the private forest

@@ -8,6 +8,8 @@ Nodes need to be encoded as dag-cbor.
 
 A directory node contains a map of entry names to either symlinks or CIDs that resolve to another directory or to a file.
 
+See the [`notation.md`](/spec/notation.md) for information on the notation used and the [validation specification](/spec/validation.md) on details of verifying these data structures during deserialization.
+
 ```typescript
 type PublicRoot = Cbor<PublicDirectory>
 
@@ -16,12 +18,13 @@ type PublicNode
   | PublicFile
 
 type PublicDirectory = {
-  type: "wnfs/pub/dir"
-  version: "0.2.0"
-  previous: Array<Cid<Cbor<PublicDirectory>>>
-  // userland:
-  metadata: Metadata
-  entries: Record<string, Cid<Cbor<PublicNode>> | PublicSymlink>
+  "wnfs/pub/dir": {
+    version: "0.2.0"
+    previous: Array<Cid<Cbor<PublicDirectory>>>
+    // userland:
+    metadata: Metadata
+    entries: Record<string, Cid<Cbor<PublicNode>> | PublicSymlink>
+  }
 }
 
 type PublicSymlink = {
@@ -29,12 +32,13 @@ type PublicSymlink = {
 }
 
 type PublicFile = {
-  type: "wnfs/pub/file"
-  version: "0.2.0"
-  previous: Array<Cid<Cbor<PublicFile>>>
-  // userland:
-  metadata: Metadata
-  content: Cid<IPFSUnixFSFile>
+  "wnfs/pub/file": {
+    version: "0.2.0"
+    previous: Array<Cid<Cbor<PublicFile>>>
+    // userland:
+    metadata: Metadata
+    content: Cid<IPFSUnixFSFile>
+  }
 }
 ```
 

@@ -124,14 +124,15 @@ type PrivateNode
   | PrivateFile
 
 type PrivateDirectory = {
-  type: "wnfs/priv/dir"
-  version: "0.2.0"
-  headerCid: Cid
-  previous: Array<PrivateBacklink>
+  "wnfs/priv/dir": {
+    version: "0.2.0"
+    headerCid: Cid
+    previous: Array<PrivateBacklink>
 
-  // USERLAND
-  metadata: Metadata
-  entries: Record<string, PrivateRef>
+    // USERLAND
+    metadata: Metadata
+    entries: Record<string, PrivateRef>
+  }
 }
 
 type PrivateRef = {
@@ -142,22 +143,31 @@ type PrivateRef = {
 }
 
 type PrivateFile = {
-  type: "wnfs/priv/file"
-  version: "0.2.0"
-  headerCid: Cid
-  previous: Array<PrivateBacklink>
+  "wnfs/priv/file": {
+    version: "0.2.0"
+    headerCid: Cid
+    previous: Array<PrivateBacklink>
 
-  // USERLAND
-  metadata: Metadata
-  content: ByteArray | ExternalContent
+    // USERLAND
+    metadata: Metadata
+    content: InlineContent | ExternalContent
+  }
+}
+
+type InlineContent = {
+  "inline": ByteArray
 }
 
 type ExternalContent = {
-  key: Key
-  blockSize: Uint64 // in bytes, at max 262132
-  blockCount: Uint64
+  "external": {
+    key: Key
+    blockSize: Uint64 // in bytes, at max 262,116
+    blockCount: Uint64
+  }
 }
 ```
+
+See the [validation specification](/spec/validation.md) on requirements for validating this data during deserialization.
 
 A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
 

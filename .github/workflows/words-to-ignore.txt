@@ -99,10 +99,16 @@ preimage like image
 IND-CCA
 multivalue like value
 PKI
+pre-defined
+erroring
 
 # rationale
 Combinatoric
 POS like ABC
+deserialize like serialize
+deserialization like serialization
+enum like structure
+javascript
 
 # other
 md
