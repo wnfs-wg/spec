@@ -14,11 +14,14 @@ Note that authentication is not strictly necessary since write access is managed
 We chose [AES-GCM] with per-message randomly generated 12-byte initialization vectors, because it is widely supported and implemented in hardware as of 2023.
 There are no known practical attacks on AES-GCM.
 
+
 ## Alternatives
 
 ### [AES-GCM-SIV]
 
-Compared to AES-GCM, this mode additionally protects against nonce-misuse via a synthetic initialization vector (SIV). To achieve this, AES-GCM-SIV sacrifices performance during encryption.
+Compared to AES-GCM, this mode additionally protects against nonce-misuse via a synthetic initialization vector (SIV). Introducing a deterministic nonce based on the content has a roughly 50% performance overhead ([2/3 throughput][AES-GCM-SIV: Specification and Analysis]).
+
+Aside from nonce-misuse resistence, the primary motivation for deterministic encryption is file deduplication. Since each revision of a file in WNFS has a unique encryption key, deduplication can only occur when two concurrent writes of the same file are made to the same point in the file's history. This case is not very common, so the write overhead on every file outweighs the deduplication benefit.
 
 ### [AES-OCB] ([paper](https://link.springer.com/article/10.1007/s00145-021-09399-8))
 
@@ -76,3 +79,4 @@ This mode's advantage is support for associated data. However, keys need to be t
 [AES-GCM]: https://csrc.nist.gov/publications/detail/sp/800-38d/final
 [AES-OCB]: https://web.cs.ucdavis.edu/~rogaway/ocb/ocb-faq.htm
 [ChaCha20-poly1305]: https://www.rfc-editor.org/rfc/rfc7539
+[AES-GCM-SIV: Specification and Analysis]: https://eprint.iacr.org/2017/168.pdf
