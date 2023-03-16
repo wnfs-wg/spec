@@ -1,106 +1,108 @@
 # Names
+Bluesky
+Holmgren like Alice
+Krüger like Alice
+Nyberg like Alice
+Philipp like Alice
 Zelenka like Alice
 expede
 matheus23
-Philipp like Alice
-Krüger like Alice
-Nyberg like Alice
-Holmgren like Alice
-Bluesky
 
 
 # Spec
-cleartext
-plaintext
-Cleartext
-sharding
-multimap
-untrusted
-namespace
-multivalues
-subgraph
-Merklized
-WNFS
-CRDT like ABC
-merklization
-webnative
-HAMT like ABC
-namefilter like filter
-merkle
-ethereum
-MMPT like ABC
-trie
-IPLD like ABC
-encoding like noun
-bitswap
-bitmask like mask
-zkSNARK like ABC
-zkSTARK like ABC
-GCA like ABC
-cardinality like formality
-RSA like ABC
-NPM like ABC
-XXHash
-popcount like count
-tunable like reachable
-cryptographic
-PDF
-pdf
-SHA
-ciphertext like text
-decrypt like encrypt
-CID like ABC
-DAG-CBOR-native
-multicodec like noun
-DAG-CBOR-encoded
-DAG-CBOR
-dag-cbor
-lookup like noun
-inline like outline
-IPFS like ABC
-symlink like link
+AEAD
 AES
-AES-KW
-AES-KWP
 AES-GCM
 AES-GCM-SIV
-AES-SIV
+AES-KW
+AES-KWP
 AES-OCB
-AEAD
-SIV
-ChaCha
+AES-SIV
 CBOR like ABC
-distinguishability
-bitarray like array
-cryptree like tree
-sharded
-benchmarking
-golang
-semilattice like lattice
-ary
-idempotence like omnipotence
-subdirectory like directory
-superset like set
-userland
-low-endian
-big-endian
-codec
-backlink like link
-UCAN like noun
-WebCrypto
+CID like ABC
+CRDT like ABC
+ChaCha
+Cleartext
+DAG-CBOR
+DAG-CBOR-encoded
+DAG-CBOR-native
 DID like ID
-RSAES-OAEP
-KEM-DEM
-varint like integer
 ECDH
-extractable
-prepend like append
-preimage like image
+GCA like ABC
+HAMT like ABC
 IND-CCA
-multivalue like value
+IPFS like ABC
+IPLD like ABC
+KEM-DEM
+MMPT like ABC
+Merklized
+NPM like ABC
+PDF
 PKI
-pre-defined
+RSA like ABC
+RSAES-OAEP
+SHA
+SIV
+UCAN like noun
+WNFS
+WebCrypto
+XXHash
+ary
+backlink like link
+benchmarking
+big-endian
+bitarray like array
+bitmask like mask
+bitswap
+cardinality like formality
+ciphertext like text
+cleartext
+codec
+cryptographic
+cryptree like tree
+dag-cbor
+decrypt like encrypt
+deduplicate
+deduplication
+distinguishability
+encoding like noun
 erroring
+ethereum
+extractable
+golang
+idempotence like omnipotence
+inline like outline
+lookup like noun
+low-endian
+merkle
+merklization
+multicodec like noun
+multimap
+multivalue like value
+multivalues
+namefilter like filter
+namespace
+pdf
+plaintext
+popcount like count
+pre-defined
+preimage like image
+prepend like append
+semilattice like lattice
+sharded
+sharding
+subdirectory like directory
+subgraph
+superset like set
+symlink like link
+trie
+tunable like reachable
+untrusted
+userland
+varint like integer
+webnative
+zkSNARK like ABC
+zkSTARK like ABC
 
 # rationale
 Combinatoric

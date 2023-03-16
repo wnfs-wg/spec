@@ -21,7 +21,7 @@ There are no known practical attacks on AES-GCM.
 
 Compared to AES-GCM, this mode additionally protects against nonce-misuse via a synthetic initialization vector (SIV). Introducing a deterministic nonce based on the content has a roughly 50% performance overhead ([2/3 throughput][AES-GCM-SIV: Specification and Analysis]).
 
-Aside from nonce-misuse resistence, the primary motivation for deterministic encryption is file deduplication. Since each revision of a file in WNFS has a unique encryption key, deduplication can only occur when two concurrent writes of the same file are made to the same point in the file's history. This case is not very common, so the write overhead on every file outweighs the deduplication benefit.
+Aside from nonce-misuse resistance, the primary motivation for deterministic encryption is file deduplication. Since each revision of a file in WNFS has a unique encryption key, deduplication can only occur when two concurrent writes of the same file are made to the same point in the file's history. This case is not very common, so the write overhead on every file outweighs the deduplication benefit.
 
 ### [AES-OCB] ([paper](https://link.springer.com/article/10.1007/s00145-021-09399-8))
 
