@@ -50,6 +50,10 @@ type PrivateForest = Cbor<{
   structure: "hamt"
   version: "0.1.0"
   root: SparseNode
+  accumulator: {
+    modulus: ByteArray<256>
+    generator: ByteArray<256>
+  }
 }>
 
 type SparseNode = [
@@ -61,7 +65,16 @@ type Entry
   = Cid<Cbor<SparseNode>> // Child node
   | Bucket
 
-type Bucket = Array<[Namefilter, Array<Cid>]> // Leaf values
+// Leaf values
+// Invariant: The bucket's label is a prefix of the NameAccumulator hash
+type Bucket = Array<[NameAccumulator, Array<(Cid, Witness)>]>
+
+type NameAccumulator = ByteArray<256>
+
+type ResidueInfo = {
+  lHash: UInt // must be a non-negative integer
+  r: ByteArray<4> // Represents a 128-bit unsigned integer (low endian)
+}
 ```
 
 Note that `SparseNode` and `Entry` are mutually recursive.
@@ -99,9 +112,8 @@ The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext 
 The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip-ratchet.md).
 
 ```typescript
-type Namefilter = ByteArray<256>
 type Key = ByteArray<32>
-type Inumber = ByteArray<32>
+type Inumber = ByteArray<32> // Invariant: MUST be prime
 type PrivateBacklink = [
   UInt, // number of revisions back
   // encrypted(deriveKey(oldRatchet), cid) where ratchet = inc(oldRatchet, number of revisions back)
@@ -114,8 +126,7 @@ type PrivateBacklink = [
 // deterministically encrypted using deriveKey(ratchet) (see AesGcmDet in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
-  bareName: Namefilter
-  inumber: Inumber // Invariant: The `inumber` is included in `bareName`
+  inumber: Inumber
 }
 
 // aes-gcm encrypted using hash(deriveKey(parentRatchet))
@@ -174,7 +185,7 @@ A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode`
 ```typescript
 type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
 
-// PrivateForest values should be Cid<CiphertextBlock>
+// PrivateForest values are (Cid<CiphertextBlock>, Witness)
 ```
 
 ### 3.1.1 Node Headers
@@ -299,13 +310,104 @@ The skip ratchet is the single source of truth for generating the decryption key
 
 The decrypted (cleartext) file layer is very straightforward: it follows the exact interface as public WNFS files and directories. The primary difference is that while the public file system MUST form a DAG by its hash-linked structure, special care MUST be taken so that the private file system does not form pointer cycles.
 
+# 4 Private Path Representation
+
+WNFS is designed to support being stored with a service provider that can gate write access without the having read access to the file system and learning as little about the private file system hierarchy as possible.
+This presents a challenge: If the service provider can't read the submitted writes from clients, how should it decide which writes are valid and which are not?
+
+In WNFS, the solution is to represent private file system paths in a way that makes it possible to use them as the key in the private forest while leaking as little as possible about the path itself.
+This means the representation
+- must not leak information about the nodes that are part of the path,
+- must not be correlatable to other paths and
+- must not leak the amount of path segments inside the path.
+
+Using simply the hash of a file path would suffice to satify the above conditions, however, we also want to be able to create cryptographically signed certificates that give write access to a  subset of keys in the private forest corresponding to a branch in the private file system hierarchy.
+
+To achieve this, we make use of cryptographic RSA accumulators. For details on how accumulation works, refer to [this paper][RSA accumulators]
+
+### How paths are represented (& revisions)
+
+Every private forest label MUST be represented as a 2048-bit number lower than the private forest's RSA modulus (stored in its root).
+
+This number is the RSA accumulator containing all inumbers of its path as well as a revision secret derived from the skip ratchet.
+
+As an example, let's look at the accumulator for a file at the path `/Docs/University/Notes.md`.
+Assuming its current ratchet state is `ratchet` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
+
+```typescript
+rsa_accumulate(
+  forest.generator,
+  forest.modulus,
+  [
+    inum(docs),
+    inum(uni),
+    inum(notes),
+    derivePrime(ratchet)
+  ]
+)
+```
+
+The function `rsa_accumulate` works by taking the generator, usually denoted as $g$ to the power of all elements modulo the RSA modulus, usually denoted $N$:
+
+$w = g^{\mathtt{inum}(\mathtt{docs}) \cdot \mathtt{inum}(\mathtt{uni}) \cdot \mathtt{inum}(\mathtt{notes}) \cdot \mathtt{derivePrime}(\mathtt{ratchet})}\ mod\ N$
+
+The name accumulator $w$ will the be used as the label in the private forest for this particular file. It is a 2048-bit number smaller than $N$, and unique for each revision.
+
+
+### Delegation n Stuff (signed certificates of "prefix paths")
+
+Usually the root owner of a file system can easily prove root access to a third party via signing updates to the private forest using their public key associated with the file system or other authorization schemes.
+
+Our goal with WNFS is to enable delegating write access to a branch of the hierarchy similar to how it's possible to delegate read access to only branches.
+
+The way this works is by creating a certificate containing both the public key of the peer to be delegated to as well as the accumulator for the path that they have access to.
+
+Extending the example from the section above: If the root owner wants to delegate write access to the directory `/Docs/University/`, they would sign a certificate containing the accumulator `rsa_accumulator([inum(docs), inum(uni)])`.
+
+### Delegating further given a Delegation
+
+When a recipient of a delegation wants to further delegate write access, they prove that the path that they delegate is actually a superset of the path segments that they got access to.
+
+This proof is made in the form of a "proof of exponent". The concrete protocol we use is based on the "proof of knowledge of exponent" (PoKE*) from [this paper](), made non-interactive via the fiat-shamir heuristic. The resulting protocol generates a 128-bit prime $l$ by hashing the path that the current node has access to and the path that they delegate further.
+
+Again extending the example from before, say an peer that has gotten delegated write access to `/Docs/University/` further delegates write access to the file `/Docs/University/Notes.md` to yet another peer.
+
+To do this, they'd generate a certificate containing
+- that peer's public key
+- their own certificate (or a hash thereof)
+- the name accumulator $u_1$ `rsa_accumulator([inum(docs), inum(uni), inum(notes)])`
+- the proof $Q = u_0^q$ where $qx + r = l$ where $l = \mathsf{Hash}_\mathsf{Prime}(u_0, u_1)$ where $u_0 = g^{\mathbb{inum}(\mathbb{docs}) \cdot \mathbb{inum}(\mathbb{uni})}\ mod\ N$
+- the residue $r$.
+
+A verify would then verify this delegation by checking $Q^l u_0^r = u_1$.
+
+### Proving writes with batching
+
+When a peer with delegated write access wants to prove to a third party that doesn't have read access that their write is valid, they can batch proofs of knowledge of exponent together via the method described as a PoKCR from [this paper]().
+
+They will thus accumulate all writes they did by multiplying the $Q_i$ they generate together by taking their product.
+
+For each key they write to the forest, they also include the residue $r$ from the $PoKE*$ in the leaf as well as a 4-byte indicator $l_{inc}$ that helps the verifier to compute the prime hash $l$ faster.
+
+They then finally provide the accumulated $Q = \prod_{i = 0}^n{Q_i}$ as well as the certificate chain and the current and previous private forest hash in a certificate proving write access.
+
+### Verifying writes without read access
+
+When a third party without read access wants to verify that they have write access, they 
+
+### Merging writes
+
+
+
+
+
 # 4 Algorithms
 
-All algorithms MUST have access to a `PrivateForest` in their context.
+All algorithms in this section implicitly have access to a `PrivateForest` in their context.
 
-## 4.1 Namefilter Hash Resolution
+## 4.1 NameAccumulator Hash Resolution
 
-`resolveHashedKey: Hash<Namefilter> -> (Namefilter, Array<Cid>)`
+`resolveHashedLabel: Hash<NameAccumulator> -> (NameAccumulator, Array<Cid>)`
 
 The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one CID that points to encrypted private node headers or private nodes.
 
@@ -411,5 +513,7 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 
 ### 4.5.1 Blind Merge
 
-The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushed some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
+The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushes some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
+
+[RSA accumulators]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
