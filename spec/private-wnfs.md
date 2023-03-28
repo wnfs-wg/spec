@@ -127,6 +127,7 @@ type PrivateBacklink = [
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   inumber: Inumber
+  name: NameAccumulator
 }
 
 // aes-gcm encrypted using hash(deriveKey(parentRatchet))
@@ -332,7 +333,7 @@ Every private forest label MUST be represented as a 2048-bit number lower than t
 This number is the RSA accumulator containing all inumbers of its path as well as a revision secret derived from the skip ratchet.
 
 As an example, let's look at the accumulator for a file at the path `/Docs/University/Notes.md`.
-Assuming its current ratchet state is `ratchet` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
+Assuming its encrypted with a `snapshotKey` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
 
 ```typescript
 rsa_accumulate(
@@ -342,14 +343,14 @@ rsa_accumulate(
     inum(docs),
     inum(uni),
     inum(notes),
-    derivePrime(ratchet)
+    hashToPrime(snapshotKey)
   ]
 )
 ```
 
 The function `rsa_accumulate` works by taking the generator, usually denoted as $g$ to the power of all elements modulo the RSA modulus, usually denoted $N$:
 
-$w = g^{\mathtt{inum}(\mathtt{docs}) \cdot \mathtt{inum}(\mathtt{uni}) \cdot \mathtt{inum}(\mathtt{notes}) \cdot \mathtt{derivePrime}(\mathtt{ratchet})}\ mod\ N$
+$w = g^{\mathtt{inum}(\mathtt{docs}) \cdot \mathtt{inum}(\mathtt{uni}) \cdot \mathtt{inum}(\mathtt{notes}) \cdot \mathtt{hashToPrime}(\mathtt{snapshotKey})}\ mod\ N$
 
 The name accumulator $w$ will the be used as the label in the private forest for this particular file. It is a 2048-bit number smaller than $N$, and unique for each revision.
 
