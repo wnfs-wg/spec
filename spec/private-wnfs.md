@@ -310,6 +310,7 @@ The skip ratchet is the single source of truth for generating the decryption key
 ## 3.2 Cleartext Files
 
 The decrypted (cleartext) file layer is very straightforward: it follows the exact interface as public WNFS files and directories. The primary difference is that while the public file system MUST form a DAG by its hash-linked structure, special care MUST be taken so that the private file system does not form pointer cycles.
+These cycles can be detected by checking the name accumulator relationships between parent directories and their children. The child's accumulator needs to be an extension of the parent's accumulator.
 
 # 4 Private Path Representation
 
@@ -326,80 +327,55 @@ Using simply the hash of a file path would suffice to satify the above condition
 
 To achieve this, we make use of cryptographic RSA accumulators. For details on how accumulation works, refer to [this paper][RSA accumulators]
 
-### How paths are represented (& revisions)
+### 4.1 Name Accumulator Content
 
-Every private forest label MUST be represented as a 2048-bit number lower than the private forest's RSA modulus (stored in its root).
+Every private forest label MUST be represented as a 2048-bit positive integer that is smaller than the private forest's RSA modulus (stored in its root).
 
-This number is the RSA accumulator containing all inumbers of its path as well as a revision secret derived from the skip ratchet.
+This integer represents an RSA accumulator commitment, committing all inumbers of its path as well as a revision secret derived from the skip ratchet.
 
 As an example, let's look at the accumulator for a file at the path `/Docs/University/Notes.md`.
-Assuming its encrypted with a `snapshotKey` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
+Assuming it's encrypted with a `snapshotKey` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
 
 ```typescript
-rsa_accumulate(
-  forest.generator,
-  forest.modulus,
-  [
-    inum(docs),
-    inum(uni),
-    inum(notes),
-    hashToPrime(snapshotKey)
-  ]
-)
+accumulate([
+  inum(docs),
+  inum(uni),
+  inum(notes),
+  hashToPrime(snapshotKey)
+])
 ```
 
-The function `rsa_accumulate` works by taking the generator, usually denoted as $g$ to the power of all elements modulo the RSA modulus, usually denoted $N$:
+The function `accumulate` is defined in the [nameaccumulator spec](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
 
-$w = g^{\mathtt{inum}(\mathtt{docs}) \cdot \mathtt{inum}(\mathtt{uni}) \cdot \mathtt{inum}(\mathtt{notes}) \cdot \mathtt{hashToPrime}(\mathtt{snapshotKey})}\ mod\ N$
-
-The name accumulator $w$ will the be used as the label in the private forest for this particular file. It is a 2048-bit number smaller than $N$, and unique for each revision.
-
-
-### Delegation n Stuff (signed certificates of "prefix paths")
+### 4.2 Write Access Delegation
 
 Usually the root owner of a file system can easily prove root access to a third party via signing updates to the private forest using their public key associated with the file system or other authorization schemes.
 
-Our goal with WNFS is to enable delegating write access to a branch of the hierarchy similar to how it's possible to delegate read access to only branches.
+Our goal with WNFS is to enable delegating write access to a branch of the hierarchy similar to how it's possible to restrict read access to certain branches only.
 
-The way this works is by creating a certificate containing both the public key of the peer to be delegated to as well as the accumulator for the path that they have access to.
+This works by creating a certificate containing both the public key of the peer to delegate to as well as the name accumulator for the path that they have access to.
 
-Extending the example from the section above: If the root owner wants to delegate write access to the directory `/Docs/University/`, they would sign a certificate containing the accumulator `rsa_accumulator([inum(docs), inum(uni)])`.
+Extending the example from the section above: If the root owner wants to delegate write access to the directory `/Docs/University/`, they would sign a certificate containing the accumulator `accumulate([inum(docs), inum(uni)])`.
 
-### Delegating further given a Delegation
+### 4.3 Further Write Access Delegation Proofs
 
-When a recipient of a delegation wants to further delegate write access, they prove that the path that they delegate is actually a superset of the path segments that they got access to.
+When a recipient of a delegation wants to prove or further delegate write access, they prove that the path that they delegate is a superset of the path segments that they have access to.
 
-This proof is made in the form of a "proof of exponent". The concrete protocol we use is based on the "proof of knowledge of exponent" (PoKE*) from [this paper](), made non-interactive via the fiat-shamir heuristic. The resulting protocol generates a 128-bit prime $l$ by hashing the path that the current node has access to and the path that they delegate further.
+This proof is made in the form of a "proof of exponent" as explained in the [name accumulator specification](/spec/nameaccumulator.md#TODO).
+The inputs to the proof are then the name accumulator of the path they have access to as a witness and the path they want to delegate further as the commitment.
 
-Again extending the example from before, say an peer that has gotten delegated write access to `/Docs/University/` further delegates write access to the file `/Docs/University/Notes.md` to yet another peer.
+### 4.3 Write Access Batch Proofs
 
-To do this, they'd generate a certificate containing
-- that peer's public key
-- their own certificate (or a hash thereof)
-- the name accumulator $u_1$ `rsa_accumulator([inum(docs), inum(uni), inum(notes)])`
-- the proof $Q = u_0^q$ where $qx + r = l$ where $l = \mathsf{Hash}_\mathsf{Prime}(u_0, u_1)$ where $u_0 = g^{\mathbb{inum}(\mathbb{docs}) \cdot \mathbb{inum}(\mathbb{uni})}\ mod\ N$
-- the residue $r$.
+We assume that third parties checking writes don't have read access to the decrypted file system itself. So when a peer with delegated write access wants to prove that their write is valid, they follow a similar protocol as described in the previous section, except they create proofs of exponents for the labels in the private forest that they modified.
 
-A verify would then verify this delegation by checking $Q^l u_0^r = u_1$.
+The biggest part of these proofs of exponents can be batched together using the algorithm described in the [name accumulator specification](/spec/nameaccumulator.md#TODO).
 
-### Proving writes with batching
+### 4.4. Write Access Batch Proof Verification
 
-When a peer with delegated write access wants to prove to a third party that doesn't have read access that their write is valid, they can batch proofs of knowledge of exponent together via the method described as a PoKCR from [this paper]().
-
-They will thus accumulate all writes they did by multiplying the $Q_i$ they generate together by taking their product.
-
-For each key they write to the forest, they also include the residue $r$ from the $PoKE*$ in the leaf as well as a 4-byte indicator $l_{inc}$ that helps the verifier to compute the prime hash $l$ faster.
-
-They then finally provide the accumulated $Q = \prod_{i = 0}^n{Q_i}$ as well as the certificate chain and the current and previous private forest hash in a certificate proving write access.
-
-### Verifying writes without read access
-
-When a third party without read access wants to verify that they have write access, they 
-
-### Merging writes
-
-
-
+Verifying a change in a private forest from one root CID to another follows these steps:
+1. Compute the diff between the forests to obtain the labels of entries that were created, removed or updated between the two revisions.
+2. From the provided certificates, extract all validly signed name accumulators that the writer has access to.
+3. Verify provided batch proofs as described in the [name accumulator specification](/spec/nameaccumulator.md#TODO) and match their bases against the validly signed name accumulators from the certificates.
 
 
 # 4 Algorithms
