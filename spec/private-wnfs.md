@@ -67,14 +67,9 @@ type Entry
 
 // Leaf values
 // Invariant: The bucket's label is a prefix of the NameAccumulator hash
-type Bucket = Array<[NameAccumulator, Array<(Cid, Witness)>]>
+type Bucket = Array<[NameAccumulator, Array<Cid>]>
 
 type NameAccumulator = ByteArray<256>
-
-type ResidueInfo = {
-  lHash: UInt // must be a non-negative integer
-  r: ByteArray<4> // Represents a 128-bit unsigned integer (low endian)
-}
 ```
 
 Note that `SparseNode` and `Entry` are mutually recursive.
@@ -92,6 +87,8 @@ A space optimization delaying the creation of additional layers until 3 collisio
 An `Entry` node MUST consist of:
 * The expanded label (HAMT hash preimage)
 * The value for this label
+
+If the HAMT is used as the `PrivateForest` for WNFS, then labels stored SHOULD be 2048-bit `NameAccumulator`s.
 
 If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOULD be ciphertexts representing conflicting file system writes to that same path and revision.
 
@@ -186,7 +183,7 @@ A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode`
 ```typescript
 type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
 
-// PrivateForest values are (Cid<CiphertextBlock>, Witness)
+// PrivateForest value block references are Cid<CiphertextBlock>
 ```
 
 ### 3.1.1 Node Headers

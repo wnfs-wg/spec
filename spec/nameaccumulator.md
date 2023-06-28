@@ -33,7 +33,7 @@ Proofs and witnesses of relationships between name accumulators come in various 
 | Proof component                        | Representation |
 |----------------------------------------|----------------|
 | Element in the quadratic residue group | 256 byte low-endian byte array |
-| Prime hash $l$                         | 16 byte low-endian byte array and 4 byte low-endian unsigned integer counter |
+| Prime hash $l$                         | 16 byte low-endian byte array and low-endian unsigned varint counter |
 | Residue $r$                            | 16 byte low-endian byte array |
 
 Collecting these proof components into their own structures is up to implementations for now. In WNFS, the residue $r$ is stored alongside each entry in the private forest, but the prime hash $l$ is computed on the fly and proof witnesses are only found in protocols that combine WNFS with certificates. A future version of this specification may describe such protocols.
@@ -69,3 +69,7 @@ They then finally provide the accumulated $Q = \prod_{i = 0}^n{Q_i}$ as well as 
 
 [RSA acc og paper]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
 [batching acc paper]: https://eprint.iacr.org/2018/1188.pdf
+
+
+
+TODO specify wnfs/nameaccum/revisions/segment for domain separation of revision part of name accumulator
