@@ -12,19 +12,19 @@ The element membership proofs in this specification are based on the 2018 paper 
 
 The accumulator setup consists of a 2048 bit RSA modulus $N$ and a quadratic residue generator $g$.
 
-They are encoded as 256 byte low-endian byte arrays.
+They are encoded as 256 byte big-endian byte arrays.
 
 ### 1.2 Commitments
 
 All name accumulator commitments are 2048 bit unsigned integers smaller than the RSA modulus from the setup parameters.
 
-They are encoded as 256 byte low-endian byte arrays.
+They are encoded as 256 byte big-endian byte arrays.
 
 ### 1.3 Elements
 
 Name accumulator elements are essentially "path segments", but not represented as strings. Instead, each element is assigned a 256-bit random prime number.
 
-They are encoded as 32 byte low-endian byte arrays.
+They are encoded as 32 byte big-endian byte arrays.
 
 ### 1.4 Proofs
 
@@ -32,9 +32,9 @@ Proofs and witnesses of relationships between name accumulators come in various 
 
 | Proof component                        | Representation |
 |----------------------------------------|----------------|
-| Element in the quadratic residue group | 256 byte low-endian byte array |
-| Prime hash $l$                         | 16 byte low-endian byte array and low-endian unsigned varint counter |
-| Residue $r$                            | 16 byte low-endian byte array |
+| Element in the quadratic residue group | 256 byte big-endian byte array |
+| Prime hash $l$                         | 16 byte big-endian byte array and big-endian unsigned varint counter |
+| Residue $r$                            | 16 byte big-endian byte array |
 
 Collecting these proof components into their own structures is up to implementations for now. In WNFS, the residue $r$ is stored alongside each entry in the private forest, but the prime hash $l$ is computed on the fly and proof witnesses are only found in protocols that combine WNFS with certificates. A future version of this specification may describe such protocols.
 
