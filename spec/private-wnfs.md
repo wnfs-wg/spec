@@ -397,6 +397,8 @@ If the child is a `Node`, repeat the process of with the next nibble.
 
 If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
 
+TODO specify wnfs/nameaccum/revisions/segment for domain separation of revision part of name accumulator
+
 ## 4.2 Private Versioning
 
 `toVersioned : (Namefilter, TemporalKey) -> Namefilter`

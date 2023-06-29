@@ -2,21 +2,21 @@
 
 Name accumulators in WNFS represent commitments to "paths" in the private file system in a way that allows a third party to verify that certain path segments are part of a committed path without revealing all path segments and without leaking correlatable information to other committed paths.
 
-They are built on 2048-bit RSA accumulators. They were originally described in 1993 in [this paper][RSA acc og paper].
+They are built on 2048-bit RSA accumulators. They were originally described in 1993 in the paper ["One-way Accumulators: A Decentralized Alternative to Digital Signatures"][RSA acc og paper].
 
-The element membership proofs in this specification are based on the 2018 paper ["Batching Techniques for Accumulators with Applications to IOPs and Stateless Blockchains"][batching acc paper].
+The element membership proofs in this specification are based on the 2018 paper ["Batching Techniques for Accumulators with Applications to IOPs and Stateless Blockchains"][IOP Batching Boneh].
 
 ## 1 Encoding
 
 ### 1.1 Setup Parameters
 
-The accumulator setup consists of a 2048 bit RSA modulus $N$ and a quadratic residue generator $g$.
+The accumulator setup consists of a 2048 bit RSA modulus $N$ and a quadratic residue generator $g$. The generator element represents the empty name accumulator.
 
 They are encoded as 256 byte big-endian byte arrays.
 
 ### 1.2 Commitments
 
-All name accumulator commitments are 2048 bit unsigned integers smaller than the RSA modulus from the setup parameters.
+All name accumulator commitments (`NameAccumulator`s) are 2048 bit unsigned integers smaller than the RSA modulus from the setup parameters.
 
 They are encoded as 256 byte big-endian byte arrays.
 
@@ -36,40 +36,76 @@ Proofs and witnesses of relationships between name accumulators come in various 
 | Prime hash $l$                         | 16 byte big-endian byte array and big-endian unsigned varint counter |
 | Residue $r$                            | 16 byte big-endian byte array |
 
-Collecting these proof components into their own structures is up to implementations for now. In WNFS, the residue $r$ is stored alongside each entry in the private forest, but the prime hash $l$ is computed on the fly and proof witnesses are only found in protocols that combine WNFS with certificates. A future version of this specification may describe such protocols.
+Collecting these proof components into their own structures is up to implementations. Future versions of this specification may describe an encoding.
 
 ## 2 Algorithms
 
----
+### 2.1 Accumulation
 
-TODO
+`add_element : (SetupParameters, NameAccumulator, Element) -> NameAccumulator`
 
-The concrete protocol we use is based on the "proof of knowledge of exponent" (PoKE*) from [this paper](https://eprint.iacr.org/2018/1188.pdf), made non-interactive via the fiat-shamir heuristic. The resulting protocol generates a 128-bit prime $l$ by hashing the path that the current node has access to and the path that they delegate further.
+To add an element, exponentiate the current state of the name accumulator to the element added and take the setup's modulo. With the current accumulator state denoted as $u$, the element denoted as $e$ and the RSA modulus denoted as $N$, the new accumulator state $u'$ is
 
-Again extending the example from before, say an peer that has gotten delegated write access to `/Docs/University/` further delegates write access to the file `/Docs/University/Notes.md` to yet another peer.
+$$u' = u^e \mod\ N$$.
 
-To do this, they'd generate a certificate containing
-- that peer's public key
-- their own certificate (or a hash thereof)
-- the name accumulator $u_1$ `rsa_accumulator([inum(docs), inum(uni), inum(notes)])`
-- the proof $Q = u_0^q$ where $qx + r = l$ where $l = \mathsf{Hash}_\mathsf{Prime}(u_0, u_1)$ where $u_0 = g^{\mathbb{inum}(\mathbb{docs}) \cdot \mathbb{inum}(\mathbb{uni})}\ mod\ N$
-- the residue $r$.
+### 2.2 Empty Accumulator
 
-A verify would then verify this delegation by checking $Q^l u_0^r = u_1$.
+`empty : SetupParameters -> NameAccumulator`
 
+The empty accumulator can simply be read out of the setup parameters, it's the generator element $g$.
 
+### 2.3 Batched Elements Proof
 
-TODO
+`batch_proof_elements : (SetupParameters, NameAccumulator, Array<Element>) -> (NameAccumulator, ElementsProof)`
 
-They will thus accumulate all writes they did by multiplying the $Q_i$ they generate together by taking their product.
+This algorithm updates an accumulator state by adding an arbitrary number of prime-sized elements to it and produces a succinct proof that verifies that the proving party knows a set of elements to go from the past state of the accumulator to the current.
 
-For each key they write to the forest, they also include the residue $r$ from the $PoKE*$ in the leaf as well as a 4-byte indicator $l_{inc}$ that helps the verifier to compute the prime hash $l$ faster.
+The algorithm for this proof is the "proof of knowledge of exponent" (PoKE*) from [this paper][IOP Batching Boneh], made non-interactive via the fiat-shamir heuristic.
 
-They then finally provide the accumulated $Q = \prod_{i = 0}^n{Q_i}$ as well as the certificate chain and the current and previous private forest hash in a certificate proving write access.
+The number $l$ from the protocol is derived via SHA-3-hashing the big-endian bytes of the modulus, base, commitment and a counter. The base is the accumulator state before the elements were added and the commitment is the state after.
+The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a big-endian unsigned 128-bit integer.
+
+```ts
+deriveLHash(
+  modulusBigEndian: Uint8Array,
+  baseBigEndian: Uint8Array,
+  commitmentBigEndian: Uint8Array
+): Uint8Array {
+  let counter = 0
+  let primeCandidate
+  
+  do {
+    const hash = sha3(concat([
+      modulusBigEndian,
+      baseBigEndian,
+      commitmentBigEndian,
+      encode32BitBigEndian(counter)
+    ]))
+    const truncatedHash = new Uint8Array(hash.buffer, 0, 16)
+    primeCandidate = decodeBigUintBigEndian(truncatedHash)
+  } while (!isPrime(primeCandidate))
+  
+  return primeCandidate
+}
+```
+
+When generating the proof, we additionally output the counter that was used for making the truncated hash prime. Although this counter is not necessary for verification, it's useful by making it constant-time.
+
+This method hashing to a prime number is described in Section 7 of [this paper][IOP Batching Boneh].
+
+The final `ElementsProof` output consists of the residue $r$, $l$ hash counter and the number $Q$. They are derived as described in the PoKE* protocol from section 3.2 of [this paper][IOP Batching Boneh].
+
+### 2.4 Multi-Batch Elements Proof
+
+`multi_batch_elements_proofs : (SetupParameters, Array<(NameAccumulator, NameAccumulator, ElementsProof)>) -> MultiBatchProof`
+
+This algorithm batches multiple batch elements proofs together. It combines the PoKCR (Proof of Knowledge of Co-prime Roots) from Section 3.3 of [this paper][IOP Batching Boneh] with the previously described PoKE* (see the last paragraph).
+
+The resulting proof is not fully succinct. It only manages to compress the number $Q$ from each `ElementsProof`, but still requires that you keep around all residues $r$ and $l$ hash counters as well as which accumulator states they are related to.
+
+The output constist of $Q^*$, the product of all numbers $Q$ from the `ElementsProof`s as well as all residues $r$ and all $l$ hash counters, mapped to the accumulator states they prove.
+
 
 [RSA acc og paper]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
-[batching acc paper]: https://eprint.iacr.org/2018/1188.pdf
+[IOP Batching Boneh]: https://eprint.iacr.org/2018/1188.pdf
 
-
-
-TODO specify wnfs/nameaccum/revisions/segment for domain separation of revision part of name accumulator
