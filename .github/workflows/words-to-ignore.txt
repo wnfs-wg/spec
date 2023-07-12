@@ -72,8 +72,8 @@ extractable
 golang
 idempotence like omnipotence
 inline like outline
+little-endian
 lookup like noun
-low-endian
 merkle
 merklization
 multicodec like noun
