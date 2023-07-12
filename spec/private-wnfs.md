@@ -386,7 +386,7 @@ function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<N
 
 - `concat` denotes byte array concatenation,
 - `bareName` is the bare namefilter from the private file's header,
-- `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
+- `encode` is a function that maps a block index to a little-endian byte array encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge
 
