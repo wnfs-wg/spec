@@ -109,6 +109,7 @@ The decrypted layer has two sub-layers: a cleartext data layer, and a cleartext 
 The cleartext data layer makes use of the pointer machine from the encrypted layer to rediscover the semantically meaningful links in the file system. The private WNFS shares the same metadata structure as the [public WNFS](/spec/public-wnfs.md#metadata). Encryption keys and revision secrets are derived from a [skip ratchet](/spec/skip-ratchet.md).
 
 ```typescript
+type NameAccumulator = ByteArray<256> // Big-endian encoded 2048-bit unsigned integer.
 type Key = ByteArray<32>
 type Inumber = ByteArray<32> // Invariant: MUST be prime
 type PrivateBacklink = [
@@ -383,7 +384,7 @@ All algorithms in this section implicitly have access to a `PrivateForest` in th
 
 `resolveHashedLabel: Hash<NameAccumulator> -> (NameAccumulator, Array<Cid>)`
 
-The private file system is a pointer machine, where pointers MUST be hashes of namefilters. To resolve a namefilter hash, look up the hash in the HAMT. The resulting key-value pair MUST contain the full "expanded" namefilter and a list of at least one CID that points to encrypted private node headers or private nodes.
+The private file system is a pointer machine, where pointers MUST be hashes of name accumulators. To resolve a name accumulator hash, look it up in the HAMT. The resulting key-value pair contains the name accumulator hash preimage and a list of at least one CID that points to encrypted private node headers or private nodes.
 
 Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
@@ -395,25 +396,26 @@ $$\textsf{index} = \textsf{popcount}(bitmask \land ((1 \ll nibble) - 1))$$
 
 If the child is a `Node`, repeat the process of with the next nibble.
 
-If the child is a HAMT bucket of values, iterate that bucket to find one that has a namefilter that matches the hash of the namefilter. The associated values then contains the ciphertexts and the algorithm is done.
+If the child is a HAMT bucket of values, iterate that bucket to find one that has a name accumulator that matches given hash. The associated values then contains the ciphertexts and the algorithm is done.
 
-TODO specify wnfs/nameaccum/revisions/segment for domain separation of revision part of name accumulator
+## 4.2 Derive Revisioned NameAccumulators
 
-## 4.2 Private Versioning
+`toRevisioned : (NameAccumulator, Ratchet) -> NameAccumulator`
 
-`toVersioned : (Namefilter, TemporalKey) -> Namefilter`
+Because a node's name accumulator in its header is stable across revisions, it cannot be used for addressing different revisions in the private forest.
+In order to do that, the node name accumulator needs to be turned into revision-specific name accumulator for each revision.
+This is done by deriving a name segment from the revision's skip ratchet state and accumulating that it the node's name accumulator:
 
-Every private file or directory implicitly links to the name (namefilter) of its next version. These implicit links can only be resolved when you have the temporal key that allows you to decrypt the `PrivateNodeHeader`. Given a `PrivateNodeHeader` it is possible to construct namefilters for newer versions of this private file or directory by stepping the ratchet forward as far as you want to look ahead. Then, the new namefilter is:
-
-$$saturate(add(deriveKey(inc^n(ratchet)), bareName))$$
+```ts
+const revisionSegment = header.ratchet.deriveKeyPrime("wnfs/segment deriv from temporal")
+const revisionedName = header.name.add(revsisionSegment)
+```
 
 Where
-- $add$ refers to the [namefilter `add` operation](/spec/namefilter.md#Operation-add)
-- $saturate$ refers to the [namefilter `saturate` operation](/spec/namefilter.md#Operation-saturate)
-- $deriveKey$ refers to the [skip ratchet `deriveKey` operation](/spec/skip-ratchet.md#Key-Derivation) and
-- $inc$ refers to the [skip ratchet increase operation](/spec/skip-ratchet.md#Increasing)
+- `deriveKeyPrime` is a variant of the [skip ratchet derive key algorithm](/spec/skip-ratchet.md#21-Key-Derivation), but instead of using normal hashing, it'll use the [name accumulator hash to prime algorithm](/spec/nameaccumulator.md#23-Hash-to-Prime)
+- `add` refers to the [name accumulator accumulation algorithm](/spec/nameaccumulator.md#21-Accumulation).
 
-Due to the skip ratchet, it is possible to skip ahead by more than one revision at a time. To do so, choose any $n$ in $inc^n(ratchet)$. When looking for the most recent version of a file, it is RECOMMENDED to first skip to the next small epoch, then the next medium, then large epochs, as long as these revisions exit, and then backtracking once an unpopulated revision is found. A common algorithm for this is [exponential search](https://en.wikipedia.org/wiki/Exponential_search).
+Every private file or directory implicitly links to the name of its next version via the skip ratchet. These implicit links can only be resolved with access to the temporal key that decrypts the `PrivateNodeHeader` and thus the node's skip ratchet. Given the skip ratchet, it's then possible to derive any future revisioned name for the same node by first using the [skip ratchet increase algorithm](/spec/skip-ratchet.md#22-Increasing) to skip to a future skip ratchet state and then deriving the revisioned name. This can be useful for finding the latest state for a certain node. We RECOMMEND using [exponential search](https://en.wikipedia.org/wiki/Exponential_search) to speed this up.
 
 ## 4.3 Path Resolution
 
@@ -431,15 +433,15 @@ Resolve the current snapshot: only resolve the current snapshot of a version. Th
 
 For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's temporal key.
 
-#### 4.3.2.1 Attach
+#### 4.3.3 Attach
 
 A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
-In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [Namefilter Hash Resolutions](#41-Namefilter-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
+In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [NameAccumulator Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].temporalKey` needs to be decrypted using the temporal key for the current directory.
 
-##### 4.3.2.1.1 Example
+##### 4.3.3.1 Example
 
 Consider the following diagram. An agent may only have access to some nodes, but not their parent. The agent is able to create new revisions of files and directories, and link that back to the previous version. Some number of revisions may accrue before this can be fully rooted again. Attachment occurs when a reader with enough rights to perform the attachment inspects the file system and discovers that they can attach this file to its parents.
 
