@@ -54,7 +54,36 @@ $$u' = u^e \mod\ N$$.
 
 The empty accumulator can simply be read out of the setup parameters, it's the generator element $g$.
 
-### 2.3 Batched Elements Proof
+### 2.3 Hashing to Prime
+
+`hashToPrime : (ByteArray, Uint) -> (BigUint, Uint)`
+
+Multiple parts of the name accumulator proof protocols need the capacity to hash a byte array to a prime number.
+
+The input to this function is a byte array to hash as well as the desired output length $n <= 32$ in bytes.
+The output is a number $h$ with $1 <= h < 2^n$ and a 32-bit unsigned integer counter that can be used to verify a hash produced by `hashToPrime` in constant time.
+
+```ts
+function hashToPrime(
+  toDigest: Uint8Array,
+  outputLength: Uint
+): [Uint8Array, Uint] {
+  let counter = 0
+  let primeCandidate
+  
+  do {
+    const counterEncoded = encode32BitBigEndian(counter)
+    const hash = sha3(concat(toDigest, counterEncoded))
+    const truncatedHash = new Uint8Array(hash.buffer, 0, outputLength)
+    primeCandidate = decodeBigUintBigEndian(truncatedHash)
+  } while (!isPrime(primeCandidate))
+  
+  return [primeCandidate, counter]
+
+}
+```
+
+### 2.4 Batched Elements Proof
 
 `batch_proof_elements : (SetupParameters, NameAccumulator, Array<Element>) -> (NameAccumulator, ElementsProof)`
 
@@ -66,26 +95,16 @@ The number $l$ from the protocol is derived via SHA-3-hashing the big-endian byt
 The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a big-endian unsigned 128-bit integer.
 
 ```ts
-deriveLHash(
+function deriveLHash(
   modulusBigEndian: Uint8Array,
   baseBigEndian: Uint8Array,
   commitmentBigEndian: Uint8Array
 ): Uint8Array {
-  let counter = 0
-  let primeCandidate
-  
-  do {
-    const hash = sha3(concat([
-      modulusBigEndian,
-      baseBigEndian,
-      commitmentBigEndian,
-      encode32BitBigEndian(counter)
-    ]))
-    const truncatedHash = new Uint8Array(hash.buffer, 0, 16)
-    primeCandidate = decodeBigUintBigEndian(truncatedHash)
-  } while (!isPrime(primeCandidate))
-  
-  return primeCandidate
+  return hashToPrime(concat([
+    modulusBigEndian,
+    baseBigEndian,
+    commitmentBigEndian,
+  ]))
 }
 ```
 
@@ -95,7 +114,7 @@ This method hashing to a prime number is described in Section 7 of [this paper][
 
 The final `ElementsProof` output consists of the residue $r$, $l$ hash counter and the number $Q$. They are derived as described in the PoKE* protocol from section 3.2 of [this paper][IOP Batching Boneh].
 
-### 2.4 Multi-Batch Elements Proof
+### 2.5 Multi-Batch Elements Proof
 
 `multi_batch_elements_proofs : (SetupParameters, Array<(NameAccumulator, NameAccumulator, ElementsProof)>) -> MultiBatchProof`
 
