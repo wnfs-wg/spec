@@ -2,12 +2,13 @@
 
 The skip ratchet is described in this paper: https://eprint.iacr.org/2022/1078
 
-## Encoding
+## 1 Encoding
 
 This specifies the field names for the skip ratchet when encoded as CBOR:
 
 ```typescript
 type SkipRatchet = {
+  salt: ByteString<32>
   large: ByteString<32>
   mediumCount: Uint8 // technically a Uint8, but encoded as a normal CBOR varint
   medium: ByteString<32>
@@ -16,21 +17,26 @@ type SkipRatchet = {
 }
 ```
 
-## Algorithms
+## 2 Algorithms
 
-### Key Derivation
+### 2.1 Key Derivation
 
 The skip ratchet cannot be used as-is for an AES-256 key, because it's bigger than 256 bits.
-To derive a key suitable for AES-256 usage from a skip ratchet, XOR the large, medium and small parts of the skip ratchet:
+To derive a key suitable for AES-256 usage from a skip ratchet, hash the large, medium and small parts of the skip ratchet together
+with a domain separation string:
 
 ```typescript
-function deriveKey(ratchet: SkipRatchet): ByteArray<32> {
-  // '^' is meant to be the XOR operator on ByteArrays of equal size
-  return ratchet.large ^ ratchet.medium ^ ratchet.small
+function deriveKey(ratchet: SkipRatchet, domainSeparation: string): ByteArray<32> {
+  return sha3(concat([
+    new TextEncoder().encode(domainSeparation), // Utf8-encode
+    ratchet.large,
+    ratchet.medium,
+    ratchet.small
+  ]))
 }
 ```
 
-### Increasing
+### 2.2 Increasing
 
 ![A diagram of a skip ratchet stepping/skipping with three binary digits](/images/skip_ratchet.png)
 
@@ -58,7 +64,7 @@ This kind of step is only valid if the `smallCount` is below 255. Once the `smal
 Skipping to the next medium epoch can also be though of as a "carry-over" operation in the digit interpretation.
 
 The next medium epoch is computed by
-- replacing `small` with the hash of the ones-complement of the current `medium`
+- replacing `small` with the hash of the ratchet salt and previous `medium`
 - replacing `medium` with its hash
 - resetting `smallCount` to 0
 - increasing `mediumCount` by one.
@@ -66,9 +72,9 @@ The next medium epoch is computed by
 This kind of step is only valid if the `mediumCount` is below 255. Once the `mediumCount` would hit 256, you need to perform a skip to the next large epoch.
 
 The next large epoch is computed by
-- replacing `medium` with the hash of the ones-complement of the current `large`
-- replacing `small` with the hash of the ones-complement of the previously computed `medium`
-- replacing `large` with the hash of the current `large`
+- replacing `large` with the hash of the previous `large`
+- replacing `medium` with the hash of the previous `medium` (which is the hash of the salt and previous `large`)
+- replacing `small` with the hash of the salt and previous `medium` (see above)
 - resetting `smallCount` to 0
 - resetting `mediumCount` to 0
 
