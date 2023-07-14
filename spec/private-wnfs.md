@@ -343,7 +343,7 @@ accumulate([
 ])
 ```
 
-The function `accumulate` is defined in the [nameaccumulator spec](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
+The function `accumulate` is defined in the [`NameAccumulator` specfication](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
 
 ### 4.2 Write Access Delegation
 
@@ -437,7 +437,7 @@ For each path segment, look up the most recent version that can be found (as des
 
 A variant of seeking. This mode searches for the latest revision of a node (by its `NameAccumulator` and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
-In all of these cases the next path segment's directory or file's hash of the `NameAccumulator` MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [NameAccumulator Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
+In all of these cases the next path segment's directory or file's hash of the `NameAccumulator` MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [`NameAccumulator` Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].temporalKey` needs to be decrypted using the temporal key for the current directory.
 

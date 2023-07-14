@@ -145,7 +145,7 @@ The file system owner can later receive share payloads by looking through their 
 
 If a sender wants to share multiple private nodes at the same time, it is RECOMMENDED to create a private directory containing all nodes to share and create a single share payload pointing to that directory.
 
-This directory MAY be constructed on-the-fly. Its name then contains the sender's root DID and the node's inumber. This ensures the sender will always have permission to create this name in the private forest.
+This directory MAY be constructed on-the-fly. Its name then contains the sender's root DID and the node's i-number. This ensures the sender will always have permission to create this name in the private forest.
 The directory's contents may then have names that aren't derived from the name of the sharing directory.
 
 # Appendix
