@@ -35,7 +35,7 @@ At the encrypted data layer, the private forest is a collection of ciphertext bl
 
 We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used [NameAccumulator](/spec/nameaccumulator.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used [`NameAccumulator`](/spec/nameaccumulator.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
@@ -343,7 +343,7 @@ accumulate([
 ])
 ```
 
-The function `accumulate` is defined in the [`NameAccumulator` specfication](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
+The function `accumulate` is defined in the [`NameAccumulator` specification](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
 
 ### 4.2 Write Access Delegation
 
