@@ -6,7 +6,7 @@ The private file system provides granular control over read access along two dim
 
 # 1 Terminology
 
-Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While namefilters and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer.
+Encryption adds another dimension to a file system: visibility. The data and file layers are each augmented with cleartext and ciphertext components. While `NameAccumulator`s and multivalues do encode a concept of an encrypted file, we generally only speak of the data layer.
 
 ![](./diagrams/layer_dimensions.svg)
 
@@ -17,11 +17,11 @@ Broadly speaking, there is a "decrypted" layer and an "encrypted" layer.
 
 These all form graphs, where the nodes and links have different meanings per layer.
 
-| Visibility | Layer | Node        | Link             |
-|------------|-------|-------------|------------------|
-| Decrypted  | File  | WNFS File   | File Path        |
-| Decrypted  | Data  | CBOR Object | Namefilter + Key |
-| Encrypted  | Data  | IPLD Block  | CID              |
+| Visibility | Layer | Node        | Link                  |
+|------------|-------|-------------|-----------------------|
+| Decrypted  | File  | WNFS File   | File Path             |
+| Decrypted  | Data  | CBOR Object | NameAccumulator + Key |
+| Encrypted  | Data  | IPLD Block  | CID                   |
 
 # 2 Encrypted Layer
 
@@ -35,7 +35,7 @@ At the encrypted data layer, the private forest is a collection of ciphertext bl
 
 We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used saturated [namefilter](/spec/namefilter.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used [NameAccumulator](/spec/nameaccumulator.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
@@ -94,7 +94,7 @@ If the HAMT is used as the `PrivateForest` for WNFS, then the values stored SHOU
 
 ## 2.2 Ciphertext Files
 
-The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about namefilters as labels, and ciphertext blobs as being separate from the expanded namefilter inside the multivalued entry.
+The encrypted file layer is a very thin enrichment of the data layer. In particular, it knows about `NameAccumulator`s as labels, and ciphertext blobs as being separate from the expanded `NameAccumulator` inside the multivalued entry.
 
 <img src="./diagrams/hamt_leaves.png" width="600">
 
@@ -146,7 +146,7 @@ type PrivateDirectory = {
 }
 
 type PrivateRef = {
-  label: Hash<Namefilter> // hash(saturated(add(deriveKey(entryRatchet), entryBareName)))
+  label: Hash<NameAccumulator> // hash(revisionedName(entry))
   contentCid: Cid // used for disambiguating which value in the multivalue was referred to
   snapshotKey: Key // hash(deriveKey(entryRatchet))
   temporalKey: AesKwp<Key> // encrypt(deriveKey(directoryRatchet), deriveKey(entryRatchet))
@@ -211,7 +211,7 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique namefilter derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique `NameAccumulator` derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
 
 The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
 
@@ -234,7 +234,7 @@ The block count MUST reference the number of blocks the externalized content was
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the snapshot key MAY remain the same across those revisions
 
-NB: Label namefilters MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
+NB: Label `NameAccumulator`s MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
 Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
@@ -249,7 +249,7 @@ See the section for [Read Hierarchy](#317-read-hierarchy) for more information a
 ### 3.1.6 Pointers & Keys
 
 Keys are always attached to pointers to some data.
-The pointer to that that data consists of the hashed namefilter, which is used as the label for a multivalue in the private forest and an accompanying CID to disambiguate which value in the multivalue is actually referred to.
+The pointer to that that data consists of the hashed `NameAccumulator`, which is used as the label for a multivalue in the private forest and an accompanying CID to disambiguate which value in the multivalue is actually referred to.
 
 <img src="./diagrams/decryption_pointer.png" width="400">
 
@@ -295,7 +295,7 @@ Special attention should be paid to the relationship of the skip ratchet to snap
 
 ### 3.1.7.2 Temporal Key Structure
 
-A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a [Temporal Key](#3161-temporal-key). Every revision of a node MUST have a unique skip ratchet, bare namefilter, and i-number.
+A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a [Temporal Key](#3161-temporal-key). Every revision of a node MUST have a unique skip ratchet, `NameAccumulator`, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the snapshot key for the current node
@@ -386,7 +386,7 @@ All algorithms in this section implicitly have access to a `PrivateForest` in th
 
 The private file system is a pointer machine, where pointers MUST be hashes of name accumulators. To resolve a name accumulator hash, look it up in the HAMT. The resulting key-value pair contains the name accumulator hash preimage and a list of at least one CID that points to encrypted private node headers or private nodes.
 
-Looking up a namefilter hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
+Looking up a `NameAccumulator` hash in the HAMT works by splitting a hash into its nibbles. For example: a hash `0xf199a877d0...` MUST be split into the nibbles `0xf`, `0x1`, `0x9`, etc.
 
 To split bytes into nibbles, first take the 4 most significant bits of and *then* the 4 least significant bits for each hash byte from byte index 0 to 31. This method matches the common hex encoding of byte strings and reading the hex digits off one-by-one in most languages.
 
@@ -419,7 +419,7 @@ Every private file or directory implicitly links to the name of its next version
 
 ## 4.3 Path Resolution
 
-`resolvePath : (PrivateDirectory, Array<string>) -> Hash<Namefilter>`
+`resolvePath : (PrivateDirectory, Array<string>) -> Hash<NameAccumulator>`
 
 Paths in the private file system MUST be resolved relative to a parent directory. This directory MAY be at the current revision, or MAY be at an earlier version.
 
@@ -435,9 +435,9 @@ For each path segment, look up the most recent version that can be found (as des
 
 #### 4.3.3 Attach
 
-A variant of seeking. This mode searches for the latest revision of a node (by its namefilter and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
+A variant of seeking. This mode searches for the latest revision of a node (by its `NameAccumulator` and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
-In all of these cases the next path segment's directory or file's hash of the namefilter MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [NameAccumulator Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
+In all of these cases the next path segment's directory or file's hash of the `NameAccumulator` MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [NameAccumulator Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].temporalKey` needs to be decrypted using the temporal key for the current directory.
 
@@ -449,23 +449,22 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 ## 4.4 Sharded File Content Access
 
-`getShards : PrivateFile -> Array<Namefilter>`
+`getShards : PrivateFile -> Array<NameAccumulator>`
 
-To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `sha3(concat(key, encode(i)))` for each block index `i` of external content to the `bareName` like so:
+To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `concat(key, encode(i))` for each block index `i` of external content to the file's name like so:
 
 ```ts
-function* shardLabels(key: Key, count: Uint64, bareName: Namefilter): Iterable<Namefilter> {
+function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
   for (let i = 0; i < count; i++) {
-    yield bareName
+    yield name
       .add(key)
-      .add(sha3(concat(key, encode(i))))
-      .saturate()
+      .add(concat(key, encode(i)))
   }
 }
 ```
 
 - `concat` denotes byte array concatenation,
-- `bareName` is the bare namefilter from the private file's header,
+- `name` is the `NameAccumulator` from the private file's header,
 - `encode` is a function that maps a block index to a low-endian byte array encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge
