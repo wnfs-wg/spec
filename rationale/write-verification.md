@@ -4,7 +4,7 @@ We need a cryptographic accumulator to prove to others we've got signature-attes
 
 # Choice
 
-We've chosen 2048-bit RSA accumulators with a per-WNFS trusted setup by the root owner on creation, 256-bit inumbers and proofs `PoKE*` and `PoKCR` described [in this paper][IOP Batching Boneh] for verifying membership.
+We've chosen 2048-bit RSA accumulators with a per-WNFS trusted setup by the root owner on creation, 256-bit i-numbers and proofs `PoKE*` and `PoKCR` described [in this paper][IOP Batching Boneh] for verifying membership.
 
 # Alternatives
 

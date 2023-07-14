@@ -7,6 +7,7 @@ Philipp like Alice
 Zelenka like Alice
 expede
 matheus23
+Fiat-Shamir
 
 
 # Spec
@@ -31,6 +32,7 @@ ECDH
 GCA like ABC
 HAMT like ABC
 IND-CCA
+IOP like ABC
 IPFS like ABC
 IPLD like ABC
 KEM-DEM
@@ -39,6 +41,8 @@ Merklized
 NPM like ABC
 PDF
 PKI
+PoKCR
+PoKE
 RSA like ABC
 RSAES-OAEP
 SHA
@@ -58,7 +62,9 @@ cardinality like formality
 ciphertext like text
 cleartext
 codec
+correlatable
 cryptographic
+cryptographically
 cryptree like tree
 dag-cbor
 decrypt like encrypt
@@ -68,6 +74,7 @@ distinguishability
 encoding like noun
 erroring
 ethereum
+exponentiate
 extractable
 golang
 idempotence like omnipotence
@@ -88,6 +95,7 @@ popcount like count
 pre-defined
 preimage like image
 prepend like append
+revisioned
 semilattice like lattice
 sharded
 sharding

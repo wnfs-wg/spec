@@ -89,7 +89,7 @@ function hashToPrime(
 
 This algorithm updates an accumulator state by adding an arbitrary number of prime-sized elements to it and produces a succinct proof that verifies that the proving party knows a set of elements to go from the past state of the accumulator to the current.
 
-The algorithm for this proof is the "proof of knowledge of exponent" (PoKE*) from [this paper][IOP Batching Boneh], made non-interactive via the fiat-shamir heuristic.
+The algorithm for this proof is the "proof of knowledge of exponent" (PoKE*) from [this paper][IOP Batching Boneh], made non-interactive via the Fiat-Shamir heuristic.
 
 The number $l$ from the protocol is derived via SHA-3-hashing the big-endian bytes of the modulus, base, commitment and a counter. The base is the accumulator state before the elements were added and the commitment is the state after.
 The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a big-endian unsigned 128-bit integer.
@@ -122,7 +122,7 @@ This algorithm batches multiple batch elements proofs together. It combines the 
 
 The resulting proof is not fully succinct. It only manages to compress the number $Q$ from each `ElementsProof`, but still requires that you keep around all residues $r$ and $l$ hash counters as well as which accumulator states they are related to.
 
-The output constist of $Q^*$, the product of all numbers $Q$ from the `ElementsProof`s as well as all residues $r$ and all $l$ hash counters, mapped to the accumulator states they prove.
+The output consists of $Q^*$, the product of all numbers $Q$ from the `ElementsProof`s as well as all residues $r$ and all $l$ hash counters, mapped to the accumulator states they prove.
 
 
 [RSA acc og paper]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf

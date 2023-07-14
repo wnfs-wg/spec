@@ -17,11 +17,11 @@ Broadly speaking, there is a "decrypted" layer and an "encrypted" layer.
 
 These all form graphs, where the nodes and links have different meanings per layer.
 
-| Visibility | Layer | Node        | Link                  |
-|------------|-------|-------------|-----------------------|
-| Decrypted  | File  | WNFS File   | File Path             |
-| Decrypted  | Data  | CBOR Object | NameAccumulator + Key |
-| Encrypted  | Data  | IPLD Block  | CID                   |
+| Visibility | Layer | Node        | Link                    |
+|------------|-------|-------------|-------------------------|
+| Decrypted  | File  | WNFS File   | File Path               |
+| Decrypted  | Data  | CBOR Object | `NameAccumulator` + Key |
+| Encrypted  | Data  | IPLD Block  | CID                     |
 
 # 2 Encrypted Layer
 
@@ -321,7 +321,7 @@ This means the representation
 - must not be correlatable to other paths and
 - must not leak the amount of path segments inside the path.
 
-Using simply the hash of a file path would suffice to satify the above conditions, however, we also want to be able to create cryptographically signed certificates that give write access to a  subset of keys in the private forest corresponding to a branch in the private file system hierarchy.
+Using simply the hash of a file path would suffice to satisfy the above conditions, however, we also want to be able to create cryptographically signed certificates that give write access to a  subset of keys in the private forest corresponding to a branch in the private file system hierarchy.
 
 To achieve this, we make use of cryptographic RSA accumulators. For details on how accumulation works, refer to [this paper][RSA accumulators]
 
@@ -329,10 +329,10 @@ To achieve this, we make use of cryptographic RSA accumulators. For details on h
 
 Every private forest label MUST be represented as a 2048-bit positive integer that is smaller than the private forest's RSA modulus (stored in its root).
 
-This integer represents an RSA accumulator commitment, committing all inumbers of its path as well as a revision secret derived from the skip ratchet.
+This integer represents an RSA accumulator commitment, committing all i-numbers of its path as well as a revision secret derived from the skip ratchet.
 
 As an example, let's look at the accumulator for a file at the path `/Docs/University/Notes.md`.
-Assuming it's encrypted with a `snapshotKey` and the inumbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
+Assuming it's encrypted with a `snapshotKey` and the i-numbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
 
 ```typescript
 accumulate([
@@ -380,7 +380,7 @@ Verifying a change in a private forest from one root CID to another follows thes
 
 All algorithms in this section implicitly have access to a `PrivateForest` in their context.
 
-## 4.1 NameAccumulator Hash Resolution
+## 4.1 `NameAccumulator` Hash Resolution
 
 `resolveHashedLabel: Hash<NameAccumulator> -> (NameAccumulator, Array<Cid>)`
 
@@ -398,7 +398,7 @@ If the child is a `Node`, repeat the process of with the next nibble.
 
 If the child is a HAMT bucket of values, iterate that bucket to find one that has a name accumulator that matches given hash. The associated values then contains the ciphertexts and the algorithm is done.
 
-## 4.2 Derive Revisioned NameAccumulators
+## 4.2 Derive Revisioned `NameAccumulator`s
 
 `toRevisioned : (NameAccumulator, Ratchet) -> NameAccumulator`
 
