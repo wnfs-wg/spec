@@ -55,22 +55,21 @@ Shared private data payloads are stored in the [Private Forest](/spec/private-wn
 
 ## 3.1 Share Label
 
-Shares are labeled in the private forest by a [namefilter](/spec/namefilter.md) consisting of:
+Shares are labeled in the private forest by a [`NameAccumulator`](/spec/nameaccumulator.md) consisting of:
 - The sender's root DID. In most cases this will be the file system owner's root DID.
 - The recipient's exchange key
 - A counter, which is incremented each time the sender creates a share.
 
 The counter MUST be a 0-based natural number.
 
-The namefilter for a share MUST be computed as follows:
+The `NameAccumulator` for a share MUST be computed as follows:
 
 ```ts
 function computeShareLabel(senderRootDID: string, recipientExchangeKey: ByteString, counter: number) {
-  return new Namefilter()
+  return NameAccumulator.empty()
     .add(senderRootDID)
     .add(recipientExchangeKey)
     .add(encode(counter))
-    .saturate()
 }
 ```
 
@@ -89,7 +88,7 @@ type SharePayload = TemporalSharePointer | SnapshotSharePointer
 
 type TemporalSharePointer = {
   "wnfs/share/temporal": {
-    label: Hash<Namefilter> // 32 bytes SHA3 hash
+    label: Hash<NameAccumulator> // 32 bytes SHA3 hash
     cid: Cid // content block CID
     temporalKey: Key // 32 bytes AES key
   }
@@ -97,7 +96,7 @@ type TemporalSharePointer = {
 
 type SnapshotSharePointer = {
   "wnfs/share/snapshot": {
-    label: Hash<Namefilter> // 32 bytes SHA3 hash
+    label: Hash<NameAccumulator> // 32 bytes SHA3 hash
     cid: Cid // content block CID
     snapshotKey: Key // 32 bytes AES key
   }
@@ -146,7 +145,8 @@ The file system owner can later receive share payloads by looking through their 
 
 If a sender wants to share multiple private nodes at the same time, it is RECOMMENDED to create a private directory containing all nodes to share and create a single share payload pointing to that directory.
 
-This directory MAY be constructed on-the-fly. Its bare namefilter then consists of only its own `inumber` and its entries don't have their bare namefilters adjusted, as this directory is not meant to have additional revisions or inherit write access to its contents.
+This directory MAY be constructed on-the-fly. Its name then contains the sender's root DID and the node's i-number. This ensures the sender will always have permission to create this name in the private forest.
+The directory's contents may then have names that aren't derived from the name of the sharing directory.
 
 # Appendix
 

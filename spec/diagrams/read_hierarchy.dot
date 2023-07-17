@@ -46,7 +46,7 @@ digraph G {
             fillcolor = 5
         ]
 
-        external_namefilter [label = "Namefilter"]
+        external_nameaccum [label = "NameAccumulator"]
         external_hidden [label = "" shape = point style = invis]
         external_content_key [label = "Content Key"]
     }
@@ -71,7 +71,7 @@ digraph G {
                 fillcolor = 5
             ]
 
-            docs_namefilter [label = "Namefilter"]
+            docs_nameaccum [label = "NameAccumulator"]
             docs_ptr_hidden [label = "" shape = point style = invis]
             docs_content_key [label = "Content Key"]
         }
@@ -89,7 +89,7 @@ digraph G {
                 fillcolor = 5
             ]
 
-            images_namefilter [label = "Namefilter"]
+            images_nameaccum [label = "NameAccumulator"]
             images_ptr_hidden [label = "" shape = point style = invis]
             images_content_key [label = "Content Key"]
         }
@@ -115,7 +115,7 @@ digraph G {
                 fillcolor = 5
             ]
 
-            thesis_namefilter [label = "Namefilter"]
+            thesis_nameaccum [label = "NameAccumulator"]
             thesis_ptr_hidden [label = "" shape = point style = invis]
             thesis_content_key [label = "Content Key"]
         }
@@ -133,7 +133,7 @@ digraph G {
                 fillcolor = 5
             ]
 
-            notes_namefilter [label = "Namefilter"]
+            notes_nameaccum [label = "NameAccumulator"]
             notes_ptr_hidden [label = "" shape = point style = invis]
             notes_content_key [label = "Content Key"]
         }
@@ -161,7 +161,7 @@ digraph G {
                 fillcolor = 5
             ]
 
-            hawaii_namefilter [label = "Namefilter"]
+            hawaii_nameaccum [label = "NameAccumulator"]
             hawaii_ptr_hidden [label = "" shape = point style = invis]
             hawaii_content_key [label = "Content Key"]
         }
@@ -190,12 +190,12 @@ digraph G {
     # EDGES #
     #########
 
-    external_hidden -> docs_namefilter:e [
+    external_hidden -> docs_nameaccum:e [
         ltail = cluster_external
         lhead = cluster_entry_dir
     ]
 
-    docs_ptr_hidden -> thesis_namefilter [
+    docs_ptr_hidden -> thesis_nameaccum [
         ltail = cluster_docs_ptr
         lhead = cluster_docs_dir
     ]

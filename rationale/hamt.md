@@ -49,7 +49,7 @@ However, for degree 16, the HAMT has a more byte-efficient encoding for full int
 
 There exist various lookup-efficient, immutable tree data structures. We took a look at Merkle Search Trees and Patter-Oriented-Split Trees.
 
-What makes these trees useful is their ability to handle non-uniform key distributions. This doesn't apply to our use-case in private WNFS, because we're using namefilter hashes as the HAMT keys.
+What makes these trees useful is their ability to handle non-uniform key distributions. This doesn't apply to our use-case in private WNFS, because we're using `NameAccumulator` hashes as the HAMT keys.
 
 
 ## [Splay Trees](https://en.wikipedia.org/wiki/Splay_tree)

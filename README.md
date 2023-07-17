@@ -21,7 +21,7 @@ The specifications are:
 - [Public WNFS](/spec/public-wnfs.md)
 - [Private WNFS](/spec/private-wnfs.md)
 - [Shared Private Data Extension](/spec/shared-private-data.md)
-- [Namefilters](/spec/namefilter.md)
+- [`NameAccumulator`s](/spec/nameaccumulator.md)
 - [Skip Ratchet](/spec/skip-ratchet.md)
 ## Editors
 
