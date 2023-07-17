@@ -48,7 +48,7 @@ We chose [AES-KWP] with 256-bit keys.
 
 ### [AES-SIV]
 
-AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the snapshot key derived from it is used with AES-GCM or the private node header is decrypted and the namefilter it implies is checked against the HAMT label.
+AES-SIV supports associated data. However, keys need to be twice the size. Associated data is not necessary to prevent attacks: We don't care about the wrapped key's integrity, as it'll be checked either when the snapshot key derived from it is used with AES-GCM or the private node header is decrypted and the `NameAccumulator` it implies is checked against the HAMT label.
 
 ### [AES-KW]
 

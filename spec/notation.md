@@ -29,7 +29,7 @@ The ciphertexts produced by `AesGcm<>` have a 12 byte initialization vector prep
 This represents a ciphertext that decrypts to given data type `Data`.
 The encryption/decryption algorithm used is [AES-KWP](https://www.rfc-editor.org/rfc/rfc5649) with 256-bit keys.
 AES-KWP can be thought of as keyed permutation function where observing the permutation doesn't reveal information about the key used, together with an 8-byte authentication tag. It doesn't provide [IND-CCA2](https://en.wikipedia.org/wiki/Ciphertext_indistinguishability), so must only be only be used in cases where detecting two same-key and same-message ciphertexts is not a security concern.
-In this specification we use AES-KWP for encrypting random AES keys and private node headers containing the `inumber`, namefilter and skip ratchet.
+In this specification we use AES-KWP for encrypting random AES keys and private node headers containing the `inumber`, `NameAccumulator` and skip ratchet.
 
 ## `ByteArray<length>`
 
@@ -43,4 +43,4 @@ This means at this point in the data structure there's a 32-byte array represent
 
 ## Algorithm Type Signatures
 
-For algorithms, we often specify their type signature, e.g. `: (Namefilter, TemporalKey) -> Namefilter`. This is read as "has the type signature 'function of namefilter and temporal key to namefilter'".
+For algorithms, we often specify their type signature, e.g. `: (NameAccumulator, TemporalKey) -> NameAccumulator`. This is read as "has the type signature 'function of name accumulator and temporal key to name accumulator'".
