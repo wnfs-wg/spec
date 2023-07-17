@@ -332,18 +332,18 @@ Every private forest label MUST be represented as a 2048-bit positive integer th
 This integer represents an RSA accumulator commitment, committing all i-numbers of its path as well as a revision secret derived from the skip ratchet.
 
 As an example, let's look at the accumulator for a file at the path `/Docs/University/Notes.md`.
-Assuming it's encrypted with a `snapshotKey` and the i-numbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
+Assuming its header contains `ratchet` and the i-numbers for `Docs`, `University` and `Notes.md` are `inum(docs)`, `inum(uni)`, and `inum(notes)` respectively, then the private forest label is this:
 
 ```typescript
 accumulate([
   inum(docs),
   inum(uni),
   inum(notes),
-  hashToPrime(snapshotKey)
+  hashToPrime(ratchet.deriveKey("wnfs/segment deriv from temporal"))
 ])
 ```
 
-The function `accumulate` is defined in the [`NameAccumulator` specification](/spec/nameaccumulator.md#TODO) using the modulus and generator stored at the `PrivateForest` root.
+The function `accumulate` is defined in the [`NameAccumulator` specification](/spec/nameaccumulator.md#21-Accumulation) using the modulus and generator stored at the `PrivateForest` root.
 
 ### 4.2 Write Access Delegation
 
@@ -359,21 +359,23 @@ Extending the example from the section above: If the root owner wants to delegat
 
 When a recipient of a delegation wants to prove or further delegate write access, they prove that the path that they delegate is a superset of the path segments that they have access to.
 
-This proof is made in the form of a "proof of exponent" as explained in the [name accumulator specification](/spec/nameaccumulator.md#TODO).
+This proof is made in the form of a "proof of exponent" as explained in the [name accumulator specification](/spec/nameaccumulator.md#24-Batched-Elements-Proof).
 The inputs to the proof are then the name accumulator of the path they have access to as a witness and the path they want to delegate further as the commitment.
 
 ### 4.3 Write Access Batch Proofs
 
 We assume that third parties checking writes don't have read access to the decrypted file system itself. So when a peer with delegated write access wants to prove that their write is valid, they follow a similar protocol as described in the previous section, except they create proofs of exponents for the labels in the private forest that they modified.
 
-The biggest part of these proofs of exponents can be batched together using the algorithm described in the [name accumulator specification](/spec/nameaccumulator.md#TODO).
+The biggest part of these proofs of exponents can be batched together using the algorithm described in the [name accumulator specification](/spec/nameaccumulator.md#25-Multi-Batch-Elements-Proof).
 
 ### 4.4. Write Access Batch Proof Verification
 
 Verifying a change in a private forest from one root CID to another follows these steps:
 1. Compute the diff between the forests to obtain the labels of entries that were created, removed or updated between the two revisions.
 2. From the provided certificates, extract all validly signed name accumulators that the writer has access to.
-3. Verify provided batch proofs as described in the [name accumulator specification](/spec/nameaccumulator.md#TODO) and match their bases against the validly signed name accumulators from the certificates.
+3. Verify provided batch proofs as described in the [name accumulator specification](/spec/nameaccumulator.md#26-Multi-Batch-Elements-Proof-Verification).
+4. Match the bases in the multi-batch proof against the validly signed name accumulators from the certificates.
+5. Make sure that all keys that changed between private forest versions were proven in the multi-batch proof.
 
 
 # 4 Algorithms
