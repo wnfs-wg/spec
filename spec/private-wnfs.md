@@ -260,7 +260,7 @@ However, developers should be aware that such operations wouldn't check the inva
 
 #### 3.1.6.1 Temporal Key
 
-Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derviation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/revision segment deriv from ratchet`.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/revision segment deriv from ratchet`.
 
 When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 
