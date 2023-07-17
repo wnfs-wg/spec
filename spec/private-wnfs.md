@@ -266,7 +266,7 @@ When added to a private directory, it MUST be encrypted with AES-KWP and the pri
 
 #### 3.1.6.2 Snapshot Key
 
-Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key](#3161-temporal-key) by hashing it with SHA3.
+Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key](#3161-temporal-key) by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/snapshot key deriv from temporal`.
 
 ### 3.1.7 Read Hierarchy
 
@@ -339,9 +339,11 @@ accumulate([
   inum(docs),
   inum(uni),
   inum(notes),
-  hashToPrime(ratchet.deriveKey("wnfs/segment deriv from temporal"))
+  hashToPrime("wnfs/segment deriv from temporal", ratchet, 32)
 ])
 ```
+
+In this case, hashing `ratchet` involves concatenating its `large`, `medium` and `small` digit together, then proceeding with `hashToPrime`.
 
 The function `accumulate` is defined in the [`NameAccumulator` specification](/spec/nameaccumulator.md#21-Accumulation) using the modulus and generator stored at the `PrivateForest` root.
 
@@ -409,12 +411,12 @@ In order to do that, the node name accumulator needs to be turned into revision-
 This is done by deriving a name segment from the revision's skip ratchet state and accumulating that it the node's name accumulator:
 
 ```ts
-const revisionSegment = header.ratchet.deriveKeyPrime("wnfs/segment deriv from temporal")
+const revisionSegment = hashToPrime("wnfs/segment deriv from temporal", header.ratchet, 32)
 const revisionedName = header.name.add(revsisionSegment)
 ```
 
 Where
-- `deriveKeyPrime` is a variant of the [skip ratchet derive key algorithm](/spec/skip-ratchet.md#21-Key-Derivation), but instead of using normal hashing, it'll use the [name accumulator hash to prime algorithm](/spec/nameaccumulator.md#23-Hash-to-Prime)
+- hashing `header.ratchet` involves concatenating its `large`, `medium` and `small` digit, then proceeding with `hashToPrime` and,
 - `add` refers to the [name accumulator accumulation algorithm](/spec/nameaccumulator.md#21-Accumulation).
 
 Every private file or directory implicitly links to the name of its next version via the skip ratchet. These implicit links can only be resolved with access to the temporal key that decrypts the `PrivateNodeHeader` and thus the node's skip ratchet. Given the skip ratchet, it's then possible to derive any future revisioned name for the same node by first using the [skip ratchet increase algorithm](/spec/skip-ratchet.md#22-Increasing) to skip to a future skip ratchet state and then deriving the revisioned name. This can be useful for finding the latest state for a certain node. We RECOMMEND using [exponential search](https://en.wikipedia.org/wiki/Exponential_search) to speed this up.
@@ -458,9 +460,8 @@ To calculate the array of HAMT labels for [external content](#3141-externalized-
 ```ts
 function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
   for (let i = 0; i < count; i++) {
-    yield name
-      .add(key)
-      .add(concat(key, encode(i)))
+    // add returns `name` with the parameter added as a name segment, using hashToPrime
+    yield name.add(concat(key, encode(i)))
   }
 }
 ```
