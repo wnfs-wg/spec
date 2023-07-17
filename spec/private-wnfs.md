@@ -461,7 +461,7 @@ To calculate the array of HAMT labels for [external content](#3141-externalized-
 function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
   for (let i = 0; i < count; i++) {
     // add returns `name` with the parameter added as a name segment
-    yield name.add(hashToPrime("wnfs/segment deriv for file block", concat(key, encode(i))))
+    yield name.add(hashToPrime("wnfs/segment deriv for file block", concat(key, encode(i)), 32))
   }
 }
 ```
