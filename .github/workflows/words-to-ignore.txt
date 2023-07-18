@@ -44,6 +44,7 @@ PDF
 PKI
 PoKCR
 PoKE
+Poly
 RSA like ABC
 RSAES-OAEP
 SHA
@@ -51,6 +52,7 @@ SIV
 UCAN like noun
 WNFS
 WebCrypto
+XChaCha
 XXHash
 ary
 backlink like link

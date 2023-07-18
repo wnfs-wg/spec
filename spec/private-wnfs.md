@@ -25,9 +25,9 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted-layer).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized][Merkle Tree] hash array mapped trie ([HAMT]). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted-layer).
 
-The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
+The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a "[dark forest]".
 
 ## 2.1 Ciphertext Blocks
 
@@ -35,13 +35,13 @@ At the encrypted data layer, the private forest is a collection of ciphertext bl
 
 We refer to the keys in the private forest as 'labels' to disambiguate them from cryptographic keys.
 
-Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap](https://en.wikipedia.org/wiki/Multimap). The HAMT MUST have a node-degree of 16, and MUST used [`NameAccumulator`](/spec/nameaccumulator.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
+Ciphertext blocks MUST be stored as the leaves of the HAMT that encodes a [multimap]. The HAMT MUST have a node-degree of 16, and MUST used [`NameAccumulator`](/spec/nameaccumulator.md)s as the label. See [`rationale/hamt.md`](/rationale/hamt.md) for more information on parameter choice.
 
 ### 2.1.1 Data Types
 
-The multimap container is based on the [IPLD HAMT specification](https://ipld.io/specs/advanced-data-layouts/hamt/spec/).
+The multimap container is based on the [IPLD HAMT specification].
 
-It MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec](https://github.com/multiformats/multicodec/blob/master/table.csv#L40) CIDs.
+It MUST be represented as a CBOR-encoded Merkle HAMT. The values MUST be a set of [`raw` codec][Multicodec Table Raw] CIDs.
 
 All values in the Merkle HAMT MUST be sorted in binary ascending order by CID and MUST NOT contain duplicates.
 
@@ -118,17 +118,17 @@ type PrivateBacklink = [
   // i.e. the CID is encrypted with the ratchet from the revision that is linked to
   // Also: What is encrypted should be the actual byte representation of a CID (usually 40 bytes),
   // as opposed to the dag-cbor-encoded representation of a CID.
-  AesKwp<Cid> // disambiguation CID for revision
+  KeyWrapped<Cid> // disambiguation CID for revision
 ]
 
-// deterministically encrypted using deriveKey(ratchet) (see AesGcmDet in notation.md)
+// deterministically encrypted using deriveKey(ratchet) (see KeyWrapped<> in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   inumber: Inumber
   name: NameAccumulator
 }
 
-// aes-gcm encrypted using hash(deriveKey(parentRatchet))
+// xchacha20-poly1305-encrypted using hash(deriveKey(parentRatchet))
 type PrivateNode
   = PrivateDirectory
   | PrivateFile
@@ -149,7 +149,7 @@ type PrivateRef = {
   label: Hash<NameAccumulator> // hash(revisionedName(entry))
   contentCid: Cid // used for disambiguating which value in the multivalue was referred to
   snapshotKey: Key // hash(deriveKey(entryRatchet))
-  temporalKey: AesKwp<Key> // encrypt(deriveKey(directoryRatchet), deriveKey(entryRatchet))
+  temporalKey: KeyWrapped<Key> // encrypt(deriveKey(directoryRatchet), deriveKey(entryRatchet))
 }
 
 type PrivateFile = {
@@ -182,7 +182,7 @@ See the [validation specification](/spec/validation.md) on requirements for vali
 A file in the cleartext layer turns into a `PrivateNodeHeader` and `PrivateNode` in the cleartext data layer. Each of these data is then encrypted and put under the same label in the `PrivateForest` as a block of the encrypted data layer:
 
 ```typescript
-type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
+type CiphertextBlock = KeyWrapped<PrivateNodeHeader> | Encrypted<PrivateNode>
 
 // PrivateForest value block references are Cid<CiphertextBlock>
 ```
@@ -213,14 +213,16 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 Since external content blocks are separate from the header, they MUST have a unique `NameAccumulator` derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
 
-The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
+The block size MUST be at least 1 and at maximum $2^{18} - 40 = 262,104$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 24 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
 
 ```
  0                   1
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5  (bytes)
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Initialization Vector |       |
-+-+-+-+-+-+-+-+-+-+-+-+-+       |
+| Initialization                |
+| Vector        +-+-+-+-+-+-+-+-+
+| (24 bytes)    |               |
++-+-+-+-+-+-+-+-+               |
 |                               :
 :         Encrypted Block       :
 :        (blockSize bytes)      |
@@ -236,7 +238,7 @@ The externalized content's `key` MUST be regenerated randomly whenever the file 
 
 NB: Label `NameAccumulator`s MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `40 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the XChaCha20-Poly1305 authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
@@ -260,9 +262,9 @@ However, developers should be aware that such operations wouldn't check the inva
 
 #### 3.1.6.1 Temporal Key
 
-Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/revision segment deriv from ratchet`.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm](/spec/skip-ratchet.md#21-Key-Derivation) with the domain separation string `wnfs/revision segment deriv from ratchet`.
 
-When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
+When added to a private directory, it MUST be encrypted with [AES-KWP] and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 
 #### 3.1.6.2 Snapshot Key
 
@@ -496,4 +498,11 @@ Otherwise, merge the HAMT `Node`s of each `PrivateForest` together recursively. 
 The private forest merge algorithm functions completely at the encrypted data layer, and MAY be performed by a third party that doesn't have read access to the private file system at all. As a trade off, this pushes some complexity to read-time. It is possible for multiple "conflicting" file writes to exist at a single revision. In these cases, some tie-breaking MUST be performed, and is up to the reader. Tie breaking MAY be as simple as choosing the smallest CID.
 
 
+[Merkle Tree]: https://en.wikipedia.org/wiki/Merkle_tree
+[HAMT]: https://en.wikipedia.org/wiki/Hash_array_mapped_trie
+[dark forest]: https://en.wikipedia.org/wiki/The_Dark_Forest
+[multimap]: https://en.wikipedia.org/wiki/Multimap
+[IPLD HAMT specification]: https://ipld.io/specs/advanced-data-layouts/hamt/spec/
+[Multicodec Table Raw]: https://github.com/multiformats/multicodec/blob/master/table.csv#L40
 [RSA accumulators]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
+[AES-KWP]: https://www.rfc-editor.org/rfc/rfc5649
