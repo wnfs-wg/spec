@@ -171,7 +171,7 @@ type InlineContent = {
 type ExternalContent = {
   "external": {
     key: Key
-    blockSize: Uint64 // in bytes, at max 262,116
+    blockSize: Uint64 // in bytes, at max 262,104
     blockCount: Uint64
   }
 }
