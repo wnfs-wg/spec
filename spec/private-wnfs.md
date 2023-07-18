@@ -232,7 +232,7 @@ The block size MUST be at least 1 and at maximum $2^{18} - 40 = 262,104$ bytes, 
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-The block count MUST reference the number of blocks the externalized content was split into. The value of `blockCount` MUST be between $1$ and $2^{32}$, for sensible security margins regarding accidental nonce reuse.
+The block count MUST reference the number of blocks the externalized content was split into.
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the snapshot key MAY remain the same across those revisions
 
