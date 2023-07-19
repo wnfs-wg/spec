@@ -212,7 +212,7 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they each MUST have a `NameAccumulator` that is different than the file's `NameAccumulator`. We allow these names to have an arbitrary base. For the normal case, the base name is RECOMMENDED to be the file's name with the externalized content's encryption `key` added to it as a name segment.
+Since external content blocks are separate from the header, they each MUST have a `NameAccumulator` that is different than the file's `NameAccumulator`. We allow these names to have an arbitrary base. For the normal case, the base name is RECOMMENDED to be the file's name with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
 However, the base name is allowed to be anything else, for instance to support copying or moving a file to a different location without having to re-encrypt all of its data.
 The [sharded file content access algorithm](#44-sharded-file-content-access) contains more information about how to derive each externalized block's name from this base name.
 
