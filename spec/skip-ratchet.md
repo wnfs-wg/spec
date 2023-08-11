@@ -27,12 +27,14 @@ with a domain separation string:
 
 ```typescript
 function deriveKey(ratchet: SkipRatchet, domainSeparation: string): ByteArray<32> {
-  return sha3(concat([
-    new TextEncoder().encode(domainSeparation), // Utf8-encode
-    ratchet.large,
-    ratchet.medium,
-    ratchet.small
-  ]))
+  return blake3.deriveKey(
+    domainSeparation,
+    concat([
+      ratchet.large,
+      ratchet.medium,
+      ratchet.small
+    ])
+  )
 }
 ```
 

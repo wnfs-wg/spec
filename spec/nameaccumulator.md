@@ -56,7 +56,7 @@ The empty accumulator can simply be read out of the setup parameters, it's the g
 
 ### 2.3 Hashing to Prime
 
-`hashToPrime : (ByteArray, Uint) -> (BigUint, Uint)`
+`hashToPrime : (String, ByteArray, Uint) -> (BigUint, Uint)`
 
 Multiple parts of the name accumulator proof protocols need the capacity to hash a byte array to a prime number.
 
@@ -65,21 +65,21 @@ The output is a number $h$ with $1 <= h < 2^n$ and a 32-bit unsigned integer cou
 
 ```ts
 function hashToPrime(
+  domainSeparationString: String,
   toDigest: Uint8Array,
   outputLength: Uint
 ): [Uint8Array, Uint] {
   let counter = 0
   let primeCandidate
-  
+
   do {
     const counterEncoded = encode32BitBigEndian(counter)
-    const hash = sha3(concat(toDigest, counterEncoded))
+    const hash = blake3.deriveKey(domainSeparationString, concat([toDigest, counterEncoded]))
     const truncatedHash = new Uint8Array(hash.buffer, 0, outputLength)
     primeCandidate = decodeBigUintBigEndian(truncatedHash)
   } while (!isPrime(primeCandidate))
-  
-  return [primeCandidate, counter]
 
+  return [primeCandidate, counter]
 }
 ```
 
@@ -100,11 +100,15 @@ function deriveLHash(
   baseBigEndian: Uint8Array,
   commitmentBigEndian: Uint8Array
 ): Uint8Array {
-  return hashToPrime(concat([
-    modulusBigEndian,
-    baseBigEndian,
-    commitmentBigEndian,
-  ]))
+  return hashToPrime(
+    "wnfs/1.0/PoKE*/l 128-bit hash derivation",
+    concat([
+      modulusBigEndian,
+      baseBigEndian,
+      commitmentBigEndian,
+    ]),
+    16
+  )
 }
 ```
 
@@ -144,4 +148,5 @@ It then does the following steps:
 [RSA acc og paper]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
 [IOP Batching Boneh]: https://eprint.iacr.org/2018/1188.pdf
 [unsigned varint]: https://github.com/multiformats/unsigned-varint
+
 [Batched Elements Proof algorithm]: #24-Batched-Elements-Proof

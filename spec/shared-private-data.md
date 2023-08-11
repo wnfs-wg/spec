@@ -90,7 +90,7 @@ type SharePayload = TemporalSharePointer | SnapshotSharePointer
 
 type TemporalSharePointer = {
   "wnfs/share/temporal": {
-    label: Hash<NameAccumulator> // 32 bytes SHA3 hash
+    label: Hash<NameAccumulator> // 32 bytes BLAKE3 hash
     cid: Cid // content block CID
     temporalKey: Key // 32 bytes AES key
   }
@@ -98,7 +98,7 @@ type TemporalSharePointer = {
 
 type SnapshotSharePointer = {
   "wnfs/share/snapshot": {
-    label: Hash<NameAccumulator> // 32 bytes SHA3 hash
+    label: Hash<NameAccumulator> // 32 bytes BLAKE3 hash
     cid: Cid // content block CID
     snapshotKey: Key // 32 bytes AES key
   }
