@@ -66,9 +66,9 @@
     {
       "id": "pointer:pointer",
       "typeName": "pointer",
-      "x": -466.0238366492681,
-      "y": 803.9460399192271,
-      "lastActivityTimestamp": 1689613030167,
+      "x": 927.2865998252691,
+      "y": 132.8021791724937,
+      "lastActivityTimestamp": 1691765182552,
       "meta": {}
     },
     {
@@ -79,7 +79,7 @@
       "typeName": "page"
     },
     {
-      "x": 1514.931439031493,
+      "x": 1163.6602609438655,
       "y": 147.16307231479675,
       "z": 0.4651786990282012,
       "meta": {},
@@ -117,7 +117,7 @@
       "screenBounds": {
         "x": 0,
         "y": 0,
-        "w": 1751.7991943359375,
+        "w": 1424.991455078125,
         "h": 866.314453125
       },
       "zoomBrush": null,
@@ -525,7 +525,7 @@
         },
         "arrowheadStart": "none",
         "arrowheadEnd": "arrow",
-        "text": "Blake3",
+        "text": "BLAKE3",
         "font": "sans"
       },
       "index": "aF",

@@ -39,7 +39,7 @@ If `length` isn't provided, this represents a `ByteArray` that additionally stor
 
 ## `Hash<Data>`
 
-This means at this point in the data structure there's a 32-byte array representing the Blake3 hash of `Data`.
+This means at this point in the data structure there's a 32-byte array representing the BLAKE3 hash of `Data`.
 
 ## Algorithm Type Signatures
 
