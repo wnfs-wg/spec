@@ -266,7 +266,7 @@ When added to a private directory, it MUST be encrypted with AES-KWP and the pri
 
 #### 3.1.6.2 Snapshot Key
 
-Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key][temporal key] by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/1.0/snapshot key derivation from temporal`.
+Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key][temporal key] by hashing it using BLAKE3's `derive_key` protocol with the context string `wnfs/1.0/snapshot key derivation from temporal`.
 
 ### 3.1.7 Read Hierarchy
 
