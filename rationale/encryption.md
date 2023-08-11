@@ -11,11 +11,20 @@ Note that authentication is not strictly necessary since write access is managed
 
 ## Choice
 
-We chose [AES-GCM] with per-message randomly generated 12-byte initialization vectors, because it is widely supported and implemented in hardware as of 2023.
-There are no known practical attacks on AES-GCM.
+We chose [XChaCha20-Poly1305] with per-message, randomly generated 24-byte initialization vectors, because of its nonce size (allowing randomly-generated nonces without worrying about message count limits) and its speed.
+There are no known practical attacks on XChaCha20-Poly1305.
 
 
 ## Alternatives
+
+### [ChaCha20-Poly1305]
+
+This is the cipher that [XChaCha20-Poly1305] is based on, but has a smaller nonce size. Although it is more popular, we believe the extended nonce is worth prioritizing over popularity.
+
+### [AES-GCM]
+
+AES-GCM is faster on platforms that have hardware support for it (`AESNI`), compared to [XChaCha20-Poly1305] in software.
+However, [XChaCha20-Poly1305] is easier to implement in constant-time and faster in software. Note that `AESNI` is not supported in Wasm at the moment.
 
 ### [AES-GCM-SIV]
 
@@ -25,14 +34,7 @@ Aside from nonce-misuse resistance, the primary motivation for deterministic enc
 
 ### [AES-OCB] ([paper](https://link.springer.com/article/10.1007/s00145-021-09399-8))
 
-This is probably the fastest AEAD cipher that can be implemented in today's hardware. However, due to patent restrictions in the past its use was not widespread, which to this day makes it hard to good support in various programming languages.
-
-### ChaCha-based ciphers (e.g. [ChaCha20-poly1305])
-
-These ciphers run at roughly 4 times the throughput in software compared to AES-GCM and are comparatively easier to implement as constant-time algorithms.
-However, AES-GCM has wider hardware support at the moment.
-In the future, it's likely we'll reconsider these ciphers.
-
+This is probably the fastest AEAD cipher that can be implemented in today's hardware. However, due to patent restrictions in the past its use was not widespread, which makes it hard to find good support for it in various programming language ecosystems.
 
 # Key Wrapping
 
@@ -78,5 +80,6 @@ This mode's advantage is support for associated data. However, keys need to be t
 [AES-GCM-SIV]: https://www.rfc-editor.org/rfc/rfc8452.html
 [AES-GCM]: https://csrc.nist.gov/publications/detail/sp/800-38d/final
 [AES-OCB]: https://web.cs.ucdavis.edu/~rogaway/ocb/ocb-faq.htm
-[ChaCha20-poly1305]: https://www.rfc-editor.org/rfc/rfc7539
+[ChaCha20-Poly1305]: https://www.rfc-editor.org/rfc/rfc7539
+[XChaCha20-Poly1305]: https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03
 [AES-GCM-SIV: Specification and Analysis]: https://eprint.iacr.org/2017/168.pdf

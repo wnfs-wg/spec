@@ -17,18 +17,18 @@ This means at this point in the data structure there's a single IPLD CID address
 
 The CID's multicodec is meant to be inferred automatically from its type parameter. For example, `Cid<Cbor<...>>` will always be a CID marked as `dag-cbor`, and `Cid<Encrypted<...>>` will always be a CID marked as `raw`.
 
-The *actual* representation of `Cid` is meant to be a byte representation for CIDs, and depends on the context. E.g. if `Cid` is found somewhere within a `Cbor<>` block, then it uses the DAG-CBOR-native way of encoding CIDs as CBOR objects with a `42` tag and a binary representation of a CID.
+The *actual* representation of `Cid` is meant to be a byte representation for CIDs, and depends on the context. E.g. if `Cid` is found somewhere within a `Cbor<T>` block, then it uses the DAG-CBOR-native way of encoding CIDs as CBOR objects with a `42` tag and a binary representation of a CID.
 
-## `AesGcm<Data>`
+## `Encrypted<Data>`
 
-This represents a ciphertext that's marked with the data type `Data` that it needs to decrypt to. For example `AesGcm<Ratchet>` represents a byte string that would decrypt to a value of type `Ratchet` using [AES-GCM](https://csrc.nist.gov/publications/detail/sp/800-38d/final) with 256-bit keys.
-The ciphertexts produced by `AesGcm<>` have a 12 byte initialization vector prepended and the 16 byte authentication tag appended.
+This represents a ciphertext that's marked with the data type `Data` that it needs to decrypt to. For example `Encrypted<Ratchet>` represents a byte string that would decrypt to a value of type `Ratchet` using [XChaCha20-Poly1305] with 256-bit keys.
+The ciphertexts produced by `Encrypted<T>` have a 24 byte initialization vector prepended and the 16 byte authentication tag appended.
 
-## `AesKwp<Data>`
+## `KeyWrapped<Data>`
 
 This represents a ciphertext that decrypts to given data type `Data`.
-The encryption/decryption algorithm used is [AES-KWP](https://www.rfc-editor.org/rfc/rfc5649) with 256-bit keys.
-AES-KWP can be thought of as keyed permutation function where observing the permutation doesn't reveal information about the key used, together with an 8-byte authentication tag. It doesn't provide [IND-CCA2](https://en.wikipedia.org/wiki/Ciphertext_indistinguishability), so must only be only be used in cases where detecting two same-key and same-message ciphertexts is not a security concern.
+The encryption/decryption algorithm used is [AES-KWP] with 256-bit keys.
+AES-KWP can be thought of as keyed permutation function where observing the permutation doesn't reveal information about the key used, together with an 8-byte authentication tag. It doesn't provide [IND-CCA2], so must only be only be used in cases where detecting two same-key and same-message ciphertexts is not a security concern.
 In this specification we use AES-KWP for encrypting random AES keys and private node headers containing the `inumber`, `NameAccumulator` and skip ratchet.
 
 ## `ByteArray<length>`
@@ -44,3 +44,7 @@ This means at this point in the data structure there's a 32-byte array represent
 ## Algorithm Type Signatures
 
 For algorithms, we often specify their type signature, e.g. `: (NameAccumulator, TemporalKey) -> NameAccumulator`. This is read as "has the type signature 'function of name accumulator and temporal key to name accumulator'".
+
+[XChaCha20-Poly1305]: https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-xchacha-03
+[AES-KWP]: https://www.rfc-editor.org/rfc/rfc5649
+[IND-CCA2]: https://en.wikipedia.org/wiki/Ciphertext_indistinguishability

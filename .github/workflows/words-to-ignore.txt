@@ -44,13 +44,16 @@ PDF
 PKI
 PoKCR
 PoKE
+Poly
 RSA like ABC
 RSAES-OAEP
 SHA
 SIV
 UCAN like noun
+Wasm
 WNFS
 WebCrypto
+XChaCha
 XXHash
 ary
 backlink like link
@@ -90,6 +93,7 @@ multivalue like value
 multivalues
 namefilter like filter
 namespace
+nonce like noun
 pdf
 plaintext
 popcount like count
