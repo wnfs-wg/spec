@@ -83,7 +83,6 @@ extractable
 golang
 idempotence like omnipotence
 inline like outline
-kiB
 little-endian
 lookup like noun
 merkle

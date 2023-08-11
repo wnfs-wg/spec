@@ -210,11 +210,11 @@ If the `previous` links contain more than one element, then some CIDs MAY refer 
 
 Private file content has two variants: inlined or externalized. Externalized content stored in separate blocks from the private file block. Inlined content is kept alongside (and thus is decrypted with) the private file block itself.
 
-This makes inline content only suitable for small files, when the content size is much smaller than the IPLD maximum block size (256kiB).
+This makes inline content only suitable for small files, when the content size is much smaller than the IPLD maximum block size (256KiB).
 
 The advantage of inline content is that there's no need for computing `NameAccumulator`s for external content blocks, but the downside is that upon copying a file, you also need to copy the inline content and re-encrypt it with a new key.
 
-It is a sensible default to make use of inline content for file sizes below a certain size threshold, e.g. 10kB.
+It is a sensible default to make use of inline content for file sizes below a certain size threshold, e.g. 10KB.
 
 #### 3.1.4.1 Externalized Content
 
