@@ -118,7 +118,7 @@ The final `ElementsProof` output consists of the residue $r$, $l_{nonce}$ hash c
 
 `multiBatchElementsProof : (SetupParameters, Array<(NameAccumulator, NameAccumulator, ElementsProof)>) -> MultiBatchProof`
 
-This algorithm batches multiple batch elements proofs together. It combines the PoKCR (Proof of Knowledge of Co-prime Roots) from Section 3.3 of [this paper][IOP Batching Boneh] with the previously described PoKE* (see the previous section).
+This algorithm batches multiple batch elements proofs together. It combines the PoKCR (Proof of Knowledge of Co-prime Roots) from Section 3.3 of [this paper][IOP Batching Boneh] with the previously described PoKE* (see the [Batched Elements Proof algorithm]).
 
 The resulting proof is not fully succinct. It only manages to compress the number $Q$ from each `ElementsProof`, but still requires that you keep around all residues $r$ and $l_{nonce}$ hash counters as well as which accumulator states they are related to.
 
@@ -133,7 +133,7 @@ This algorithm verifies the multi-batch proof's mapping of accumulator states. T
 It then does the following steps:
 1. Initialize an empty array `basesAndExponents`.
 2. Go through each mapping of accumulator states, for each:
-   1. Compute the $l$ hash by using `deriveLHash` from the [Batched Elements Proof algorithm](#24-Batched-Elements-Proof). It's RECOMMENDED to speed the prime hash computation up by making use of the given hash counter $l_{nonce}$.
+   1. Compute the $l$ hash by using `deriveLHash` from the [Batched Elements Proof algorithm]. It's RECOMMENDED to speed the prime hash computation up by making use of the given hash counter $l_{nonce}$.
    2. Verify that $l < r$. If not, return `false`.
    3. Given the accumulator before state $b$ and after state $c$, compute $c * b^{-r}\ mod\ N$.
    4. Push this result together with the $l$ hash as a tuple into `basesAndExponents`.
@@ -144,3 +144,4 @@ It then does the following steps:
 [RSA acc og paper]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
 [IOP Batching Boneh]: https://eprint.iacr.org/2018/1188.pdf
 [unsigned varint]: https://github.com/multiformats/unsigned-varint
+[Batched Elements Proof algorithm]: #24-Batched-Elements-Proof
