@@ -101,7 +101,7 @@ function deriveLHash(
   commitmentBigEndian: Uint8Array
 ): Uint8Array {
   return hashToPrime(
-    "wnfs/PoKE*/l 128-bit hash derivation",
+    "wnfs/1.0/PoKE*/l 128-bit hash derivation",
     concat([
       modulusBigEndian,
       baseBigEndian,

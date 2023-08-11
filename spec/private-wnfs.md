@@ -260,13 +260,13 @@ However, developers should be aware that such operations wouldn't check the inva
 
 #### 3.1.6.1 Temporal Key
 
-Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/revision segment deriv from ratchet`.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/1.0/revision segment derivation from ratchet`.
 
 When added to a private directory, it MUST be encrypted with AES-KWP and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 
 #### 3.1.6.2 Snapshot Key
 
-Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key][temporal key] by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/snapshot key deriv from temporal`.
+Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key][temporal key] by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/1.0/snapshot key derivation from temporal`.
 
 ### 3.1.7 Read Hierarchy
 
@@ -339,7 +339,7 @@ accumulate([
   inum(docs),
   inum(uni),
   inum(notes),
-  hashToPrime("wnfs/revision segment deriv from ratchet", ratchet, 32)
+  hashToPrime("wnfs/1.0/revision segment derivation from ratchet", ratchet, 32)
 ])
 ```
 
@@ -411,7 +411,7 @@ In order to do that, the node name accumulator needs to be turned into revision-
 This is done by deriving a name segment from the revision's skip ratchet state and accumulating that it the node's name accumulator:
 
 ```ts
-const revisionSegment = hashToPrime("wnfs/segment derivation from temporal", header.ratchet, 32)
+const revisionSegment = hashToPrime("wnfs/1.0/segment derivation from temporal", header.ratchet, 32)
 const revisionedName = header.name.add(revsisionSegment)
 ```
 
@@ -461,7 +461,7 @@ To calculate the array of HAMT labels for [externalized content], add `key` and 
 function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
   for (let i = 0; i < count; i++) {
     // add returns `name` with the parameter added as a name segment
-    yield name.add(hashToPrime("wnfs/segment deriv for file block", concat(key, encode(i)), 32))
+    yield name.add(hashToPrime("wnfs/1.0/segment derivation for file block", concat(key, encode(i)), 32))
   }
 }
 ```
