@@ -218,7 +218,7 @@ It is a sensible default to make use of inline content for file sizes below a ce
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they each MUST have a `NameAccumulator` that is different than the file's `name` from the header. We allow these names to have an arbitrary `baseName`. For the normal case, the `baseName` is RECOMMENDED to be the file's `name` from the header with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
+Since external content blocks are separate from its header, they each MUST have a `NameAccumulator` that is different than the file's `name` from its header. We allow these names to have an arbitrary `baseName`. For the normal case, the `baseName` is RECOMMENDED to be the file's `name` from its header with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
 However, the `baseName` is allowed to be anything else, for instance to support copying or moving a file to a different location without having to re-encrypt all of its data.
 The [sharded file content access] algorithm contains more information about how to derive each externalized block's name from this `baseName`.
 
