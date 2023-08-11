@@ -25,7 +25,7 @@ These all form graphs, where the nodes and links have different meanings per lay
 
 # 2 Encrypted Layer
 
-The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)](#3-decrypted-layer).
+The encrypted layer hides the structure of the file system that it contains. The data MUST be placed into a flat namespace — in this case a [Merklized](https://en.wikipedia.org/wiki/Merkle_tree) [hash array mapped tire (HAMT)](https://en.wikipedia.org/wiki/Hash_array_mapped_trie). The root node of the resulting HAMT plays a very different role from a file system root: it "merely" anchors this flat namespace, and is otherwise unrelated to the file system. The file system structure will be ["rediscovered" in the decrypted layer (§3)][decrypted layer].
 
 The encrypted layer is intended to hide as much information as possible, while still permitting write access validation by untrusted nodes. A single file system's encrypted root MAY represent a whole forest of decrypted file system trees. The roots of these trees MAY be completely unrelated. These are referred to as the `PrivateForest`. Since a reader may not know what else there is in the forest — and that it is safer to not reveal this information — we sometimes refer to the it as a ["dark forest"](https://en.wikipedia.org/wiki/The_Dark_Forest).
 
@@ -189,7 +189,7 @@ type CiphertextBlock = AesKwp<PrivateNodeHeader> | AesGcm<PrivateNode>
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "snapshot key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys](#316-pointers--keys) for more detail.
+Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "snapshot key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys][pointers and keys] for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -211,7 +211,7 @@ Private file content has two variants: inlined or externalized. Externalized con
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique `NameAccumulator` derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access algorithm](#44-sharded-file-content-access) for more detail.
+Since external content blocks are separate from the header, they MUST have a unique `NameAccumulator` derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access] algorithm for more detail.
 
 The block size MUST be at least 1 and at maximum $2^{18} - 28 = 262,116$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 12 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
 
@@ -234,7 +234,7 @@ The block count MUST reference the number of blocks the externalized content was
 
 The externalized content's `key` MUST be regenerated randomly whenever the file content changes. If the content stays the same across metadata changes, the snapshot key MAY remain the same across those revisions
 
-NB: Label `NameAccumulator`s MUST be computed as described in the algorithm for [sharded file content access](#44-sharded-file-content-access).
+NB: Label `NameAccumulator`s MUST be computed as described in the algorithm for [sharded file content access].
 
 Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `28 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the AES-GCM authentication tag.
 
@@ -244,7 +244,7 @@ If any externalized content blocks exceed the specified `blockSize` or are missi
 
 A private directory MUST contain links to zero or more further nodes. Private directories MAY include userland metadata.
 
-See the section for [Read Hierarchy](#317-read-hierarchy) for more information about the link structure.
+See the section for [Read Hierarchy][read hierarchy] for more information about the link structure.
 
 ### 3.1.6 Pointers & Keys
 
@@ -266,7 +266,7 @@ When added to a private directory, it MUST be encrypted with AES-KWP and the pri
 
 #### 3.1.6.2 Snapshot Key
 
-Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key](#3161-temporal-key) by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/snapshot key deriv from temporal`.
+Snapshot Keys grant access to a single revision snapshot of that node and its children, but no other revisions forward or backward. They MUST be derived from the [Temporal Key][temporal key] by hashing it using Blake3's `derive_key` protocol with the context string `wnfs/snapshot key deriv from temporal`.
 
 ### 3.1.7 Read Hierarchy
 
@@ -276,13 +276,13 @@ For example, having a decryption pointer to a directory with the `Documents/` an
 
 ![](./diagrams/read_hierarchy.svg)
 
-Each link in the above picture is looked up in the [encrypted HAMT](#211-data-types), decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
+Each link in the above picture is looked up in the [encrypted HAMT][data types], decrypted, and transformed into further decrypted file system nodes. It is sometimes helpful to analogize this process as being similar to lazy loading remote content, though of course with content addressed encrypted-at-rest data the encrypted data could very well be stored locally.
 
 Note that holding the decryption pointer to this particular directory MUST NOT grant access to sibling or parent nodes, nor to other structures rooted in the private forest.
 
 ### 3.1.7.1 Temporal Hierarchy
 
-Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy](#317-read-hierarchy). An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
+Being a versioned file system, private nodes also have read control in the temporal dimension as well as in the [file read hierarchy][read hierarchy]. An agent MAY have access to one or more revisions of a node, and the associated children in that temporal window.
 
 Given the root snapshot key, you can decrypt the root directory that contains the snapshot keys of all subdirectories, which allow you to decrypt the subdirectories.
 It's possible to share the snapshot key of a subdirectory which allows you to decrypt everything below that directory, but not siblings or anything above.
@@ -295,7 +295,7 @@ Special attention should be paid to the relationship of the skip ratchet to snap
 
 ### 3.1.7.2 Temporal Key Structure
 
-A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a [Temporal Key](#3161-temporal-key). Every revision of a node MUST have a unique skip ratchet, `NameAccumulator`, and i-number.
+A viewing agent may be able to view more than a single revision of a node. This information must be kept somewhere that some agents would be able to discover as they walk through a file system, but stay hidden from others. This is achieved per node with a [Temporal Key][temporal key]. Every revision of a node MUST have a unique skip ratchet, `NameAccumulator`, and i-number.
 
 The skip ratchet is the single source of truth for generating the decryption key. Knowledge of this one internal skip ratchet state is sufficient to grant access to all of the relevant state in the diagram:
 * Generate the snapshot key for the current node
@@ -345,7 +345,7 @@ accumulate([
 
 In this case, hashing `ratchet` involves concatenating its `large`, `medium` and `small` digit together, then proceeding with `hashToPrime`.
 
-The function `accumulate` is defined in the [`NameAccumulator` specification](/spec/nameaccumulator.md#21-Accumulation) using the modulus and generator stored at the `PrivateForest` root.
+The function `accumulate` is defined in the [`NameAccumulator` specification][nameaccumulator accumulation] using the modulus and generator stored at the `PrivateForest` root.
 
 ### 4.2 Write Access Delegation
 
@@ -361,21 +361,21 @@ Extending the example from the section above: If the root owner wants to delegat
 
 When a recipient of a delegation wants to prove or further delegate write access, they prove that the path that they delegate is a superset of the path segments that they have access to.
 
-This proof is made in the form of a "proof of exponent" as explained in the [name accumulator specification](/spec/nameaccumulator.md#24-Batched-Elements-Proof).
+This proof is made in the form of a "proof of exponent" as explained in the [name accumulator specification][nameaccumulator elements proof].
 The inputs to the proof are then the name accumulator of the path they have access to as a witness and the path they want to delegate further as the commitment.
 
 ### 4.3 Write Access Batch Proofs
 
 We assume that third parties checking writes don't have read access to the decrypted file system itself. So when a peer with delegated write access wants to prove that their write is valid, they follow a similar protocol as described in the previous section, except they create proofs of exponents for the labels in the private forest that they modified.
 
-The biggest part of these proofs of exponents can be batched together using the algorithm described in the [name accumulator specification](/spec/nameaccumulator.md#25-Multi-Batch-Elements-Proof).
+The biggest part of these proofs of exponents can be batched together using the algorithm described in the [name accumulator specification][nameaccumulator multi batch].
 
 ### 4.4. Write Access Batch Proof Verification
 
 Verifying a change in a private forest from one root CID to another follows these steps:
 1. Compute the diff between the forests to obtain the labels of entries that were created, removed or updated between the two revisions.
 2. From the provided certificates, extract all validly signed name accumulators that the writer has access to.
-3. Verify provided batch proofs as described in the [name accumulator specification](/spec/nameaccumulator.md#26-Multi-Batch-Elements-Proof-Verification).
+3. Verify provided batch proofs as described in the [name accumulator specification][nameaccumulator multi batch verification].
 4. Match the bases in the multi-batch proof against the validly signed name accumulators from the certificates.
 5. Make sure that all keys that changed between private forest versions were proven in the multi-batch proof.
 
@@ -411,15 +411,15 @@ In order to do that, the node name accumulator needs to be turned into revision-
 This is done by deriving a name segment from the revision's skip ratchet state and accumulating that it the node's name accumulator:
 
 ```ts
-const revisionSegment = hashToPrime("wnfs/segment deriv from temporal", header.ratchet, 32)
+const revisionSegment = hashToPrime("wnfs/segment derivation from temporal", header.ratchet, 32)
 const revisionedName = header.name.add(revsisionSegment)
 ```
 
 Where
 - hashing `header.ratchet` involves concatenating its `large`, `medium` and `small` digit, then proceeding with `hashToPrime` and,
-- `add` refers to the [name accumulator accumulation algorithm](/spec/nameaccumulator.md#21-Accumulation).
+- `add` refers to the [name accumulator accumulation algorithm][nameaccumulator accumulation].
 
-Every private file or directory implicitly links to the name of its next version via the skip ratchet. These implicit links can only be resolved with access to the temporal key that decrypts the `PrivateNodeHeader` and thus the node's skip ratchet. Given the skip ratchet, it's then possible to derive any future revisioned name for the same node by first using the [skip ratchet increase algorithm](/spec/skip-ratchet.md#22-Increasing) to skip to a future skip ratchet state and then deriving the revisioned name. This can be useful for finding the latest state for a certain node. We RECOMMEND using [exponential search](https://en.wikipedia.org/wiki/Exponential_search) to speed this up.
+Every private file or directory implicitly links to the name of its next version via the skip ratchet. These implicit links can only be resolved with access to the temporal key that decrypts the `PrivateNodeHeader` and thus the node's skip ratchet. Given the skip ratchet, it's then possible to derive any future revisioned name for the same node by first using the [skip ratchet increase algorithm][skip ratchet increasing] to skip to a future skip ratchet state and then deriving the revisioned name. This can be useful for finding the latest state for a certain node. We RECOMMEND using [exponential search] to speed this up.
 
 ## 4.3 Path Resolution
 
@@ -435,13 +435,13 @@ Resolve the current snapshot: only resolve the current snapshot of a version. Th
 
 ### 4.3.2 Seek
 
-For each path segment, look up the most recent version that can be found (as described in the [private versioning algorithm](#42-Private-Versioning)). This requires access to the directory's temporal key.
+For each path segment, look up the most recent version that can be found (as described in the [private versioning] algorithm). This requires access to the directory's temporal key.
 
 #### 4.3.3 Attach
 
 A variant of seeking. This mode searches for the latest revision of a node (by its `NameAccumulator` and skip ratchet) and if it is found to differ from the parent's link, a new parent revision MAY be created with an updated link to the file. It is RECOMMENDED that this process then be performed recursively to the highest parent that the agent has write access to. This saves the next viewer from having to seek forward more than is strictly necessary, as this always starts from the parent's link which moves forward monotonically.
 
-In all of these cases the next path segment's directory or file's hash of the `NameAccumulator` MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [`NameAccumulator` Hash Resolution](#41-NameAccumulator-Hash-Resolution) and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
+In all of these cases the next path segment's directory or file's hash of the `NameAccumulator` MUST be retrieved by accessing the current directory's `directory.entries[segmentName].name`, looking up the private node as described in [`NameAccumulator` Hash Resolution][hash resolution] and then decrypting the content node(s) using `directory.entries[segmentName].snapshotKey`.
 
 If this mode is seeking, the `directory.entries[segmentName].temporalKey` needs to be decrypted using the temporal key for the current directory.
 
@@ -455,7 +455,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<NameAccumulator>`
 
-To calculate the array of HAMT labels for [external content](#3141-externalized-content), add `key` and `concat(key, encode(i))` for each block index `i` of external content to the file's name like so:
+To calculate the array of HAMT labels for [externalized content], add `key` and `concat(key, encode(i))` for each block index `i` of external content to the file's name like so:
 
 ```ts
 function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
@@ -475,9 +475,9 @@ function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<
 `merge : Array<PrivateForest> -> PrivateForest`
 
 The private forest forms a join-semilattice via the `merge` ( $\land$ ) operation. `merge` is thus:
-- [Associative](https://en.wikipedia.org/wiki/Associative_property): $(a \land b) \land c = a \land (b \land c) $
-- [Commutative](https://en.wikipedia.org/wiki/Commutative_property): $a \land b = b \land a$
-- [Idempotent](https://en.wikipedia.org/wiki/Idempotence): $a \land a = a$
+- [Associative]: $(a \land b) \land c = a \land (b \land c) $
+- [Commutative]: $a \land b = b \land a$
+- [Idempotent]: $a \land a = a$
 
 The identity element is the empty HAMT.
 
@@ -497,3 +497,26 @@ The private forest merge algorithm functions completely at the encrypted data la
 
 
 [RSA accumulators]: https://link.springer.com/content/pdf/10.1007/3-540-48285-7_24.pdf
+[exponential search]: https://en.wikipedia.org/wiki/Exponential_search
+[Associative]: https://en.wikipedia.org/wiki/Associative_property
+[Commutative]: https://en.wikipedia.org/wiki/Commutative_property
+[Idempotent]: https://en.wikipedia.org/wiki/Idempotence
+
+[data types]: #211-data-types
+[decrypted layer]: #3-decrypted-layer
+[externalized content]: #3141-externalized-content
+[pointers and keys]: #316-pointers--keys
+[temporal key]: #3161-temporal-key
+[read hierarchy]: #317-read-hierarchy
+[hash resolution]: #41-NameAccumulator-Hash-Resolution
+[private versioning]: #42-Private-Versioning
+[sharded file content access]: #44-sharded-file-content-access
+
+[nameaccumulator accumulation]: /spec/nameaccumulator.md#21-Accumulation
+[nameaccumulator elements proof]: /spec/nameaccumulator.md#24-Batched-Elements-Proof
+[nameaccumulator multi batch]: /spec/nameaccumulator.md#25-Multi-Batch-Elements-Proof
+[nameaccumulator multi batch verification]: /spec/nameaccumulator.md#26-Multi-Batch-Elements-Proof-Verification
+[nameaccumulator hash to prime]: /spec/nameaccumulator.md#23-Hash-to-Prime
+
+[skip ratchet key derivation]: /spec/skip-ratchet.md#21-Key-Derivation
+[skip ratchet increasing]: /spec/skip-ratchet.md#22-Increasing
