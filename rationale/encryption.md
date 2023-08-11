@@ -21,10 +21,6 @@ There are no known practical attacks on XChaCha20-Poly1305.
 
 This is the cipher that [XChaCha20-Poly1305] is based on, but has a smaller nonce size. Although it is more popular, we believe the extended nonce is worth prioritizing over popularity.
 
-These ciphers run at roughly 4 times the throughput in software compared to AES-GCM and are comparatively easier to implement as constant-time algorithms.
-However, AES-GCM has wider hardware support at the moment.
-In the future, it's likely we'll reconsider these ciphers.
-
 ### [AES-GCM]
 
 AES-GCM is faster on platforms that have hardware support for it (`AESNI`), compared to [XChaCha20-Poly1305] in software.
