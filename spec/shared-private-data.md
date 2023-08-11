@@ -41,7 +41,9 @@ See the [example exchange partition layout](#exchange-partition-layout) for exam
 
 Individual device exchange keys are versioned. The protocol version is derived from the file name. Protocol version 1 exchange keys are named `v1.exchangekey`.
 
-The file's content is 256 bytes of the exchange key's RSA public modulus encoded as low-endian unsigned integer.
+The file's content is 256 bytes of the exchange key's RSA public modulus encoded as big-endian unsigned integer.
+
+Note: Using big-endian here is inconsistent with this specification's use of little-endian encoding for integers in general, but it's the more common encoding for RSA numbers.
 
 See the [test vectors](#exchange-key-test-vectors) for examples.
 
@@ -73,7 +75,7 @@ function computeShareLabel(senderRootDID: string, recipientExchangeKey: ByteStri
 }
 ```
 
-Here `encode` is a function that maps a share counter to a low-endian byte array encoding of a 64-bit unsigned integer.
+Here `encode` is a function that maps a share counter to a little-endian byte array encoding of a 64-bit unsigned integer.
 
 The `recipientExchangeKey` are the recipient device's exchange key bytes, including the protocol versioning prefix.
 
@@ -157,7 +159,7 @@ The directory's contents may then have names that aren't derived from the name o
 The hex encoded bytes for the [RSA-2048](https://en.wikipedia.org/wiki/RSA_numbers#RSA-2048) public modulus used as an exchange key of protocol version 1:
 
 ```
-e5c71c36c6489d3916bcf71768eba533e724c85450f930ccbc6628171556f531311b0ffca3241f72d873d3d9a4166be523793b3c5bdc614cf2202964929572bc32adbd2595902c8765ad956aac109f6005cd80dcad1318cbb53453f8095813f659517da33e5f95eb6ce69d430927443f374dd689af79c402fc666cd2efdae8f74a52efbd92f535bebb30d7c4c291b98eba643167d1e41b78fd7b1fb5044af1b4359f03803ca30ed492855ecfc709eb46b68433c9ffb6b4448bff65770b5b1fa313288c64f00741a032deacc2acee1a72bd110065d1932fc79e18a11e8edbf07f5bbb5035466f72a8f1f590c781109173cd13a67a1a20904475b0c3dcee0c97c7
+c7970ceedcc3b0754490201a7aa613cd73911081c790f5f1a8726f463550bb5b7ff0db8e1ea1189ec72f93d1650011bd721aeeacc2acde32a04107f0648c2813a31f5b0b7765ff8b44b4b6ffc93384b646eb09c7cf5e8592d40ea33c80039f35b4f14a04b51f7bfd781be4d1673164ba8eb991c2c4d730bbbe35f592bdef524af7e8daefd26c66fc02c479af89d64d373f442709439de66ceb955f3ea37d5159f6135809f85334b5cb1813addc80cd05609f10ac6a95ad65872c909525bdad32bc729592642920f24c61dc5b3c3b7923e56b16a4d9d373d8721f24a3fc0f1b3131f55615172866bccc30f95054c824e733a5eb6817f7bc16399d48c6361cc7e5
 ```
 
 The RSA-2048 public modulus is this decimal-encoded number:
