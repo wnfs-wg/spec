@@ -218,9 +218,9 @@ It is a sensible default to make use of inline content for file sizes below a ce
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they each MUST have a `NameAccumulator` that is different than the file's `NameAccumulator`. We allow these names to have an arbitrary base. For the normal case, the base name is RECOMMENDED to be the file's name with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
-However, the base name is allowed to be anything else, for instance to support copying or moving a file to a different location without having to re-encrypt all of its data.
-The [sharded file content access algorithm] contains more information about how to derive each externalized block's name from this base name.
+Since external content blocks are separate from the header, they each MUST have a `NameAccumulator` that is different than the file's `name` from the header. We allow these names to have an arbitrary `baseName`. For the normal case, the `baseName` is RECOMMENDED to be the file's `name` from the header with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
+However, the `baseName` is allowed to be anything else, for instance to support copying or moving a file to a different location without having to re-encrypt all of its data.
+The [sharded file content access] algorithm contains more information about how to derive each externalized block's name from this `baseName`.
 
 The block size MUST be at least 1 and at maximum $2^{18} - 40 = 262,104$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 24 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
 
@@ -466,7 +466,7 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<NameAccumulator>`
 
-To calculate the array of HAMT labels for [externalized content], add `concat(key, encode(i))` for each block index `i` of external content to the external file content's base name like so:
+To calculate the array of HAMT labels for [externalized content], add `concat(key, encode(i))` for each block index `i` of external content to the external file content's `baseName` like so:
 
 ```ts
 function* shardLabels(key: Key, blockCount: Uint64, baseName: NameAccumulator): Iterable<NameAccumulator> {
