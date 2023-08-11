@@ -339,7 +339,7 @@ accumulate([
   inum(docs),
   inum(uni),
   inum(notes),
-  hashToPrime(ratchet.deriveKey("wnfs/segment deriv from temporal"))
+  hashToPrime(ratchet.deriveKey("wnfs/segment derivation from temporal"))
 ])
 ```
 
@@ -409,7 +409,7 @@ In order to do that, the node name accumulator needs to be turned into revision-
 This is done by deriving a name segment from the revision's skip ratchet state and accumulating that it the node's name accumulator:
 
 ```ts
-const revisionSegment = header.ratchet.deriveKeyPrime("wnfs/segment deriv from temporal")
+const revisionSegment = header.ratchet.deriveKeyPrime("wnfs/segment derivation from temporal")
 const revisionedName = header.name.add(revsisionSegment)
 ```
 
