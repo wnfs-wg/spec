@@ -121,7 +121,7 @@ type PrivateBacklink = [
   KeyWrapped<Cid> // disambiguation CID for revision
 ]
 
-// deterministically encrypted using deriveKey(ratchet) (see KeyWrapped<> in notation.md)
+// deterministically encrypted using deriveKey(ratchet) (see KeyWrapped<T> in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   inumber: Inumber
