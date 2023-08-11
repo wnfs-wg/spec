@@ -43,7 +43,7 @@ Individual device exchange keys are versioned. The protocol version is derived f
 
 The file's content is 256 bytes of the exchange key's RSA public modulus encoded as big-endian unsigned integer.
 
-Note: Using big-endian here is inconsistent with WNFS's use of little-endian encoding for integers in general, but it's the more common encoding for RSA numbers.
+Note: Using big-endian here is inconsistent with this specification's use of little-endian encoding for integers in general, but it's the more common encoding for RSA numbers.
 
 See the [test vectors](#exchange-key-test-vectors) for examples.
 
