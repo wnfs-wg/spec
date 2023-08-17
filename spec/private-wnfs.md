@@ -171,6 +171,7 @@ type InlineContent = {
 type ExternalContent = {
   "external": {
     key: Key
+    baseName: NameAccumulator
     blockSize: Uint64 // in bytes, at max 262,104
     blockCount: Uint64
   }
@@ -207,11 +208,19 @@ If the `previous` links contain more than one element, then some CIDs MAY refer 
 
 ### 3.1.4 Private File
 
-Private file content has two variants: inlined or externalized. Externalized content is held as a separate node in the bucket. Inlined content is kept alongside (and thus is decrypted with) the header.
+Private file content has two variants: inlined or externalized. Externalized content stored in separate blocks from the private file block. Inlined content is kept alongside (and thus is decrypted with) the private file block itself.
+
+This makes inline content only suitable for small files, when the content size is much smaller than the IPLD maximum block size (256KiB).
+
+The advantage of inline content is that there's no need for computing `NameAccumulator`s for external content blocks, but the downside is that upon copying a file, you also need to copy the inline content and re-encrypt it with a new key.
+
+It is a sensible default to make use of inline content for file sizes below a certain size threshold, e.g. 10KB.
 
 #### 3.1.4.1 Externalized Content
 
-Since external content blocks are separate from the header, they MUST have a unique `NameAccumulator` derived from a random key (to avoid forcing lookups to go through the header). If the key were derived from the header's key, then the file would be re-encrypted e.g. every time the metadata changed. See [sharded file content access] algorithm for more detail.
+Since external content blocks are separate from its header, they each MUST have a `NameAccumulator` that is different than the file's `name` from its header. We allow these names to have an arbitrary `baseName`. For the normal case, the `baseName` is RECOMMENDED to be the file's `name` from its header with the externalized content's encryption `key`, hashed to a prime, added to it as a name segment.
+However, the `baseName` is allowed to be anything else, for instance to support copying or moving a file to a different location without having to re-encrypt all of its data.
+The [sharded file content access] algorithm contains more information about how to derive each externalized block's name from this `baseName`.
 
 The block size MUST be at least 1 and at maximum $2^{18} - 40 = 262,104$ bytes, as the maximum block size for IPLD is usually $2^{18}$, but 24 initialization vector bytes and 16 authentication tag bytes need to be added to each ciphertext. It is RECOMMENDED to use the maximum block size. An externalized content block is laid out like this:
 
@@ -262,7 +271,7 @@ However, developers should be aware that such operations wouldn't check the inva
 
 #### 3.1.6.1 Temporal Key
 
-Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][/spec/skip-ratchet.md#21-Key-Derivation] with the domain separation string `wnfs/1.0/revision segment derivation from ratchet`.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][skip ratchet key derivation] with the domain separation string `wnfs/1.0/revision segment derivation from ratchet`.
 
 When added to a private directory, it MUST be encrypted with [AES-KWP] and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 
@@ -457,19 +466,19 @@ Consider the following diagram. An agent may only have access to some nodes, but
 
 `getShards : PrivateFile -> Array<NameAccumulator>`
 
-To calculate the array of HAMT labels for [externalized content], add `key` and `concat(key, encode(i))` for each block index `i` of external content to the file's name like so:
+To calculate the array of HAMT labels for [externalized content], add `concat(key, encode(i))` for each block index `i` of external content to the external file content's `baseName` like so:
 
 ```ts
-function* shardLabels(key: Key, count: Uint64, name: NameAccumulator): Iterable<NameAccumulator> {
-  for (let i = 0; i < count; i++) {
+function* shardLabels(key: Key, blockCount: Uint64, baseName: NameAccumulator): Iterable<NameAccumulator> {
+  for (let i = 0; i < blockCount; i++) {
     // add returns `name` with the parameter added as a name segment
-    yield name.add(hashToPrime("wnfs/1.0/segment derivation for file block", concat(key, encode(i)), 32))
+    yield baseName.add(hashToPrime("wnfs/1.0/segment derivation for file block", concat([key, encode(i)]), 32))
   }
 }
 ```
 
+- `key`, `blockCount` and `baseName` are fetched from the `PrivateFile`'s external file content record,
 - `concat` denotes byte array concatenation,
-- `name` is the `NameAccumulator` from the private file's header,
 - `encode` is a function that maps a block index to a little-endian byte array encoding of a 64-bit unsigned integer.
 
 ## 4.5 Merge

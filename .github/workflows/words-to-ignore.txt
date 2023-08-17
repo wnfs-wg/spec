@@ -81,6 +81,7 @@ ethereum
 exponentiate
 extractable
 golang
+KiB
 idempotence like omnipotence
 inline like outline
 little-endian
