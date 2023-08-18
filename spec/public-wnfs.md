@@ -19,7 +19,7 @@ type PublicNode
 
 type PublicDirectory = {
   "wnfs/pub/dir": {
-    version: "0.2.0"
+    version: "1.0.0"
     previous: Array<Cid<Cbor<PublicDirectory>>>
     // userland:
     metadata: Metadata
@@ -33,7 +33,7 @@ type PublicSymlink = {
 
 type PublicFile = {
   "wnfs/pub/file": {
-    version: "0.2.0"
+    version: "1.0.0"
     previous: Array<Cid<Cbor<PublicFile>>>
     // userland:
     metadata: Metadata

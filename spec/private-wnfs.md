@@ -135,7 +135,7 @@ type PrivateNode
 
 type PrivateDirectory = {
   "wnfs/priv/dir": {
-    version: "0.2.0"
+    version: "1.0.0"
     headerCid: Cid
     previous: Array<PrivateBacklink>
 
@@ -154,7 +154,7 @@ type PrivateRef = {
 
 type PrivateFile = {
   "wnfs/priv/file": {
-    version: "0.2.0"
+    version: "1.0.0"
     headerCid: Cid
     previous: Array<PrivateBacklink>
 
