@@ -1,4 +1,4 @@
-# Webnative File System (WNFS) Specification v1.0.0-rc
+# Webnative File System (WNFS) Specification `v1.0.0-rc`
 
 ## Abstract
 
