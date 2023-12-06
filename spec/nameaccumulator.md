@@ -33,8 +33,8 @@ Proofs and witnesses of relationships between name accumulators come in various 
 | Proof component                        | Representation |
 |----------------------------------------|----------------|
 | Element in the quadratic residue group | 256 byte big-endian byte array |
-| Prime hash $l$                         | 16 byte little-endian byte array and [unsigned varint] counter |
-| Residue $r$                            | 16 byte little-endian byte array |
+| Prime hash $l$                         | 16 byte big-endian byte array and [unsigned varint] counter |
+| Residue $r$                            | 16 byte big-endian byte array |
 
 Collecting these proof components into their own structures is up to implementations. Future versions of this specification may describe an encoding.
 
@@ -92,7 +92,7 @@ This algorithm updates an accumulator state by adding an arbitrary number of pri
 The algorithm for this proof is the "proof of knowledge of exponent" (PoKE*) from [this paper][IOP Batching Boneh], made non-interactive via the Fiat-Shamir heuristic.
 
 The number $l$ from the protocol is derived via SHA-3-hashing the big-endian bytes of the modulus, base, commitment and a counter. The base is the accumulator state before the elements were added and the commitment is the state after.
-The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a little-endian unsigned 128-bit integer.
+The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a big-endian unsigned 128-bit integer.
 
 ```ts
 function deriveLHash(
