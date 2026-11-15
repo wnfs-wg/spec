@@ -23,6 +23,12 @@ The specifications are:
 - [Shared Private Data Extension](/spec/shared-private-data.md)
 - [`NameAccumulator`s](/spec/nameaccumulator.md)
 - [Skip Ratchet](/spec/skip-ratchet.md)
+## Implementation compatibility
+
+This work-in-progress suite and a particular implementation release are not
+automatically interchangeable. See the [implementation compatibility notes](rationale/implementation-compatibility.md)
+for pinned examples of unresolved algorithm and encoding differences.
+
 ## Editors
 
 * [Brooklyn Zelenka](https://github.com/expede), [Fission](https://fission.codes)
