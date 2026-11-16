@@ -121,14 +121,14 @@ type PrivateBacklink = [
   KeyWrapped<Cid> // disambiguation CID for revision
 ]
 
-// deterministically encrypted using deriveKey(ratchet) (see KeyWrapped<T> in notation.md)
+// deterministically key-wrapped using the temporal key (see KeyWrapped<T> in notation.md)
 type PrivateNodeHeader = {
   ratchet: SkipRatchet
   inumber: Inumber
   name: NameAccumulator
 }
 
-// xchacha20-poly1305-encrypted using hash(deriveKey(parentRatchet))
+// xchacha20-poly1305-encrypted using the node snapshot key
 type PrivateNode
   = PrivateDirectory
   | PrivateFile
@@ -190,7 +190,7 @@ type CiphertextBlock = KeyWrapped<PrivateNodeHeader> | Encrypted<PrivateNode>
 
 ### 3.1.1 Node Headers
 
-Node headers MUST be encrypted with the key derived from the node's skip ratchet: the "snapshot key". Headers MUST NOT grant access to other versions of the associated node. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys][pointers and keys] for more detail.
+Node headers MUST be key-wrapped with the temporal key derived from the node's skip ratchet. Node content MUST be encrypted with the snapshot key derived from that temporal key. Snapshot-key access MUST NOT grant access to the header: its ratchet would allow deriving keys for future revisions. Node headers are in kernel space and MUST NOT be user writable. Refer to [Pointers & Keys][pointers and keys] for more detail.
 
 ### 3.1.2 Node Metadata
 
@@ -247,7 +247,7 @@ The externalized content's `key` MUST be regenerated randomly whenever the file 
 
 NB: Label `NameAccumulator`s MUST be computed as described in the algorithm for [sharded file content access].
 
-Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `40 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 12 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the XChaCha20-Poly1305 authentication tag.
+Entries in the private forest corresponding to externalized content blocks MUST have exactly one CID as their multivalue. This CID MUST refer to a ciphertext with exactly `40 + blockSize` bytes, except for the last block with index `blockCount - 1`. The first 24 bytes of the block MUST be an initialization vector, and the rest MUST be the ciphertext including the XChaCha20-Poly1305 authentication tag.
 
 If any externalized content blocks exceed the specified `blockSize` or are missing in the private forest despite having a lower index than `blockCount` during file read operations, then these operations MUST produce an error.
 
@@ -271,7 +271,7 @@ However, developers should be aware that such operations wouldn't check the inva
 
 #### 3.1.6.1 Temporal Key
 
-Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][skip ratchet key derivation] with the domain separation string `wnfs/1.0/revision segment derivation from ratchet`.
+Temporal keys give temporal read access to a certain node and its descendants. It MUST be derived from the skip ratchet for that node, incremented to the relevant revision number. This limits the reader to reading from a their earliest ratchet and forward, but never earlier revisions than that. The derivation algorithm MUST be the skip ratchet [key derivation algorithm][skip ratchet key derivation] with the domain separation string `wnfs/1.0/temporal derivation from ratchet`.
 
 When added to a private directory, it MUST be encrypted with [AES-KWP] and the private directory's temporal key. This prevents readers with only a snapshot key from gaining revision read access.
 

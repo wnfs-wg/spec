@@ -61,7 +61,7 @@ The empty accumulator can simply be read out of the setup parameters, it's the g
 Multiple parts of the name accumulator proof protocols need the capacity to hash a byte array to a prime number.
 
 The input to this function is a byte array to hash as well as the desired output length $n <= 32$ in bytes.
-The output is a number $h$ with $1 <= h < 2^n$ and a 32-bit unsigned integer counter that can be used to verify a hash produced by `hashToPrime` in constant time.
+The output is a number $h$ with $1 <= h < 2^{8n}$ and a 32-bit unsigned integer counter that can be used to verify a hash produced by `hashToPrime` in constant time.
 
 ```ts
 function hashToPrime(
@@ -77,9 +77,15 @@ function hashToPrime(
     const hash = blake3.deriveKey(domainSeparationString, concat([toDigest, counterEncoded]))
     const truncatedHash = new Uint8Array(hash.buffer, 0, outputLength)
     primeCandidate = decodeBigUintBigEndian(truncatedHash)
-  } while (!isPrime(primeCandidate))
+    if (isPrime(primeCandidate)) {
+      return [primeCandidate, counter]
+    }
+    if (counter == 0xffffffff) {
+      throw new Error("hashToPrime counter exhausted")
+    }
+    counter += 1
+  } while (true)
 
-  return [primeCandidate, counter]
 }
 ```
 
@@ -91,7 +97,7 @@ This algorithm updates an accumulator state by adding an arbitrary number of pri
 
 The algorithm for this proof is the "proof of knowledge of exponent" (PoKE*) from [this paper][IOP Batching Boneh], made non-interactive via the Fiat-Shamir heuristic.
 
-The number $l$ from the protocol is derived via SHA-3-hashing the big-endian bytes of the modulus, base, commitment and a counter. The base is the accumulator state before the elements were added and the commitment is the state after.
+The number $l$ from the protocol is derived via BLAKE3 key derivation over the big-endian bytes of the modulus, base, commitment and a counter. The base is the accumulator state before the elements were added and the commitment is the state after.
 The counter is the lowest 32-bit number that makes the first 128-bit truncated hash prime, if interpreted as a big-endian unsigned 128-bit integer.
 
 ```ts
