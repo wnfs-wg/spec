@@ -13,6 +13,7 @@ reversed just to match an existing release.
 | Temporal key context | Separate temporal and revision-label purposes | `wnfs/1.0/temporal derivation from ratchet` | Using the revision-segment context produces a different key. |
 | Header protection | Header contains the skip ratchet; content uses the snapshot key | AES-KWP with temporal key for the header | Snapshot readers must not obtain the header's ratchet. |
 | Hash-to-prime counter | 32-bit big-endian counter | 32-bit little-endian counter, then candidate bit zero is set to make it odd | Different candidate sequences produce different name segments and labels. |
+| Ratchet counter fields | `mediumCount`, `smallCount` | `mediumCounter`, `smallCounter` | The encoded field names also require an explicit target. |
 | Medium ratchet carry | New medium is the hash of the old medium; new small hashes salt and old medium | Intervening preimage is the hash of old medium; new medium hashes that preimage again; new small hashes salt and that preimage | Carrying past a small epoch can diverge even if earlier keys matched. |
 | Large ratchet carry | Prose describes updating the old medium | Rebuild from old large: hash old large; derive a medium preimage from salt and old large; hash it for medium and with salt for small | Validate large-epoch transitions separately. |
 | File content | `inline` byte array; external `blockSize` | `inline: {data: [...]}`; external `blockContentSize` | Primitive encryption agreement is not private-file codec agreement. |
