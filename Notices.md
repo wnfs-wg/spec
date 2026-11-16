@@ -46,6 +46,14 @@ Specification version: 0.2.0-alpha or later
 
 ---------------------------------------------------------------------------------
 
+Licensee’s name: Jun Kawasaki
+
+Authorized individual and system identifier: Jun Kawasaki (GitHub: com-junkawasaki)
+
+Specification version: 0.2.0-alpha
+
+---------------------------------------------------------------------------------
+
 ## Withdrawals
 
 Name of party withdrawing:
